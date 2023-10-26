@@ -39,3 +39,21 @@ class UpcomingDueError extends MybillState {
   final String? message;
   UpcomingDueError({@required this.message});
 }
+
+// upcoming
+class AutopayUpcomingLoading extends MybillState {}
+
+class AutopayUpcomingSuccess extends MybillState {
+  AutoSchedulePayModel? autoSchedulePayModel;
+  AutopayUpcomingSuccess({@required this.autoSchedulePayModel});
+}
+
+class AutopayUpcomingFailed extends MybillState {
+  final String? message;
+  AutopayUpcomingFailed({@required this.message});
+}
+
+class AutopayUpcomingError extends MybillState {
+  final String? message;
+  AutopayUpcomingError({@required this.message});
+}

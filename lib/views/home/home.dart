@@ -1,17 +1,12 @@
-import 'package:dotted_line/dotted_line.dart';
+import 'package:bbps/bloc/home/home_cubit.dart';
+import 'package:bbps/views/home/home_sliders.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
-// import 'package:showcaseview/showcaseview.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
-import '../../bloc/home/home_cubit.dart';
 import '../../utils/commen.dart';
 import '../../utils/const.dart';
 import '../../utils/utils.dart';
 import 'bill_category.dart';
-import 'home_sliders.dart';
-import 'my_billers_home.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function()? notifyParent;
@@ -56,7 +51,7 @@ class _HomeScreenUIState extends State<HomeScreenUI>
     super.initState();
 
     _tabController = TabController(
-      length: 2,
+      length: 1,
       vsync: this,
       initialIndex: 0,
     );
@@ -175,46 +170,20 @@ class _HomeScreenUIState extends State<HomeScreenUI>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  height: height(context) * 0.06,
-                  width: width(context),
-                  color: primaryBodyColor,
-                  child: TabBar(
-                    labelPadding: const EdgeInsets.all(8),
-                    indicatorPadding: const EdgeInsets.all(0),
-                    isScrollable: true,
-                    indicatorColor: Colors.transparent,
-                    labelColor: txtPrimaryColor,
-                    unselectedLabelColor: txtSecondaryColor,
-                    unselectedLabelStyle: TextStyle(
-                      fontSize: width(context) * 0.04,
-                    ),
-                    controller: _tabController,
-                    labelStyle: TextStyle(
-                      fontFamily: 'Rubik-Regular',
-                      fontSize: width(context) * 0.045,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    tabs: [
-                      _individualTab("Bill Categories"),
-                      // Tab(
-                      //   text: "Bill Categories",
-                      // ),
-                      const Tab(
-                        text: "My Billers",
-                      ),
-                    ],
+                Padding(
+                  padding: EdgeInsets.only(
+                      left: width(context) * 0.056,
+                      bottom: width(context) * 0.046),
+                  child: appText(
+                    data: "Bill Categories",
+                    color: primaryColor,
+                    weight: FontWeight.w600,
+                    size: width(context) * 0.040,
                   ),
                 ),
                 SizedBox(
-                  height: height(context) * 0.38,
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: const [
-                      BillCategory(),
-                      MyBillersHome(),
-                    ],
-                  ),
+                  height: height(context) * 0.40,
+                  child: BillCategory(),
                 ),
               ],
             ),

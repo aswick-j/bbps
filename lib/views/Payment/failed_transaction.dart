@@ -72,7 +72,7 @@ class _FailedTransactionState extends State<FailedTransaction> {
     super.initState();
 
     inspect(widget.tnxData);
-    log(jsonEncode(widget.tnxData), name: "widget.tnxData ::");
+    logConsole(jsonEncode(widget.tnxData), "widget.tnxData ::");
     if (widget.tnxData['isMobilePrepaid'] == null ||
         widget.tnxData['isMobilePrepaid'] == false) {
       setState(() {
@@ -98,12 +98,12 @@ class _FailedTransactionState extends State<FailedTransaction> {
               alignment: Alignment.center,
               children: [
                 Center(
-                  child: Image.asset("assets/images/clrpappersfail.png"),
+                  child: Image.asset(clrpappersFailLogo),
                 ),
                 Positioned(
                   top: height(context) * 0.025,
                   left: width(context) * 0.35,
-                  child: Image.asset("assets/images/icon_failur_png.png"),
+                  child: Image.asset(iconFailure),
                 ),
                 Positioned(
                   top: height(context) * 0.2,

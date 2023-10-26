@@ -1,59 +1,54 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-import 'package:basic_utils/basic_utils.dart';
 
+import 'package:basic_utils/basic_utils.dart';
+import 'package:bbps/bloc/autopay/autopay_cubit.dart';
+import 'package:bbps/bloc/complaint/complaint_cubit.dart';
+import 'package:bbps/bloc/history/history_cubit.dart';
+import 'package:bbps/bloc/home/home_cubit.dart';
+import 'package:bbps/bloc/mybill/mybill_cubit.dart';
+import 'package:bbps/bloc/otp/otp_cubit.dart';
+import 'package:bbps/model/complaints_model.dart';
+import 'package:bbps/model/history_model.dart';
+import 'package:bbps/views/auto_pay/setupAutoPay.dart';
+import 'package:bbps/views/complaints/complaint_list.dart';
+import 'package:bbps/views/complaints/complaint_submit.dart';
+import 'package:bbps/views/complaints/new_complaint_tab.dart';
+import 'package:bbps/views/history/history_tab_module.dart';
+import 'package:bbps/views/home/home_tab.dart';
+import 'package:bbps/views/mobile_prepaid/prepaid_add_biller.dart';
+import 'package:bbps/views/mybills/billers_search.dart';
+import 'package:bbps/views/otp/otp_validation.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_overlay_loader/flutter_overlay_loader.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:jwt_io/jwt_io.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 // import 'package:timeago/timeago.dart' as timeago;
 import '../api/api_repository.dart';
-import '../bloc/autopay/autopay_cubit.dart';
-import '../bloc/complaint/complaint_cubit.dart';
-import '../bloc/history/history_cubit.dart';
 import '../bloc/home/billflow_cubit.dart';
-import '../bloc/home/home_cubit.dart';
-import '../bloc/mybill/mybill_cubit.dart';
-import '../bloc/otp/otp_cubit.dart';
 import '../bloc/splash/splash_cubit.dart';
-import '../model/biller_type_model.dart';
-import '../model/complaints_model.dart';
 import '../model/confirm_done_model.dart';
 import '../model/decoded_model.dart';
-import '../model/fetch_bill_model.dart';
-import '../model/history_model.dart';
+import '../views/ManageBillers/add_new_bill.dart';
+import '../views/ManageBillers/edit_bill.dart';
+import '../views/Payment/confirm_payment.dart';
+import '../views/Payment/confirm_payment_done.dart';
+import '../views/Payment/failed_transaction.dart';
+import '../views/Payment/transaction_receipt.dart';
 import '../views/auto_pay/edit_auto_pay.dart';
-import '../views/auto_pay/setupAutoPay.dart';
-import '../views/complaints/complaint_list.dart';
-import '../views/complaints/complaint_submit.dart';
 import '../views/complaints/complaint_view.dart';
-import '../views/complaints/new_complaint.dart';
-import '../views/complaints/new_complaint_tab.dart';
-import '../views/history/history_tab_module.dart';
 import '../views/history/transaction_details.dart';
-
-import '../views/home/add_new_bill.dart';
 import '../views/home/bill_flow.dart';
-import '../views/home/confirm_payment.dart';
-import '../views/home/confirm_payment_done.dart';
-import '../views/home/edit_bill.dart';
-import '../views/home/failed_transaction.dart';
-import '../views/home/home_tab.dart';
 import '../views/home/pdf_preview_page.dart';
-import '../views/home/transaction_receipt.dart';
-import '../views/mobile_prepaid/prepaid_add_biller.dart';
-import '../views/mybills/billers_search.dart';
 import '../views/mybills/my_bill.dart';
-import '../views/otp/otp_validation.dart';
 import '../views/splash_screen.dart';
 import 'const.dart';
 
@@ -94,16 +89,10 @@ showLoaderSplash(context, Image? equitasImage) {
       overlayColor: Colors.transparent,
       progressIndicator: equitasImage ??
           Image.asset(
-            "assets/images/loader.gif",
+            LoaderGif,
             height: height(context) * 0.07,
             width: height(context) * 0.07,
           ),
-      // progressIndicator: Image.asset(
-      //   "assets/images/loader.gif",
-      //   height: height(context) * 0.07,
-      //   width: height(context) * 0.07,
-      // ),
-      // progressIndicator: CircularProgressIndicator(backgroundColor: Colors.red),
       themeData: Theme.of(context).copyWith(
           colorScheme:
               ColorScheme.fromSwatch().copyWith(secondary: primarySubColor)));
@@ -116,7 +105,7 @@ showLoader(context) {
       overlayFromBottom: 0,
       overlayColor: Colors.transparent,
       progressIndicator: Image.asset(
-        "assets/images/loader.gif",
+        LoaderGif,
         height: height(context) * 0.07,
         width: height(context) * 0.07,
       ),
@@ -139,12 +128,12 @@ class MyRouter {
         if (settings.arguments != null) {
           final args = settings.arguments as Map<String, dynamic>;
 
-          log(args.toString(), name: "at generateRoute() ::: args 1 ::");
+          logConsole(args.toString(), "at generateRoute() ::: args 1 ::");
 
           if (args['redirectionRequest'] != null) {
-            log(jsonEncode(args).toString(),
-                name: "at generateRoute() ::: args 2 :: ");
-            log(args.toString(), name: "at generateRoute() :::args 3 ::");
+            logConsole(jsonEncode(args).toString(),
+                "at generateRoute() ::: args 2 :: ");
+            logConsole(args.toString(), "at generateRoute() :::args 3 ::");
             if (args['redirectionRequest']['msgBdy'] != null &&
                 args['redirectionRequest']['checkSum'] != null) {
               splashScreen = SplashScreen(
@@ -156,7 +145,7 @@ class MyRouter {
                 redirectData: {},
                 checkSum: "",
               );
-              print("NO SUFFICIENT DATA SENT");
+              debugPrint("NO SUFFICIENT DATA SENT");
             }
           }
         }
@@ -193,50 +182,50 @@ class MyRouter {
           templateName: '',
         );
         final args = settings.arguments as Map<String, dynamic>;
-        log(jsonEncode(args).toString());
+        // logInfo(jsonEncode(args).toString());
         if (args['from'] == fromAutoPayDelete) {
-          log('fromAutoPayDelete');
+          logInfo('fromAutoPayDelete');
           otpScreen = OtpVerification(
             from: args['from'],
             templateName: args['templateName'],
             autopayData: args['data'],
           );
         } else if (args['from'] == fromAutoPayEdit) {
-          log('fromAutoPayEdit');
+          logInfo('fromAutoPayEdit');
           otpScreen = OtpVerification(
               from: args['from'],
               id: args['id'].toString(),
               templateName: args['templateName'],
               data: args['data']);
         } else if (args['from'] == fromAutoPayCreate) {
-          log('fromAutoPayCreate');
+          logInfo('fromAutoPayCreate');
           otpScreen = OtpVerification(
               from: args['from'],
               id: args['id'].toString(),
               templateName: args['templateName'],
               data: args['data']);
         } else if (args['from'] == myBillRoute) {
-          log('myBillRoute');
+          logInfo('myBillRoute');
           otpScreen = OtpVerification(
               from: args['from'],
               templateName: args['templateName'],
               data: args['data']);
         } else if (args['from'] == confirmPaymentRoute) {
-          log('confirmPaymentRoute');
+          logInfo('confirmPaymentRoute');
           otpScreen = OtpVerification(
               from: args['from'],
               templateName: args['templateName'],
               data: args['data']);
         } else if (args['from'] == fromUpcomingDisable) {
-          log('fromUpcomingDisable');
-          log(args['from'].toString());
+          logInfo('fromUpcomingDisable');
+          // logInfo(args['from'].toString());
           otpScreen = OtpVerification(
             from: args['from'],
             templateName: args['templateName'],
             data: args['data'],
           );
         } else if (args['from'] == fromAddnewBillOtp) {
-          log('fromAddnewBillOtp');
+          logInfo('fromAddnewBillOtp');
           otpScreen = OtpVerification(
             from: args['from'],
             templateName: args['templateName'],
@@ -263,7 +252,7 @@ class MyRouter {
                 ));
       case confirmPaymentDoneRoute:
         final args = settings.arguments as Map<String, dynamic>;
-        print("confirmPaymentDone args=============>");
+        debugPrint("confirmPaymentDone args=============>");
         inspect(args);
         return CupertinoPageRoute(
             builder: (_) => BlocProvider(
@@ -275,7 +264,7 @@ class MyRouter {
 
       case failedPaymentRoute:
         final args = settings.arguments as Map<String, dynamic>;
-        print("confirmPayment failed args=============>");
+        debugPrint("confirmPayment failed args=============>");
         inspect(args);
         return CupertinoPageRoute(
             builder: (_) => BlocProvider(
@@ -318,7 +307,7 @@ class MyRouter {
                 ));
       case autoPayEditRoute:
         final args = settings.arguments as Map<String, dynamic>;
-        log(jsonEncode(args).toString());
+        logInfo(jsonEncode(args).toString());
         return CupertinoPageRoute(
             builder: (_) => BlocProvider(
                   create: (context) => AutopayCubit(repository: apicall),
@@ -327,12 +316,13 @@ class MyRouter {
                       autoPayData: args['autoPayData'],
                       billerName: args['billerName'],
                       billName: args['billName'],
+                      lastPaidAmount: args['lastPaidAmount'],
                       maxAllowedAmount: args['limit']),
                 ));
 
       case setupAutoPayRoute:
         final args = settings.arguments as Map<String, dynamic>;
-        log(jsonEncode(args).toString());
+        logInfo(jsonEncode(args).toString());
         return CupertinoPageRoute(
           builder: (_) => BlocProvider(
             create: (context) => AutopayCubit(repository: apicall),
@@ -342,6 +332,7 @@ class MyRouter {
                 billerName: args['billername'],
                 billName: args['billname'],
                 inputSignatures: args['inputSignatures'],
+                dueAmount: args['dueAmount'],
                 maxAllowedAmount: args['limit']),
           ),
         );
@@ -372,7 +363,7 @@ class MyRouter {
         );
       case pdfPreviewPageRoute:
         final args = settings.arguments as Map<String, dynamic>;
-        print("PdfPreviewPage args=============>");
+        debugPrint("PdfPreviewPage args=============>");
         inspect(args);
         return CupertinoPageRoute(
             builder: (_) => BlocProvider(
@@ -383,10 +374,10 @@ class MyRouter {
                 ));
       case confirmPaymentRoute:
         final args = settings.arguments as Map<String, dynamic>;
-        log(args.toString(), name: "AT CONFIRMPAYMENTROUTE ");
+        logConsole(args.toString(), "AT CONFIRMPAYMENTROUTE ");
 
         // args['savedBillersData']
-        //     .forEach((key, value) => print("$key = $value"));
+        //     .forEach((key, value) => debugPrint("$key = $value"));
         return CupertinoPageRoute(
             builder: (_) => BlocProvider(
                   create: (context) => billFlowCubit(repository: apicall),
@@ -482,14 +473,14 @@ validateJWT() async {
     var token = await getSharedValue(TOKEN);
     bool hasExpired = JwtToken.isExpired(token);
     if (hasExpired != true) {
-      log(hasExpired.toString(), name: "Hash expaired ? : ");
+      logConsole(hasExpired.toString(), "HASH EXPIRED ??? : ");
       var decodedToken = JwtToken.payload(token);
       DecodedModel? model = DecodedModel.fromJson(decodedToken);
 
       // log(model.accounts!.length.toString(), name: "JWT MODEL");
       return model;
     } else {
-      log("Expaired");
+      logError("Expired", "TOKEN");
       return 'restart';
     }
   } catch (e) {
@@ -501,7 +492,7 @@ Future<List<Accounts>> getDecodedAccounts() async {
   List<Accounts> decodedAccounts = [];
   try {
     DecodedModel? decodedModel = await validateJWT();
-    log(jsonEncode(decodedModel).toString(), name: "TRUE CONDITION");
+    logConsole(jsonEncode(decodedModel).toString(), "TRUE CONDITION");
 
     if (decodedModel.toString() != 'restart') {
       decodedAccounts = decodedModel!.accounts!;
@@ -548,17 +539,12 @@ DateTime getLastSixMonths(DateTime d) => DateTime(d.year, d.month - 6, d.day);
 // API CALL
 var client = http.Client();
 
-api(
+api1(
     {@required String? method,
     @required String? url,
     Map<String, dynamic>? body,
     token,
     checkSum}) async {
-  log(method.toString(), name: "api() : method :: ");
-  log(url.toString(), name: "api() : url :: ");
-  log(jsonEncode(body), name: "api() : body :: ");
-
-  // log(await getSharedValue(TOKEN),name: "TOKEN GOPI:::");
   try {
     if (method!.toLowerCase().contains("post")) {
       return client
@@ -634,7 +620,7 @@ api(
         },
       );
     } else if (method.toLowerCase().contains("get")) {
-      log(await getSharedValue(TOKEN));
+      logConsole(await getSharedValue(TOKEN), "TOKEN ::::");
       return client
           .get(Uri.parse(url!),
               headers: token == true
@@ -663,7 +649,7 @@ api(
         },
       );
     } else if (method.toLowerCase().contains("delete")) {
-      log(await getSharedValue(TOKEN));
+      logConsole(await getSharedValue(TOKEN), "TOKEN ::::");
       return client
           .delete(Uri.parse(url!),
               headers: token == true
@@ -693,22 +679,16 @@ api(
       );
     }
   } catch (e) {
-    log(e.toString(), name: "API CALL FUNCTION ERROR:::: ");
+    logError(e.toString(), "API CALL FUNCTION ERROR:::: ");
   }
 }
 
-apiWithEncryption(
+api(
     {@required String? method,
     @required String? url,
     Map<String, dynamic>? body,
     token,
     checkSum}) async {
-  log(method.toString(), name: "api() : method :: ");
-  log(url.toString(), name: "api() : url :: ");
-  if (body != null) {
-    log(jsonEncode(body), name: "api() : body :: ");
-  }
-
   late String bodyPayload;
 
   if (url.toString().contains(redirectUrl) ||
@@ -717,37 +697,39 @@ apiWithEncryption(
   } else if (method!.toLowerCase().contains("put") ||
       method.toLowerCase().contains("post")) {
     var publicKey = await getSharedValue(ENCRYPTION_KEY);
-    log(jsonEncode(publicKey), name: "api() : publicKey :: ");
 
-    // log(data.toString(), name: "api() : utf8 :: ");
-    // log(compressed.toString(), name: "api() : compressed :: ");
-    // String decompress(String zipText) {
+    final rsaencryption = encrypt.Encrypter(
+      encrypt.RSA(
+          publicKey: CryptoUtils.rsaPublicKeyFromPem(publicKey),
+          encoding: encrypt.RSAEncoding.OAEP),
+    );
 
-    //   if (compressed.length > 4) {
-    //     Uint8List uint8list = GZipDecoder()
-    //         .decodeBytes(compressed.sublist(4, compressed.length - 4));
-    //     // print( String.fromCharCodes(uint8list));
-    //     return String.fromCharCodes(uint8list);
-    //   } else {
-    //     return "";
-    //   }
-    // }
+    List<String> splitByLength(String value, int length) {
+      List<String> SplitDatas = [];
 
-    // final encryption = Encrypter(
-    //   RSA(
-    //       publicKey: CryptoUtils.rsaPublicKeyFromPem(publicKey),
-    //       encoding: RSAEncoding.OAEP),
-    // );
+      for (int i = 0; i < value.length; i += length) {
+        int offset = i + length;
+        SplitDatas.add(
+            value.substring(i, offset >= value.length ? value.length : offset));
+      }
+      return SplitDatas;
+    }
 
-    final key = encrypt.Key.fromUtf8("Qwerty12Qwerty12Qwerty12Qwerty12");
+    final data = splitByLength(jsonEncode(body), 64);
+
     final iv = encrypt.IV.fromUtf8("1234567890123456");
 
-    final encryption = encrypt.Encrypter(encrypt.AES(key));
-    var encryptedData = encryption.encrypt(jsonEncode(body), iv: iv).base64;
-    log(jsonEncode(encryptedData), name: "api() : encryptedData :: ");
+    List<String> newChunks = [];
+    for (var chunk in data) {
+      final encryptedChunk = rsaencryption.encrypt(chunk, iv: iv).base64;
+      newChunks.add(encryptedChunk);
+    }
+
+    final chunksstring = newChunks.join("");
+
     bodyPayload =
-        json.encode({"encryptedData": encryptedData, "fromMobile": true});
-    log(bodyPayload, name: "api() : EncryptedBody for :: $url ::");
+        json.encode({"encryptedData": chunksstring, "fromMobile": true});
+    logConsole(bodyPayload, "api() : EncryptedBody for :: $url ::");
   }
 
   try {
@@ -825,7 +807,7 @@ apiWithEncryption(
         },
       );
     } else if (method.toLowerCase().contains("get")) {
-      log(await getSharedValue(TOKEN));
+      logConsole(await getSharedValue(TOKEN), "TOKEN ::::");
       return client
           .get(Uri.parse(url!),
               headers: token == true
@@ -854,7 +836,7 @@ apiWithEncryption(
         },
       );
     } else if (method.toLowerCase().contains("delete")) {
-      log(await getSharedValue(TOKEN));
+      logConsole(await getSharedValue(TOKEN), "TOKEN ::::");
       return client
           .delete(Uri.parse(url!),
               headers: token == true
@@ -884,7 +866,7 @@ apiWithEncryption(
       );
     }
   } catch (e) {
-    log(e.toString(), name: "API CALL FUNCTION ERROR:::: ");
+    logError(e.toString(), "API CALL FUNCTION ERROR:::: ");
   }
 }
 
@@ -904,7 +886,7 @@ List<String> calendarMonths = [
 ];
 
 dynamic getMonthName(_month) {
-  print("object" + _month);
+  debugPrint("object" + _month);
   String returnMonth = "";
   final List<String> months = [
     "January",
@@ -1037,7 +1019,7 @@ dynamic getTransactionDateForComplaint(transactionType) async {
       "startDate": "",
       "endDate": ""
     };
-    log(transactionType, name: 'transactionType');
+    logConsole(transactionType, 'transactionType');
 
     var curDateTime = DateTime.now();
     var parsetoday = getDate(curDateTime);
@@ -1045,7 +1027,7 @@ dynamic getTransactionDateForComplaint(transactionType) async {
     var thisMonthFirstDay = DateTime(curDateTime.year, curDateTime.month, 1);
     thisMonthFirstDay = thisMonthFirstDay.subtract(Duration(days: 0));
     DateTime last3MonthFirstDay = parsetoday.subtract(Duration(days: 90));
-    log(last3MonthFirstDay.toString(), name: "last3MonthLastDay ::");
+    logConsole(last3MonthFirstDay.toString(), "last3MonthLastDay ::");
 
     // DateTime last3MonthFirstDay = DateTime(
     //     last3MonthLastDay.year, last3MonthLastDay.month, last3MonthLastDay.day);
@@ -1087,8 +1069,8 @@ dynamic getTransactionDateForComplaint(transactionType) async {
     var last3MonthStartDt = last3MonthFirstDay.toLocal().toIso8601String();
 
     var currTime = curDateTime.toLocal().toIso8601String();
-    log(transactionType);
-    log(currTime);
+    logInfo(transactionType);
+    logInfo(currTime);
     if (transactionType == "Today") {
       // returnResponse['startDate'] = today;
       returnResponse['endDate'] = currTime;
@@ -1122,7 +1104,7 @@ dynamic getTransactionDateForComplaint(transactionType) async {
     }
     return returnResponse;
   } catch (e) {
-    log(e.toString(), name: "getTransactionHistoryDate (fn)");
+    logError(e.toString(), "getTransactionHistoryDate (fn)");
   }
 }
 
@@ -1132,7 +1114,7 @@ dynamic getTransactionHistoryDate(transactionType) async {
       "startDate": "",
       "endDate": ""
     };
-    log(transactionType, name: 'transactionType');
+    logConsole(transactionType, 'transactionType');
 
     var curDateTime = DateTime.now();
     var parsetoday = getDate(curDateTime);
@@ -1171,8 +1153,8 @@ dynamic getTransactionHistoryDate(transactionType) async {
     var last3MonthStartDt = last3MonthFirstDay.toLocal().toIso8601String();
 
     var currTime = curDateTime.toLocal().toIso8601String();
-    log(transactionType);
-    log(currTime);
+    logInfo(transactionType);
+    logInfo(currTime);
     if (transactionType == "Today") {
       returnResponse['startDate'] = today;
       returnResponse['endDate'] = currTime;
@@ -1204,7 +1186,7 @@ dynamic getTransactionHistoryDate(transactionType) async {
     }
     return returnResponse;
   } catch (e) {
-    log(e.toString(), name: "getTransactionHistoryDate (fn)");
+    logError(e.toString(), "getTransactionHistoryDate (fn)");
   }
 }
 
@@ -1401,7 +1383,7 @@ getBillPaymentDetails(
   //   failed,
   //   bbpsTimeout,
   // } as Map<String, dynamic>;
-  // print(result);
+  // debugPrint(result);
   return {
     "totalAmount": totalAmount,
     "paymentDate": paymentDate,
@@ -1463,5 +1445,17 @@ String ComplaintStatus(String statusID) {
 
     default:
       return statusID.toString();
+  }
+}
+
+extension StringExtension on String {
+  String capitalizeByWord() {
+    if (trim().isEmpty) {
+      return '';
+    }
+    return split(' ')
+        .map((element) =>
+            "${element[0].toUpperCase()}${element.substring(1).toLowerCase()}")
+        .join(" ");
   }
 }

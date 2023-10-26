@@ -1,25 +1,29 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:bbps/model/auto_schedule_pay_model.dart';
+import 'package:bbps/model/bbps_settings_model.dart';
+import 'package:bbps/model/billers_search_model.dart';
+import 'package:bbps/model/chart_model.dart';
+import 'package:bbps/model/delete_upcoming_due_model.dart';
+import 'package:bbps/model/prepaid_fetch_plans_model.dart';
+import 'package:bbps/model/states_data_model.dart';
+import 'package:bbps/utils/const.dart';
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 
 import '../../api/api_repository.dart';
 // import '../../model/auto_schedule_pay_model copy.dart';
+import '../../model/add_update_upcoming_due_model.dart';
 import '../../model/auto_schedule_pay_model.dart';
 import '../../model/auto_schedule_pay_model.dart';
-import '../../model/bbps_settings_model.dart';
 import '../../model/biller_model.dart';
 import '../../model/categories_model.dart';
-import '../../model/chart_model.dart';
-import '../../model/delete_upcoming_due_model.dart';
 import '../../model/edit_bill_modal.dart';
 import '../../model/input_signatures_model.dart';
 import '../../model/location_model.dart';
 import '../../model/paymentInformationModel.dart';
-import '../../model/prepaid_fetch_plans_model.dart';
 import '../../model/saved_billers_model.dart';
-import '../../model/states_data_model.dart';
 import '../../model/upcoming_dues_model.dart';
 import '../../model/update_bill_model.dart';
 
@@ -60,7 +64,7 @@ class HomeCubit extends Cubit<HomeState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getCharts:::");
+      logError(e.toString(), "CUBIT::getCharts:::");
     }
   }
 
@@ -102,7 +106,7 @@ class HomeCubit extends Cubit<HomeState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT:::fetchPrepaidFetchPlans:::");
+      logError(e.toString(), "CUBIT:::fetchPrepaidFetchPlans:::");
     }
   }
 
@@ -144,12 +148,12 @@ class HomeCubit extends Cubit<HomeState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT:::deleteUpcomingDue:::");
+      logError(e.toString(), "CUBIT:::deleteUpcomingDue:::");
     }
   }
 
   void searchBiller(queryString, Category, Loaction) {
-    log(queryString, name: "SEARCH IN HOME CUBIT");
+    logConsole(queryString, "SEARCH IN HOME CUBIT");
 
     if (!isClosed) {
       emit(BillersSearchLoading());
@@ -171,7 +175,7 @@ class HomeCubit extends Cubit<HomeState> {
               testPayload['location'],
               testPayload['pageNumber'])
           .then((value) {
-        log(value['status'].toString(), name: "home cubit : searchBiller");
+        // log(value['status'].toString(), name: "home cubit : searchBiller");
 
         if (value != null) {
           if (!value.toString().contains("Invalid token")) {
@@ -203,7 +207,7 @@ class HomeCubit extends Cubit<HomeState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getSearchedBillers :::");
+      logError(e.toString(), "CUBIT::getSearchedBillers :::");
     }
   }
 
@@ -213,7 +217,7 @@ class HomeCubit extends Cubit<HomeState> {
     }
     try {
       repository!.getSavedBillers().then((value) {
-        log(value['status'].toString());
+        // logInfo(value['status'].toString());
 
         if (value != null) {
           if (!value.toString().contains("Invalid token")) {
@@ -246,7 +250,7 @@ class HomeCubit extends Cubit<HomeState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getSavedBillers :::");
+      logError(e.toString(), "CUBIT::getSavedBillers :::");
     }
   }
 
@@ -265,8 +269,8 @@ class HomeCubit extends Cubit<HomeState> {
                   UpcomingDuesModel.fromJson(value);
               //  success emit
               if (!isClosed) {
-                log(upcomingDuesModel.data.toString(),
-                    name: "at getAllUpcomingDues() ::::");
+                // log(upcomingDuesModel.data.toString(),
+                //     name: "at getAllUpcomingDues() ::::");
                 emit(UpcomingDuesSuccess(
                     upcomingDuesData: upcomingDuesModel.data));
               }
@@ -290,7 +294,7 @@ class HomeCubit extends Cubit<HomeState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getAllUpcomingDues :::");
+      logError(e.toString(), "CUBIT::getAllUpcomingDues :::");
     }
   }
 
@@ -306,8 +310,8 @@ class HomeCubit extends Cubit<HomeState> {
               AutoSchedulePayModel? autoSchedulePayModel =
                   AutoSchedulePayModel.fromJson(value);
               if (!isClosed) {
-                log(jsonEncode(autoSchedulePayModel.data),
-                    name: "AT getAutopay");
+                // log(jsonEncode(autoSchedulePayModel.data),
+                //     name: "AT getAutopay");
 
                 emit(AutopaySuccess(
                     autoScheduleData: autoSchedulePayModel.data));
@@ -329,7 +333,7 @@ class HomeCubit extends Cubit<HomeState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getAutopay :::");
+      logError(e.toString(), "CUBIT::getAutopay :::");
     }
   }
 
@@ -364,7 +368,7 @@ class HomeCubit extends Cubit<HomeState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getAllCategories:::");
+      logError(e.toString(), "CUBIT::getAllCategories:::");
     }
   }
 
@@ -398,7 +402,7 @@ class HomeCubit extends Cubit<HomeState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getStateAndCities:::");
+      logError(e.toString(), "CUBIT::getStateAndCities:::");
     }
   }
 
@@ -435,7 +439,7 @@ class HomeCubit extends Cubit<HomeState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::fetchStatesData:::");
+      logError(e.toString(), "CUBIT::fetchStatesData:::");
     }
   }
 
@@ -483,7 +487,7 @@ class HomeCubit extends Cubit<HomeState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getAllBiller:::");
+      logError(e.toString(), "CUBIT::getAllBiller:::");
     }
   }
 
@@ -519,7 +523,7 @@ class HomeCubit extends Cubit<HomeState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getInputSingnature:::");
+      logError(e.toString(), "CUBIT::getInputSingnature:::");
     }
   }
 
@@ -553,7 +557,54 @@ class HomeCubit extends Cubit<HomeState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getEditBill:::");
+      logError(e.toString(), "CUBIT::getEditBill:::");
+    }
+  }
+
+  void getAddUpdateUpcomingDue(
+      {int? customerBillID,
+      String? dueAmount,
+      String? dueDate,
+      String? billDate,
+      String? billPeriod}) {
+    // int customerBillID = 1621;
+    // String dueAmount = "1000.00";
+    // String dueDate = "2015-06-20";
+    if (!isClosed) {
+      emit(AddUpdateUpcomingDueLoading());
+    }
+    try {
+      repository!
+          .getAddUpdateUpcomingDue(
+              customerBillID, dueAmount, dueDate, billDate, billPeriod)
+          .then((value) {
+        if (value != null) {
+          if (!value.toString().contains("Invalid token")) {
+            if (value['status'] == 200) {
+              AddUpdateUpcomingModel? addUpdateUpcomingModel =
+                  AddUpdateUpcomingModel.fromJson(value);
+              if (!isClosed) {
+                emit(AddUpdateUpcomingDueSuccess(
+                    addUpdateUpcomingDueData: addUpdateUpcomingModel.data));
+              }
+            } else {
+              if (!isClosed) {
+                emit(AddUpdateUpcomingDueFailed(message: value['message']));
+              }
+            }
+          } else {
+            if (!isClosed) {
+              emit(AddUpdateUpcomingDueError(message: value['message']));
+            }
+          }
+        } else {
+          if (!isClosed) {
+            emit(AddUpdateUpcomingDueFailed(message: value['message']));
+          }
+        }
+      });
+    } catch (e) {
+      logError(e.toString(), "CUBIT::getAddUpdateUpcomingDue:::");
     }
   }
 
@@ -561,7 +612,7 @@ class HomeCubit extends Cubit<HomeState> {
     if (!isClosed) {
       emit(UpdateBillLoading());
     }
-    log(payload.toString(), name: "payload for updateBill");
+    // log(payload.toString(), name: "payload for updateBill");
     try {
       repository!.updateBillDetails(payload).then((value) {
         if (value != null) {
@@ -589,7 +640,7 @@ class HomeCubit extends Cubit<HomeState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::updateBill:::");
+      logError(e.toString(), "CUBIT::updateBill:::");
     }
   }
 
@@ -625,7 +676,7 @@ class HomeCubit extends Cubit<HomeState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getBbpsSettings:::");
+      logError(e.toString(), "CUBIT::getBbpsSettings:::");
     }
   }
 }

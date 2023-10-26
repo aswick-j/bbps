@@ -1,27 +1,28 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:bbps/model/input_signatures_model.dart';
+import 'package:bbps/model/prepaid_fetch_plans_model.dart';
+import 'package:bbps/model/saved_billers_model.dart';
+import 'package:bbps/model/validate_bill_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_overlay_loader/flutter_overlay_loader.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:intl/intl.dart';
-import '../../model/add_bill_payload_model.dart';
-import '../../model/biller_model.dart';
+
 import '../../bloc/home/billflow_cubit.dart';
 import '../../bloc/home/billflow_state.dart';
 import '../../model/account_info_model.dart';
+import '../../model/add_bill_payload_model.dart';
+import '../../model/auto_schedule_pay_model.dart';
 import '../../model/bbps_settings_model.dart';
+import '../../model/biller_model.dart';
 import '../../model/confirm_fetch_bill_model.dart';
 import '../../model/fetch_bill_model.dart';
-import '../../model/input_signatures_model.dart';
 import '../../model/paymentInformationModel.dart';
-import '../../model/prepaid_fetch_plans_model.dart';
 import '../../model/saved_bill_details_model.dart';
-import '../../model/saved_billers_model.dart';
-import '../../model/validate_bill_model.dart';
 import '../../utils/commen.dart';
 import '../../utils/const.dart';
 import '../../utils/utils.dart';
@@ -65,12 +66,15 @@ class ConfirmPayment extends StatefulWidget {
 class _ConfirmPaymentState extends State<ConfirmPayment> {
   List<InputSignatures>? savedInputSignatures = [];
   List<PARAMETERS>? prepaidParameters = [];
+  List<AllConfigurations>? allautoPaymentList = [];
+  List<UpcomingPaymentsData>? upcomingPaymentList = [];
 
   // List<BillNameDetail>? billName = [];
   PaymentInformationData? paymentInform;
   bbpsSettingsData? BbpsSettingInfo;
   String _dailyLimit = "0";
   BillerResponse? _billerResponseData;
+  int? _customerBIllID;
   //  List<Tag> newTag = [];
   //  Map<String,dynamic> temp = {
   //   "Tag" : null
@@ -78,6 +82,7 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
   // AdditionalInfo? _additionalInfo = AdditionalInfo.fromJson(temp);
   AdditionalInfo? _additionalInfo;
   Map<String, dynamic> billerInputSign = {};
+  AutoSchedulePayModel? autoSchedulePayData = AutoSchedulePayModel();
 
   List<AccountsData>? accountInfo = [];
   int billAmount = 0;
@@ -85,7 +90,7 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
   List<AddbillerpayloadModel>? newAddbillerParams = [];
 
   void helperFunction() async {
-    log(myAccounts.toString(), name: "myAccounts");
+    logConsole(myAccounts.toString(), "myAccounts");
     if (myAccounts!.length > 0)
       BlocProvider.of<billFlowCubit>(context).getAccountInfo(myAccounts);
 
@@ -121,8 +126,8 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
         //   billerInputSign[element.pARAMETERNAME.toString()] =
         //       element.pARAMETERVALUE.toString();
         // }
-        log(widget.savedBillersData!.pARAMETERS!.asMap().toString(),
-            name: "HERE :::");
+        logConsole(widget.savedBillersData!.pARAMETERS!.asMap().toString(),
+            "HERE :::");
         List<PARAMETERS> newInputParameters = [];
 
         PARAMETERS newparam;
@@ -167,7 +172,8 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
             quickPayAmount: "0",
             adHocBillValidationRefKey: null,
             validateBill: validateBill!["validateBill"],
-            billerParams: billerInputSign);
+            billerParams: billerInputSign,
+            billName: widget.isSavedBill ? null : widget!.billName);
       } else {
         isFetchBillLoading = false;
       }
@@ -183,7 +189,7 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
             widget.billerData!.pAYMENTEXACTNESS);
       });
       inspect(validateBill);
-      print("widget.inputSignatureItems :::::::::::::");
+      debugPrint("widget.inputSignatureItems :::::::::::::");
       inspect(widget.inputSignatureItems);
       List<AddbillerpayloadModel> newInputAddbillerParams = [];
       AddbillerpayloadModel tempModel;
@@ -249,7 +255,7 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
         prepaidParameters = newInputParameters;
       });
 
-      print("check herer ============");
+      debugPrint("check herer ============");
 
       inspect(newInputAddbillerParams);
       Map<String, dynamic> inputParameters = {
@@ -265,31 +271,32 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
       });
     }
 
-    print(
+    debugPrint(
         "validateBill ============> ${validateBill!["fetchBill"]}${validateBill!["amountEditable"]}${validateBill!["validateBill"]}${validateBill!["billerType"]}${validateBill!["isAdhoc"]}${validateBill!["quickPay"]}${jsonEncode(myAccounts)}");
   }
 
   @override
   void initState() {
     helperFunction();
-    log(jsonEncode(widget.savedBillersData).toString(),
-        name: "savedBillersData :::");
-    log(jsonEncode(widget.billerData).toString(), name: "billerData :::");
-    log(isSavedBillFrom.toString(), name: "isSavedBillFrom ::::");
-    log(isMobilePrepaidFrom.toString(), name: "isMobilePrepaidFrom::::");
+    logConsole(
+        jsonEncode(widget.savedBillersData).toString(), "savedBillersData :::");
+    logConsole(jsonEncode(widget.billerData).toString(), "billerData :::");
+    logConsole(isSavedBillFrom.toString(), "isSavedBillFrom ::::");
+    logConsole(isMobilePrepaidFrom.toString(), "isMobilePrepaidFrom::::");
 
     if (widget.isSavedBill &&
         (widget.isMobilePrepaid == null ||
             widget.isMobilePrepaid!.toString().isEmpty)) {
       BlocProvider.of<billFlowCubit>(context).getSavedDetails(widget.billID);
     }
-
     BlocProvider.of<billFlowCubit>(context).getAmountByDate();
     BlocProvider.of<billFlowCubit>(context).getBbpsSettings();
     BlocProvider.of<billFlowCubit>(context).getPaymentInformation(
         widget.isSavedBill
             ? widget.savedBillersData!.bILLERID
             : widget.billerData!.bILLERID);
+    BlocProvider.of<billFlowCubit>(context).getAutopay();
+
     super.initState();
   }
 
@@ -304,6 +311,8 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
   bool isBBPSSettingsLoading = true;
 
   bool isSavedBillerDetailsLoading = false;
+
+  bool isAutopayLoading = true;
 
   @override
   Widget build(BuildContext context) {
@@ -349,6 +358,28 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
       ),
       body: BlocConsumer<billFlowCubit, billFlowState>(
         listener: (context, state) {
+          if (state is AllAutopayLoading) {
+            isAutopayLoading = true;
+          } else if (state is AllAutopaySuccess) {
+            autoSchedulePayData = state.autoSchedulePayData;
+            allautoPaymentList = autoSchedulePayData!.data!.allConfigurations!;
+            upcomingPaymentList =
+                autoSchedulePayData!.data!.upcomingPayments!.isEmpty
+                    ? []
+                    : autoSchedulePayData!.data!.upcomingPayments![0].data;
+            // model = state.autoSchedulePayModel.data.allConfigurations;
+            // allautoPaymentList = model!.data!.allConfigurations!;
+
+            isAutopayLoading = false;
+          } else if (state is AllAutopayFailed) {
+            isAutopayLoading = false;
+
+            showSnackBar(state.message, context);
+          } else if (state is AllAutopayError) {
+            isAutopayLoading = false;
+
+            goToUntil(context, splashRoute);
+          }
           if (state is SavedBillDetailsLoading) {
             // showLoader(context);
             helperFunction();
@@ -370,7 +401,8 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
                   quickPayAmount: "0",
                   adHocBillValidationRefKey: null,
                   validateBill: validateBill!["validateBill"],
-                  billerParams: billerInputSign);
+                  billerParams: billerInputSign,
+                  billName: widget.isSavedBill ? null : widget!.billName);
             } else {
               isFetchBillLoading = false;
             }
@@ -525,21 +557,25 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
             // final res = state.fetchBillResponse!.data?.data?.billerResponse;
             _billerResponseData =
                 state.fetchBillResponse!.data!.data!.billerResponse;
-            // print(state.fetchBillResponse!.data!.data!.billerResponse);
+            // debugPrint(state.fetchBillResponse!.data!.data!.billerResponse);
+            _customerBIllID = state.fetchBillResponse!.customerbillId;
             _additionalInfo =
                 state.fetchBillResponse!.data!.data!.additionalInfo;
-            if (widget.isSavedBill) {
-              BlocProvider.of<billFlowCubit>(context).getAddUpdateUpcomingDue(
-                  customerBillID: widget.savedBillersData!.cUSTOMERBILLID,
-                  dueAmount: _billerResponseData!.amount,
-                  dueDate: _billerResponseData!.dueDate);
-            }
+            BlocProvider.of<billFlowCubit>(context).getAddUpdateUpcomingDue(
+                customerBillID: widget.isSavedBill
+                    ? widget.savedBillersData!.cUSTOMERBILLID
+                    : _customerBIllID,
+                dueAmount: _billerResponseData!.amount,
+                dueDate: _billerResponseData!.dueDate,
+                billDate: _billerResponseData!.billDate,
+                billPeriod: _billerResponseData!.billPeriod);
 
             // billAmount = int.parse(state
             //     .fetchBillResponse!.data!.data!.billerResponse!.amount
             //     .toString());
             isFetchBillLoading = false;
           } else if (state is FetchBillFailed) {
+            BlocProvider.of<billFlowCubit>(context).getAddUpdateUpcomingDue();
             // if (Loader.isShown) {
             //   Loader.hide();
             // }
@@ -555,9 +591,9 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
                 buttonName: "Okay",
                 dialogHeight: height(context) / 2.6,
                 buttonAction: () {
-                  // goBack(context);
-                  // goBack(context);
-                  goToUntil(context, homeRoute);
+                  goBack(context);
+                  goBack(context);
+                  // goToUntil(context, homeRoute);
                 },
                 context: context,
                 iconSvg: alertSvg,
@@ -647,6 +683,7 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
                   isFetchBillLoading ||
                   isPaymentInfoLoading ||
                   isBBPSSettingsLoading ||
+                  isAutopayLoading ||
                   isSavedBillerDetailsLoading)
               ? ConformPaymentUI(
                   id: widget.billID,
@@ -676,13 +713,15 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
                   selectedPrepaidPlan: widget.selectedPrepaidPlan,
                   selectedCircle: widget.selectedCircle,
                   prepaidParameters: prepaidParameters,
-                )
+                  newCustomerBillId: _customerBIllID,
+                  allAutopayData: allautoPaymentList,
+                  allAutopayUpcomingData: upcomingPaymentList)
               : Container(
                   height: height(context),
                   child: Center(
                     heightFactor: height(context) * 0.0097,
                     child: Image.asset(
-                      "assets/images/loader.gif",
+                      LoaderGif,
                       height: height(context) * 0.07,
                       width: height(context) * 0.07,
                     ),
@@ -723,6 +762,9 @@ class ConformPaymentUI extends StatefulWidget {
   bool isMobilePrepaid;
   String? selectedCircle;
   bool? isAccLoading;
+  dynamic? newCustomerBillId;
+  dynamic? allAutopayData;
+  dynamic? allAutopayUpcomingData;
   ConformPaymentUI(
       {super.key,
       required this.id,
@@ -747,6 +789,9 @@ class ConformPaymentUI extends StatefulWidget {
       this.selectedPrepaidPlan,
       this.prepaidParameters,
       this.isAccLoading,
+      this.newCustomerBillId,
+      this.allAutopayData,
+      this.allAutopayUpcomingData,
       this.newAddbillerParams});
   @override
   State<ConformPaymentUI> createState() => _ConformPaymentUIState();
@@ -792,12 +837,12 @@ class _ConformPaymentUIState extends State<ConformPaymentUI> {
 
     if (widget.validate_bill!["fetchBill"]) {
       billAmount = getFetchBillDetails();
-      print("billAmount $billAmount");
+      debugPrint("billAmount $billAmount");
 
       if (!_amountForAdhocBill) {
-        print("_amountForAdhocBill $_amountForAdhocBill");
+        debugPrint("_amountForAdhocBill $_amountForAdhocBill");
         userAmount = double.parse(billAmount);
-        print("_amountForAdhocBill $userAmount");
+        debugPrint("_amountForAdhocBill $userAmount");
       }
       // userAmount = 100;
     }
@@ -816,7 +861,7 @@ class _ConformPaymentUIState extends State<ConformPaymentUI> {
   // @override
   // void didChangeDependencies() {
 
-  //   // log("OTP DEP CHANGED :::: +++++");
+  //   //logConsole("OTP DEP CHANGED :::: +++++");
   //   super.didChangeDependencies();
   // }
 
@@ -953,6 +998,31 @@ class _ConformPaymentUIState extends State<ConformPaymentUI> {
   ValidateBillResponseData? validateBillResponseData;
   String _isErrorMsg = "";
 
+  getAutopayStatus(customerBillID) {
+    List<AllConfigurationsData>? AutoData = [];
+    List<UpcomingPaymentsData>? UpcomingData = [];
+
+    for (int i = 0; i < widget.allAutopayData!.length; i++) {
+      for (int j = 0; j < widget.allAutopayData![i].data!.length; j++) {
+        AutoData.add(widget.allAutopayData![i].data![j]);
+      }
+    }
+
+    for (int i = 0; i < widget.allAutopayUpcomingData!.length; i++) {
+      UpcomingData.add(widget.allAutopayUpcomingData![i]);
+    }
+
+    List<AllConfigurationsData>? data =
+        AutoData.where((item) => item.cUSTOMERBILLID == customerBillID)
+            .toList();
+
+    List<UpcomingPaymentsData>? Updata =
+        UpcomingData.where((item) => item.cUSTOMERBILLID == customerBillID)
+            .toList();
+
+    return (data.isNotEmpty || Updata.isNotEmpty ? true : false);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<billFlowCubit, billFlowState>(
@@ -976,8 +1046,8 @@ class _ConformPaymentUIState extends State<ConformPaymentUI> {
               userAmount == billAmount);
         }
         if (widget.isSavedBill) {
-          log(jsonEncode(widget.savedInputSignatures).toString(),
-              name: "widget.savedInputSignatures ::");
+          logConsole(jsonEncode(widget.savedInputSignatures).toString(),
+              "widget.savedInputSignatures ::");
         }
 
         inspect(widget.savedInputSignatures);
@@ -999,14 +1069,18 @@ class _ConformPaymentUIState extends State<ConformPaymentUI> {
                 : widget.billName,
             "acNo": widget.accInfo![selectedAccount].accountNumber,
             "billAmount": userAmount.toString(),
-            "customerBillID":
-                widget.isSavedBill ? widget.savedBillerData!.cUSTOMERBILLID : 0,
+            "customerBillID": widget.isSavedBill
+                ? widget.savedBillerData!.cUSTOMERBILLID
+                : widget.newCustomerBillId,
             "tnxRefKey": confirmbillerResData!.txnRefKey,
             "quickPay": widget.validate_bill!["quickPay"],
             "inputSignature": widget.isSavedBill
                 ? widget.savedInputSignatures
                 : widget.inputParameters,
             "otherAmount": _otherAmount,
+            "autoPayStatus": getAutopayStatus(widget.isSavedBill
+                ? widget.savedBillerData!.cUSTOMERBILLID
+                : widget.newCustomerBillId),
             "billerData":
                 widget.isSavedBill ? widget.savedBillerData : widget.billerData
           }
@@ -1030,12 +1104,12 @@ class _ConformPaymentUIState extends State<ConformPaymentUI> {
         isSavedBillFrom = widget.billerData != null ? false : true;
         isMobilePrepaidFrom = true;
 
-        log(jsonEncode(widget.savedInputSignatures).toString(),
-            name: "widget.savedInputSignatures :::");
-        log(state.transactionReferenceKey.toString(),
-            name: "transactionReferenceKey:::");
-        log(jsonEncode(widget.newAddbillerParams).toString(),
-            name: "widget.inputParameters ::::");
+        logConsole(jsonEncode(widget.savedInputSignatures).toString(),
+            "widget.savedInputSignatures :::");
+        logConsole(state.transactionReferenceKey.toString(),
+            "transactionReferenceKey:::");
+        logConsole(jsonEncode(widget.newAddbillerParams).toString(),
+            "widget.inputParameters ::::");
         goToData(context, otpRoute, {
           "from": confirmPaymentRoute,
           "templateName": "confirm-payment",
@@ -1067,6 +1141,9 @@ class _ConformPaymentUIState extends State<ConformPaymentUI> {
             "paymentChannel": "BNKBRNCH",
             "forChannel": "prepaid",
             "otherAmount": _otherAmount,
+            "autoPayStatus": getAutopayStatus(widget.isSavedBill
+                ? widget.savedBillerData!.cUSTOMERBILLID
+                : widget.newCustomerBillId),
             "billerData":
                 widget.isSavedBill ? widget.savedBillerData : widget.billerData
           }
@@ -1086,24 +1163,24 @@ class _ConformPaymentUIState extends State<ConformPaymentUI> {
             "quickPayAmount": txtAmountController.text,
             "forChannel": "prepaid",
             "adHocBillValidationRefKey": state.bbpsTranlogId,
-            "planId": widget.selectedPrepaidPlan!.billerPlanId,
-            "supportPlan": "MANDATORY",
-            // "planType": widget.selectedPrepaidPlan!.planAdditionalInfo!.planType
-            "planType": "CURATED"
+            "planid": widget.selectedPrepaidPlan!.billerPlanId,
+            "supportplan": "MANDATORY",
+            "plantype": widget.selectedPrepaidPlan!.planAdditionalInfo!.Type
+            // "plantype": "CURATED"
           };
           BlocProvider.of<billFlowCubit>(context).prepaidValidateBill(payload);
         } else {
           BlocProvider.of<billFlowCubit>(context).confirmFetchBill(
-            validateBill: false,
-            billerID: widget.isSavedBill
-                ? widget.savedBillerData!.bILLERID
-                : widget.billerID,
-            billerParams: widget.billerParams,
-            quickPay: widget.validate_bill!["quickPay"],
-            quickPayAmount: userAmount.toString(),
-            adHocBillValidationRefKey:
-                validateBillResponseData?.data!.bbpsTranlogId,
-          );
+              validateBill: false,
+              billerID: widget.isSavedBill
+                  ? widget.savedBillerData!.bILLERID
+                  : widget.billerID,
+              billerParams: widget.billerParams,
+              quickPay: widget.validate_bill!["quickPay"],
+              quickPayAmount: userAmount.toString(),
+              adHocBillValidationRefKey:
+                  validateBillResponseData?.data!.bbpsTranlogId,
+              billName: widget.isSavedBill ? null : widget!.billName);
         }
       } else if (state is ValidateBillFailed) {
         isMobilePrepaidFrom = false;
@@ -1121,7 +1198,8 @@ class _ConformPaymentUIState extends State<ConformPaymentUI> {
             buttonName: "Okay",
             dialogHeight: height(context) / 2.6,
             buttonAction: () {
-              goToUntil(context, homeRoute);
+              goBack(context);
+              goBack(context);
             },
             context: context,
             iconSvg: alertSvg);
@@ -1547,7 +1625,7 @@ class _ConformPaymentUIState extends State<ConformPaymentUI> {
                     Align(
                       alignment: Alignment.center,
                       child: Image.asset(
-                        "assets/images/be_assured_logo.png",
+                        bbpsAssuredLogo,
                         height: height(context) * 0.07,
                       ),
                     ),
@@ -1631,7 +1709,7 @@ class _ConformPaymentUIState extends State<ConformPaymentUI> {
                             controller: txtAmountController,
                             enabled: widget.validate_bill!["amountEditable"],
                             onChanged: (val) {
-                              // print(val);
+                              // debugPrint(val);
                               _isErrorMsg = "";
                               if (txtAmountController.text.isEmpty) {
                                 setState(() {
@@ -1643,8 +1721,8 @@ class _ConformPaymentUIState extends State<ConformPaymentUI> {
                                   userAmount = double.parse(val.toString());
                                 });
                               }
-                              log(selectedAccount.toString(),
-                                  name: "selectedAccount :: ");
+                              logConsole(selectedAccount.toString(),
+                                  "selectedAccount :: ");
                               if (selectedAccount != 9999 &&
                                   txtAmountController.text.isNotEmpty) {
                                 if (double.parse(widget
@@ -1838,7 +1916,6 @@ class _ConformPaymentUIState extends State<ConformPaymentUI> {
                                                 : (value) {
                                                     setState(() =>
                                                         selectedAccount = i);
-                                                    print(selectedAccount);
 
                                                     if (double.parse(widget
                                                             .accInfo![
@@ -2176,7 +2253,7 @@ class _ConformPaymentUIState extends State<ConformPaymentUI> {
                               }
 
                               if (!_response) {
-                                print(
+                                debugPrint(
                                     "limits ${widget.dailyLimit} $userAmount ${widget.settingInfo!.dAILYLIMIT}");
                                 if (txtAmountController.text.isEmpty) {
                                   showSnackBar(
@@ -2197,8 +2274,8 @@ class _ConformPaymentUIState extends State<ConformPaymentUI> {
                                   if (!Loader.isShown) {
                                     showLoader(context);
                                   }
-                                  log(widget.validate_bill.toString(),
-                                      name: "widget.validate_bill");
+                                  logConsole(widget.validate_bill.toString(),
+                                      "widget.validate_bill");
 
                                   //CHANGE HERE
                                   if (widget.isMobilePrepaid == true) {
@@ -2248,9 +2325,11 @@ class _ConformPaymentUIState extends State<ConformPaymentUI> {
                                     billDetail["quickPay"] =
                                         widget.validate_bill!["quickPay"];
                                     billDetail["quickPayAmount"] = userAmount;
-                                    log(jsonEncode(billDetail),
-                                        name: "billDetail=>");
-                                    log("if widget.validate_bill!['validateBill'] is true :::");
+                                    billDetail["billName"] = widget.billName;
+                                    logConsole(
+                                        jsonEncode(billDetail), "billDetail=>");
+                                    logInfo(
+                                        "if widget.validate_bill!['validateBill'] is true :::");
 
                                     Map<String, dynamic> payload = {
                                       "validateBill":
@@ -2262,6 +2341,7 @@ class _ConformPaymentUIState extends State<ConformPaymentUI> {
                                       "quickPay":
                                           widget.validate_bill!["quickPay"],
                                       "quickPayAmount": userAmount.toString(),
+                                      "billName": widget.billName,
                                     };
                                     BlocProvider.of<billFlowCubit>(context)
                                         .fetchValidateBill(payload);
@@ -2304,6 +2384,9 @@ class _ConformPaymentUIState extends State<ConformPaymentUI> {
                                       validateBill:
                                           widget.validate_bill!["validateBill"],
                                       billerParams: widget.billerParams,
+                                      billName: widget.isSavedBill
+                                          ? null
+                                          : widget.billName,
                                     );
                                   }
                                 }

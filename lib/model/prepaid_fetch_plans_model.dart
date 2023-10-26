@@ -121,7 +121,7 @@ class PlanAdditionalInfo {
   String? validity;
   String? circle;
   String? type;
-  String? planType;
+  String? Type;
   String? data;
   String? talktime;
   String? additionalBenefits;
@@ -132,7 +132,7 @@ class PlanAdditionalInfo {
       this.type,
       this.data,
       this.talktime,
-      this.planType,
+      this.Type,
       this.additionalBenefits});
 
   PlanAdditionalInfo.fromJson(Map<String, dynamic> json) {
@@ -141,7 +141,7 @@ class PlanAdditionalInfo {
     type = json['Type'];
     data = json['Data'];
     talktime = json['Talktime'];
-    planType = json['Plan Type'];
+    type = json['Type'];
     additionalBenefits = json['Additional Benefits'];
   }
 
@@ -152,7 +152,7 @@ class PlanAdditionalInfo {
     data['Type'] = this.type;
     data['Data'] = this.data;
     data['Talktime'] = this.talktime;
-    data['Plan Type'] = this.planType;
+    data['Type'] = this.type;
     data['Additional Benefits'] = this.additionalBenefits;
     return data;
   }

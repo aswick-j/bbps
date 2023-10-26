@@ -1,20 +1,19 @@
-import 'dart:developer';
 import 'dart:io';
 
+import 'package:bbps/bloc/mybill/mybill_cubit.dart';
+import 'package:bbps/utils/const.dart';
+import 'package:bbps/views/home/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
 import '../../api/api_repository.dart';
-import '../../bloc/autopay/autopay_cubit.dart';
-import '../../bloc/mybill/mybill_cubit.dart';
+import '../../bloc/history/history_cubit.dart';
 import '../../utils/commen.dart';
-import '../../utils/const.dart';
 import '../../utils/utils.dart';
-import '../auto_pay/auto_pay_tab.dart';
+import '../history/history_tab_module.dart';
 import '../mybills/my_bill.dart';
-import '../other_options/other_options.dart';
-import 'home.dart';
 
 class HomeTabScreen extends StatefulWidget {
   const HomeTabScreen({Key? key}) : super(key: key);
@@ -104,7 +103,16 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
     });
     switch (index) {
       case 0:
-        return showAlert();
+        if (Platform.isAndroid) {
+          SystemNavigator.pop(animated: true);
+        } else {
+          platform_channel.invokeMethod("exitBbpsModule", "");
+        }
+
+        break;
+      //Redirect to Parent app removal
+
+      // return showAlert();
       case 1:
         return HomeScreen(
           notifyParent: refresh,
@@ -114,13 +122,17 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
           create: (context) => MybillCubit(repository: apicall),
           child: const MyBillScreen(),
         );
+      // case 3:
+      //   return BlocProvider(
+      //     create: (context) => AutopayCubit(repository: apicall),
+      //     child: const AutoPayTabScreen(),
+      //   );
       case 3:
         return BlocProvider(
-          create: (context) => AutopayCubit(repository: apicall),
-          child: const AutoPayTabScreen(),
+          create: (context) => HistoryCubit(repository: apicall),
+          child: const HistoryTabViewScreen(),
+          // child: const HistoryTabScreen(),
         );
-      case 4:
-        return const OthersOptions();
       default:
         return HomeScreen(
           notifyParent: refresh,
@@ -149,7 +161,7 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
         body: _onItemTapped(selectedIndex),
         bottomNavigationBar: BottomAppBar(
           elevation: 0,
-          notchMargin: 5,
+          notchMargin: 4,
           shape: const CircularNotchedRectangle(),
           child: Container(
             decoration: const BoxDecoration(
@@ -168,6 +180,7 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
               child: Theme(
                 data: ThemeData(splashColor: Colors.transparent),
                 child: BottomNavigationBar(
+                  showUnselectedLabels: false,
                   onTap: _onItemTapped,
                   elevation: 0,
                   type: BottomNavigationBarType.fixed,
@@ -175,10 +188,12 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
                   unselectedItemColor: iconColor,
                   currentIndex: selectedIndex,
                   items: [
-                    const BottomNavigationBarItem(
-                      icon: Icon(Icons.home_outlined),
+                    BottomNavigationBarItem(
+                      icon:
+                          Icon(Icons.home_sharp, size: height(context) * 0.04),
                       label: "",
-                      activeIcon: Icon(Icons.home_filled),
+                      activeIcon:
+                          Icon(Icons.home_filled, size: height(context) * 0.04),
                     ),
                     BottomNavigationBarItem(
                       icon: SvgPicture.asset(iconAppHomeSvg),
@@ -187,18 +202,25 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
                     ),
                     BottomNavigationBarItem(
                       icon: SvgPicture.asset(iconMyBillSvg),
+                      // icon: Icon(Icons.perm_contact_cal_outlined,
+                      //     size: height(context) * 0.04),
                       label: "",
                       activeIcon: SvgPicture.asset(iconMyBillSelectedSvg),
                     ),
+                    // BottomNavigationBarItem(
+                    //   icon: SvgPicture.asset(iconAutoPaySvg),
+                    //   label: "",
+                    //   activeIcon: SvgPicture.asset(iconAutoPaySelectedSvg),
+                    // ),
                     BottomNavigationBarItem(
-                      icon: SvgPicture.asset(iconAutoPaySvg),
+                      icon: Icon(Icons.history_rounded,
+                          size: height(context) * 0.04),
                       label: "",
-                      activeIcon: SvgPicture.asset(iconAutoPaySelectedSvg),
-                    ),
-                    BottomNavigationBarItem(
-                      icon: SvgPicture.asset(iconOtherOptionsSvg),
-                      label: "",
-                      activeIcon: SvgPicture.asset(iconOtherOptionsSelectedSvg),
+                      activeIcon: Icon(Icons.history_rounded,
+                          size: height(context) * 0.04),
+                      // icon: SvgPicture.asset(iconOtherOptionsSvg),
+                      // label: "",
+                      // activeIcon: SvgPicture.asset(iconOtherOptionsSelectedSvg),
                     ),
                   ],
                 ),

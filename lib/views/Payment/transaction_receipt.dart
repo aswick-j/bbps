@@ -1,9 +1,9 @@
+import 'package:bbps/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../../utils/commen.dart';
 import '../../utils/const.dart';
-import '../../utils/utils.dart';
 
 class TransactionReceipt extends StatefulWidget {
   const TransactionReceipt({Key? key}) : super(key: key);

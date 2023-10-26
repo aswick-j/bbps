@@ -1,10 +1,10 @@
 import 'dart:developer';
 
+import 'package:bbps/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'const.dart';
-import 'utils.dart';
 
 horizondalSpacer(double width) {
   return SizedBox(
@@ -289,7 +289,7 @@ prepaidCustomDialogMultiText(
     dialogHeight,
     goToAddBiller}) {
   message?.forEach((element) {});
-  log(message.toString(), name: "customDialogMultiText");
+  logConsole(message.toString(), "customDialogMultiText");
 
   return showDialog(
     barrierDismissible: false,
@@ -423,21 +423,21 @@ prepaidCustomDialogMultiText(
                           onpress: buttonAction,
                         ),
 
-                  if (!isSavedBillFrom)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 16),
-                      child: InkWell(
-                        onTap: goToAddBiller,
-                        child: Text(
-                          'Save Biller for Future Payments',
-                          style: TextStyle(
-                            color: txtAmountColor,
-                            fontWeight: FontWeight.w600,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                    )
+                  // if (!isSavedBillFrom)
+                  //   Padding(
+                  //     padding: const EdgeInsets.only(top: 16),
+                  //     child: InkWell(
+                  //       onTap: goToAddBiller,
+                  //       child: Text(
+                  //         'Save Biller for Future Payments',
+                  //         style: TextStyle(
+                  //           color: txtAmountColor,
+                  //           fontWeight: FontWeight.w600,
+                  //           decoration: TextDecoration.underline,
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   )
                 ],
               ),
             ),
@@ -459,7 +459,7 @@ customDialogMultiText(
     iconHeight,
     dialogHeight}) {
   message?.forEach((element) {});
-  log(message.toString(), name: "customDialogMultiText");
+  logConsole(message.toString(), "customDialogMultiText");
 
   return showDialog(
     barrierDismissible: false,
@@ -620,56 +620,122 @@ myAppButton(
   );
 }
 
-String CatIcon(String CatName) {
+String CatLogo(String CatName) {
   switch (CatName) {
     case "Mobile Postpaid":
-      return iconMobilePostpaidSvg;
+      return "packages/bbps/assets/logo/logo_mobilePostpaid.svg";
     case "Mobile Prepaid":
-      return iconPrepaidSvg;
+      return "packages/bbps/assets/logo/logo_mobilePrepaid.svg";
     case "Education Fees":
-      return iconEducationFeeSvg;
+      return "packages/bbps/assets/logo/logo_education.svg";
     case "Landline Postpaid":
-      return iconLandlinePostpaidSvg;
+      return "packages/bbps/assets/logo/logo_landline.svg";
     case "DTH":
-      return iconDthSvg;
+      return "packages/bbps/assets/logo/logo_dth.svg";
     case "Electricity":
-      return iconElectricityBillSvg;
+    case "ELECTRICITY":
+      return "packages/bbps/assets/logo/logo_electricity.svg";
     case "Broadband Postpaid":
-      return iconBroadbandPostpaidSvg;
+      return "packages/bbps/assets/logo/logo_broadbandpost.svg";
     case "Water":
-      return iconWaterTaxSvg;
+      return "packages/bbps/assets/logo/logo_water.svg";
     case "Gas":
-      return iconGasBookingSvg;
+      return "packages/bbps/assets/logo/logo_gas.svg";
     case "LPG Gas":
-      return iconLpgGasSvg;
+      return "packages/bbps/assets/logo/logo_lpgGas.svg";
     case "Life Insurance":
-      return iconLifeInsuranceSvg;
+      return "packages/bbps/assets/logo/logo_lifeInsurance.svg";
     case "Loan Repayment":
-      return iconLoanPaymentSvg;
+      return "packages/bbps/assets/logo/logo_loanRepay.svg";
     case "Fastag":
-      return iconFastagFeeSvg;
+      return "packages/bbps/assets/logo/logo_fasttag.svg";
     case "Cable TV":
-      return iconCableSvg;
+      return "packages/bbps/assets/logo/logo_cableTV.svg";
     case "Municipal Services":
-      return iconMunicipalServicesSvg;
+      return "packages/bbps/assets/logo/logo_municipalService.svg";
     case "Clubs & Associations":
-      return iconClubsAssociationsSvg;
+    case "Clubs and Associations":
+      return "packages/bbps/assets/logo/logo_clubandasso.svg";
     case "Credit Card":
-      return iconCreditCardSvg;
+      return "packages/bbps/assets/logo/logo_creditCard.svg";
     case "Hospital":
-      return iconHospitalServicesSvg;
+      return "packages/bbps/assets/logo/logo_hospital.svg";
     case "Housing Society":
-      return iconHousingSocietuSvg;
+      return "packages/bbps/assets/logo/logo_housingSociety.svg";
     case "Subscription Fees":
-      return iconSubscriptionSvg;
+    case "Subscription":
+      return "packages/bbps/assets/logo/logo_subs.svg";
     case "Municipal Taxes":
-      return iconMunicipalTaxesSvg;
+      return "packages/bbps/assets/logo/logo_municipal.svg";
     case "Health Insurance":
-      return iconHealthInsuranceSvg;
+      return "packages/bbps/assets/logo/logo_healthInsurance.svg";
     case "Insurance":
-      return iconInsuranceSvg;
+      return "packages/bbps/assets/logo/logo_insurance.svg";
     default:
-      return iconMunicipalTaxesSvg;
+      return "packages/bbps/assets/logo/logo_bbps.svg";
+  }
+}
+
+String BillerLogo(String BillerName, String CatName) {
+  switch (BillerName.toLowerCase()) {
+    case "airtel dth":
+    case "airtel postpaid":
+    case "airtel postpaid (fetch and pay)":
+    case "airtel broadband (fetch and pay)":
+    case "airtel broadband":
+      return "packages/bbps/assets/images/icon_airtel.svg";
+    case "bsnl":
+      return "packages/bbps/assets/images/icon_bsnl.svg";
+    case "bsnl mobile postpaid":
+      return "packages/bbps/assets/images/icon_bsnl.svg";
+    case "vi postpaid":
+    case "vi postpaid (fetch and pay)":
+      return "packages/bbps/assets/images/icon_vi.svg";
+    case "mtnl mumbai dolphin":
+      return "packages/bbps/assets/images/icon_mtnl.svg";
+    case "jio postpaid":
+    case "jio postpaid (fetch and pay)":
+      return "packages/bbps/assets/images/icon_jio.svg";
+    case "meerut institute of technology":
+    case "meerut institute of technology test":
+      return "packages/bbps/assets/images/icon_meerut_education.svg";
+    case "hdb financial services limited test":
+    case "hdb financial services limited":
+      return "packages/bbps/assets/images/icon_hdb_loan.svg";
+    case "tamil nadu electricity board (tneb)":
+    case "ofmedn mobile":
+      return "packages/bbps/assets/images/icon_tneb.svg";
+    case "bank of baroda":
+    case "bank of baroda test":
+      return "packages/bbps/assets/images/icon_bob.svg";
+
+    default:
+      return CatLogo(CatName);
+  }
+}
+
+String getTransactionReason(String status) {
+  switch (status) {
+    case "Memo present on Loan Account.":
+      return "Memo present on Loan Account";
+    case "aggregator-failed":
+    case "aggregator-response-unknown":
+      return "Bill Payment failed";
+    case "Insufficient Balance.":
+    case " Insufficient Balance. ":
+      return "Insufficient Balance";
+    case "Database Error :":
+    case "Called function has had a Fatal Error":
+      return "Internal Error";
+    case "fund-transfer-failed":
+      return "Fund Transfer failed from Bank";
+    case "bbps-timeout":
+    case "bbps-in-progress":
+      return "Waiting Confirmation from Biller";
+    case "Customer is KYC Pending/KYC Non-Compliant. KYC Documents need to be collected from Customer.":
+      return "KYC Pending";
+    default:
+      return "Bill Payment Failed";
   }
 }
 

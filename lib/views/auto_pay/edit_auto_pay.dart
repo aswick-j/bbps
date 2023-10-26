@@ -1,22 +1,19 @@
-import 'dart:convert';
 import 'dart:developer';
 import 'dart:math' as math;
 
+import 'package:bbps/utils/commen.dart';
+import 'package:bbps/utils/const.dart';
+import 'package:bbps/utils/utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_overlay_loader/flutter_overlay_loader.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 
 import '../../bloc/autopay/autopay_cubit.dart';
 import '../../model/auto_schedule_pay_model.dart';
 import '../../model/edit_autopay_model.dart';
-import '../../utils/commen.dart';
-import '../../utils/const.dart';
-import '../../utils/utils.dart';
-import '../../widgets/editAutopay_shimmer.dart';
 
 class EditAutoPayScreen extends StatefulWidget {
   AllConfigurationsData? autoPayData;
@@ -24,6 +21,7 @@ class EditAutoPayScreen extends StatefulWidget {
   String? maxAllowedAmount;
   String? billerName;
   String? billName;
+  String? lastPaidAmount;
 
   EditAutoPayScreen(
       {super.key,
@@ -31,6 +29,7 @@ class EditAutoPayScreen extends StatefulWidget {
       @required this.maxAllowedAmount,
       this.id,
       this.billerName,
+      this.lastPaidAmount,
       this.billName});
 
   @override
@@ -70,7 +69,25 @@ class _EditAutoPayScreenState extends State<EditAutoPayScreen> {
               width: width(context),
               color: primaryBodyColor,
             ),
-          )),
+          ),
+          actions: [
+            Tooltip(
+              textStyle: TextStyle(fontFamily: appFont, color: Colors.white),
+              decoration: BoxDecoration(color: primaryColorDark),
+              triggerMode: TooltipTriggerMode.tap,
+              padding: EdgeInsets.all(width(context) * 0.02),
+              margin: EdgeInsets.symmetric(horizontal: width(context) * 0.06),
+              message:
+                  "Autopay will be enabled from the 1st of the month you selected while setting up the autopay and payments will be made from the date selected for autopay execution. Until the autopay is enabled, you cannot edit it. To edit the auto pay that is not enabled yet, please wait till the autopay is enabled in the month selected during creation or delete the autopay and create a new one.",
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(
+                  Icons.info_outline,
+                  color: iconColor,
+                ),
+              ),
+            ),
+          ]),
       body: BlocConsumer<AutopayCubit, AutopayState>(
         listener: (context, state) {
           if (state is AutopayEditLoading) {
@@ -116,11 +133,21 @@ class _EditAutoPayScreenState extends State<EditAutoPayScreen> {
         },
         builder: (context, state) {
           return isLoading
-              ? editAutopayShimmer()
+              ? SizedBox(
+                  height: height(context) * 0.8,
+                  width: width(context),
+                  child: Center(
+                    child: Image.asset(
+                      LoaderGif,
+                      height: height(context) * 0.07,
+                      width: height(context) * 0.07,
+                    ),
+                  ))
               : EditAutoPayScreenUI(
                   maxAllowedAmount: maxAllowedAmount,
                   editAutoPayData: editAutoPayData,
                   autopayData: widget.autoPayData,
+                  lastPaidAmount: widget.lastPaidAmount,
                   billername: widget.billerName);
         },
       ),
@@ -133,11 +160,13 @@ class EditAutoPayScreenUI extends StatefulWidget {
   String? maxAllowedAmount;
   EditAutoPayData? editAutoPayData;
   String? billername;
+  String? lastPaidAmount;
   EditAutoPayScreenUI(
       {super.key,
       @required this.maxAllowedAmount,
       this.autopayData,
       this.editAutoPayData,
+      this.lastPaidAmount,
       this.billername});
 
   @override
@@ -153,7 +182,9 @@ class _EditAutoPayScreenUIState extends State<EditAutoPayScreenUI> {
   final txtActivateAutoPaymentController = TextEditingController();
 
   // radio
+
   int? isBimonthly = 0;
+  int? isAmountLimt = 0;
 
   int? isActive = 0;
 
@@ -202,11 +233,21 @@ class _EditAutoPayScreenUIState extends State<EditAutoPayScreenUI> {
   @override
   void initState() {
     var temp = getMonthName2(99);
-    log(temp.toString(), name: "getMonthName2 ::");
+    logConsole(temp.toString(), "getMonthName2 ::");
     isBimonthly = widget.autopayData?.iSBIMONTHLY;
     newDate = widget.autopayData!.pAYMENTDATE.toString();
+    isAmountLimt = widget.autopayData!.aMOUNTLIMIT ?? 0;
+    // txtMaxAmountController.text = (widget.autopayData!.aMOUNTLIMIT == 1
+    //     ? widget.maxAllowedAmount.toString()
+    //     : widget.autopayData!.mAXIMUMAMOUNT.toString());
 
-    txtMaxAmountController.text = widget.autopayData!.mAXIMUMAMOUNT.toString();
+    txtMaxAmountController.text = widget.maxAllowedAmount!.isNotEmpty
+        ? (widget.autopayData!.aMOUNTLIMIT == 1
+            ? widget.maxAllowedAmount.toString()
+            : (double.parse(widget.lastPaidAmount.toString()) * 0.3 +
+                    double.parse(widget.lastPaidAmount.toString()))
+                .toStringAsFixed(2))
+        : "40000";
     txtDateofPaymentController.text =
         widget.autopayData!.pAYMENTDATE.toString();
 
@@ -240,13 +281,18 @@ class _EditAutoPayScreenUIState extends State<EditAutoPayScreenUI> {
       // maximumAllowedAmount = widget.autopayData!.mAXIMUMAMOUNT;
     });
 
-    if (widget.autopayData!.mAXIMUMAMOUNT.toString() != "") {
-      txtMaxAmountController.text =
-          widget.autopayData!.mAXIMUMAMOUNT.toString();
-    } else {
-      txtMaxAmountController.text = "0.00";
-      // maximumAmount = "0.00";
-    }
+    // if (widget.autopayData!.mAXIMUMAMOUNT.toString() != "") {
+    //   // txtMaxAmountController.text =
+    //   //     widget.autopayData!.mAXIMUMAMOUNT.toString();
+    //   txtMaxAmountController.text = widget.maxAllowedAmount.toString();
+    // } else {
+    //   txtMaxAmountController.text = "0.00";
+    //   // maximumAmount = "0.00";
+    // }
+
+    // txtMaxAmountController.text = widget.maxAllowedAmount!.isNotEmpty
+    //     ? widget.maxAllowedAmount!
+    //     : "40000";
 
     assignDecodedTokenAccounts();
     assignDecodedToken(accountNumber);
@@ -259,7 +305,7 @@ class _EditAutoPayScreenUIState extends State<EditAutoPayScreenUI> {
       decodedTokenAccounts = decodedToken['accounts'];
     });
 
-    log(decodedTokenAccounts.toString(), name: "HERERE *******");
+    logConsole(decodedTokenAccounts.toString(), "HERERE *******");
   }
 
   assignDecodedToken(accNum) async {
@@ -272,7 +318,7 @@ class _EditAutoPayScreenUIState extends State<EditAutoPayScreenUI> {
             //     (element) => element.accountID == accNum.toString());
             accountIndex = data['id'];
           });
-          log('${data['id']}', name: "array value");
+          logConsole('${data['id']}', "array value");
         }
       }
 
@@ -419,7 +465,7 @@ class _EditAutoPayScreenUIState extends State<EditAutoPayScreenUI> {
 
   @override
   Widget build(BuildContext context) {
-    log(optionsList.toString(), name: "AT EDIT AUTO PAY");
+    logConsole(optionsList.toString(), "AT EDIT AUTO PAY");
     return Container(
       height: height(context),
       width: width(context),
@@ -452,7 +498,7 @@ class _EditAutoPayScreenUIState extends State<EditAutoPayScreenUI> {
                     weight: FontWeight.bold,
                     color: txtPrimaryColor),
                 subtitle: appText(
-                    data: widget.billername ?? " ",
+                    data: widget.billername ?? "-",
                     size: width(context) * 0.03,
                     color: txtPrimaryColor),
               ),
@@ -505,6 +551,47 @@ class _EditAutoPayScreenUIState extends State<EditAutoPayScreenUI> {
               ),
             ),
             child: Column(children: [
+              RadioListTile(
+                value: 1,
+                activeColor: txtCheckBalanceColor,
+                groupValue: isAmountLimt,
+                onChanged: (ind) {
+                  setState(() {
+                    isAmountLimt = 1;
+                    // txtMaxAmountController.text =
+                    //     widget.autopayData!.mAXIMUMAMOUNT.toString();
+                    txtMaxAmountController.text =
+                        widget.maxAllowedAmount!.isNotEmpty
+                            ? widget.maxAllowedAmount!
+                            : "40000";
+                  });
+                },
+                title: appText(
+                    data: "Default Bill Amount",
+                    size: width(context) * 0.04,
+                    color: txtPrimaryColor),
+              ),
+              RadioListTile(
+                value: 0,
+                activeColor: txtCheckBalanceColor,
+                groupValue: isAmountLimt,
+                onChanged: (ind) {
+                  setState(() {
+                    isAmountLimt = 0;
+                    final dataAmount = (double.parse(
+                                    widget.lastPaidAmount.toString())
+                                .round() +
+                            (double.parse(widget.lastPaidAmount.toString()) *
+                                0.3))
+                        .toStringAsFixed(2);
+                    txtMaxAmountController.text = dataAmount;
+                  });
+                },
+                title: appText(
+                    data: "Set Bill Limit",
+                    size: width(context) * 0.04,
+                    color: txtPrimaryColor),
+              ),
               // max amount
               verticalSpacer(16.0),
               Row(
@@ -526,6 +613,7 @@ class _EditAutoPayScreenUIState extends State<EditAutoPayScreenUI> {
               TextFormField(
                 controller: txtMaxAmountController,
                 autocorrect: false,
+                enabled: isAmountLimt == 0 ? true : false,
                 enableSuggestions: false,
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
@@ -554,7 +642,9 @@ class _EditAutoPayScreenUIState extends State<EditAutoPayScreenUI> {
 
                 // keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  fillColor: primaryBodyColor,
+                  filled: true,
+                  fillColor:
+                      isAmountLimt == 0 ? Colors.white : Colors.grey.shade300,
                   border: OutlineInputBorder(
                     borderSide: BorderSide(color: primaryBodyColor, width: 2.0),
                     borderRadius: BorderRadius.circular(8.0),
@@ -594,6 +684,32 @@ class _EditAutoPayScreenUIState extends State<EditAutoPayScreenUI> {
                   ),
                 ),
               verticalSpacer(16.0),
+              // if (double.parse(txtMaxAmountController.text.toString()) <
+              //     double.parse(widget.autopayData!.mAXIMUMAMOUNT.toString()))
+              //   Container(
+              //     height: height(context) * 0.12,
+              //     decoration: BoxDecoration(
+              //       borderRadius: BorderRadius.circular(8),
+              //       color: Color.fromRGBO(250, 204, 21, 0.3),
+              //     ),
+              //     margin: const EdgeInsets.all(16),
+              //     child: Column(
+              //       children: [
+              //         Padding(
+              //           padding: const EdgeInsets.only(
+              //               left: 20.0, right: 20, top: 20, bottom: 6),
+              //           child: appText(
+              //               data:
+              //                   "Your auto-pay limit is lower than the balance due, so it may cause an auto-pay error. Change the payment amount limit equal to or greater than the bill amount.",
+              //               size: width(context) * 0.032,
+              //               color: Colors.black87,
+              //               maxline: 5,
+              //               weight: FontWeight.w400),
+              //         )
+              //       ],
+              //     ),
+              //   ),
+
               Align(
                 alignment: Alignment.centerLeft,
                 child: appText(
@@ -757,7 +873,7 @@ class _EditAutoPayScreenUIState extends State<EditAutoPayScreenUI> {
                               color: primaryColor),
                           horizondalSpacer(width(context) * 0.016),
                           ImageIcon(
-                            AssetImage("assets/images/iconCalender.png"),
+                            AssetImage(iconCalender),
                             color: txtCheckBalanceColor,
                           ),
                         ])),
@@ -1015,7 +1131,8 @@ class _EditAutoPayScreenUIState extends State<EditAutoPayScreenUI> {
                                     ? null
                                     : activatesFrom.toLowerCase(),
                                 "isActive": isActive,
-                                "billerName": widget.autopayData!.bILLERNAME
+                                "billerName": widget.autopayData!.bILLERNAME,
+                                "amountLimit": isAmountLimt,
                               } //update billerName later;
                             });
                           },

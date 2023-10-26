@@ -1,18 +1,18 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
-// import 'package:pinput/pinput.dart';
 
+import 'package:bbps/bloc/otp/otp_cubit.dart';
+import 'package:bbps/model/add_bill_payload_model.dart';
+import 'package:bbps/model/saved_billers_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_overlay_loader/flutter_overlay_loader.dart';
 import 'package:shimmer/shimmer.dart';
-import '../../bloc/otp/otp_cubit.dart';
-import '../../model/add_bill_payload_model.dart';
+
 import '../../model/auto_schedule_pay_model.dart';
 import '../../model/biller_model.dart';
-import '../../model/saved_billers_model.dart';
 import '../../utils/commen.dart';
 import '../../utils/const.dart';
 import '../../utils/utils.dart';
@@ -68,37 +68,37 @@ class _OtpVerificationState extends State<OtpVerification> {
           templateName: widget.templateName,
           billerName: widget.autopayData!.bILLERNAME);
     } else if (widget.from == fromAutoPayEdit) {
-      log(widget.data!['billerName'].toString());
+      logInfo(widget.data!['billerName'].toString());
       BlocProvider.of<OtpCubit>(context).generateOtp(
           templateName: widget.templateName,
           billerName: widget.data!['billerName']);
     } else if (widget.from == fromAutoPayCreate) {
-      log(widget.data!['billerName'].toString());
+      logInfo(widget.data!['billerName'].toString());
       BlocProvider.of<OtpCubit>(context).generateOtp(
           templateName: widget.templateName, billerName: widget.id);
     } else if (widget.from == fromUpcomingDisable) {
-      log(widget.templateName.toString());
-      log(widget.data!['billerName'].toString());
+      logInfo(widget.templateName.toString());
+      logInfo(widget.data!['billerName'].toString());
       BlocProvider.of<OtpCubit>(context).generateOtp(
           templateName: widget.templateName,
           billerName: widget.data!['billerName']);
     } else if (widget.from == fromAddnewBillOtp) {
-      log(widget.templateName.toString());
-      log(widget.data!['billName'].toString());
+      logInfo(widget.templateName.toString());
+      logInfo(widget.data!['billName'].toString());
       BlocProvider.of<OtpCubit>(context).generateOtp(
           templateName: widget.templateName,
           billerName: widget.data!['billName']);
     } else if (widget.from == myBillRoute) {
-      log(widget.templateName.toString());
-      log(widget.data!['bILLERNAME'].toString());
+      logInfo(widget.templateName.toString());
+      logInfo(widget.data!['bILLERNAME'].toString());
       BlocProvider.of<OtpCubit>(context).generateOtp(
           templateName: widget.templateName,
           billerName: widget.data!['bILLERNAME']);
     } else if (widget.from == confirmPaymentRoute) {
-      log(widget.templateName.toString());
-      print("at otp screen =========>");
+      logInfo(widget.templateName.toString());
+      logInfo("AT OTP SCREEN ::::::");
       inspect(widget.data!);
-      log(widget.data!['billAmount'].toString());
+      logInfo(widget.data!['billAmount'].toString());
       BlocProvider.of<OtpCubit>(context).generateOtp(
           templateName: widget.templateName,
           billerName: widget.data!['billAmount']);
@@ -117,13 +117,13 @@ class _OtpVerificationState extends State<OtpVerification> {
       decodedTokenCustomer = decodedToken['customerID'];
     });
 
-    log(decodedTokenCustomer.toString(), name: "customerID");
+    logConsole(decodedTokenCustomer.toString(), "customerID");
   }
 
   void autoRedirect() {
     try {
-      log(secondsRemaining.toString(),
-          name: "autoRedirect() :: secondsRemaining: ");
+      logConsole(
+          secondsRemaining.toString(), "autoRedirect() :: secondsRemaining: ");
 
       timer = Timer.periodic(Duration(seconds: 3), (timer) {
         if (secondsRemaining != 0) {
@@ -146,7 +146,7 @@ class _OtpVerificationState extends State<OtpVerification> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "autoRedirect");
+      logError(e.toString(), "autoRedirect");
     }
   }
 
@@ -174,7 +174,7 @@ class _OtpVerificationState extends State<OtpVerification> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "Trigger Timer (Fn)");
+      logError(e.toString(), "Trigger Timer (Fn)");
     }
   }
 
@@ -187,36 +187,36 @@ class _OtpVerificationState extends State<OtpVerification> {
             templateName: widget.templateName,
             billerName: widget.autopayData!.bILLERNAME);
       } else if (widget.from == fromAutoPayEdit) {
-        log(widget.data!['billerName'].toString());
+        logInfo(widget.data!['billerName'].toString());
         BlocProvider.of<OtpCubit>(context).generateOtp(
             templateName: widget.templateName,
             billerName: widget.data!['billerName']);
       } else if (widget.from == fromAutoPayCreate) {
-        log(widget.data!['billerName'].toString());
+        logInfo(widget.data!['billerName'].toString());
         BlocProvider.of<OtpCubit>(context).generateOtp(
             templateName: widget.templateName,
             billerName: widget.data!['billerName']);
       } else if (widget.from == fromUpcomingDisable) {
-        log(widget.templateName.toString());
-        log(widget.data!['billerName'].toString());
+        logInfo(widget.templateName.toString());
+        logInfo(widget.data!['billerName'].toString());
         BlocProvider.of<OtpCubit>(context).generateOtp(
             templateName: widget.templateName,
             billerName: widget.data!['billerName']);
       } else if (widget.from == fromAddnewBillOtp) {
-        log(widget.templateName.toString());
-        log(widget.data!['billName'].toString());
+        logInfo(widget.templateName.toString());
+        logInfo(widget.data!['billName'].toString());
         BlocProvider.of<OtpCubit>(context).generateOtp(
             templateName: widget.templateName,
             billerName: widget.data!['billName']);
       } else if (widget.from == myBillRoute) {
-        log(widget.templateName.toString());
-        log(widget.data!['bILLERNAME'].toString());
+        logInfo(widget.templateName.toString());
+        logInfo(widget.data!['bILLERNAME'].toString());
         BlocProvider.of<OtpCubit>(context).generateOtp(
             templateName: widget.templateName,
             billerName: widget.data!['bILLERNAME']);
       } else if (widget.from == confirmPaymentRoute) {
-        log(widget.templateName.toString());
-        log(widget.data!['billAmount'].toString());
+        logInfo(widget.templateName.toString());
+        logInfo(widget.data!['billAmount'].toString());
         BlocProvider.of<OtpCubit>(context).generateOtp(
             templateName: widget.templateName,
             billerName: widget.data!['billAmount']);
@@ -231,7 +231,7 @@ class _OtpVerificationState extends State<OtpVerification> {
         });
       }
     } catch (e) {
-      log(e.toString(), name: "Resend OTP Code (fn)");
+      logError(e.toString(), "Resend OTP Code (fn)");
     }
   }
 
@@ -241,13 +241,13 @@ class _OtpVerificationState extends State<OtpVerification> {
   //     timer!.cancel();
   //     super.dispose();
   //   } catch (e) {
-  //     log(e.toString(), name: "Dispose Timer (fn)");
+  //    logConsole(e.toString(), name: "Dispose Timer (fn)");
   //   }
   // }
 
   @override
   void dispose() {
-    log("OTP VALIDATION : dispose()");
+    logInfo("OTP VALIDATION : dispose()");
     if (!mounted) {
       txtOtpController.clear();
     }
@@ -313,14 +313,14 @@ class _OtpVerificationState extends State<OtpVerification> {
               if (!Loader.isShown) {
                 showLoader(context);
               }
-              log("succesfully verified", name: "succesfully verified");
+              logInfo("succesfully verified");
               // delete or do other action
               if (widget.from == fromAutoPayDelete) {
-                log(otp, name: "PASSED OTP");
+                logConsole(otp, "PASSED OTP");
                 BlocProvider.of<OtpCubit>(context)
                     .deleteAutoPay(widget.autopayData!.iD, otp);
               } else if (widget.from == fromAutoPayEdit) {
-                log(widget.id.toString(), name: "idddddddddddddd");
+                logConsole(widget.id.toString(), "idddddddddddddd");
                 dynamic payload = widget.data;
                 payload['otp'] = otp;
                 BlocProvider.of<OtpCubit>(context)
@@ -328,15 +328,15 @@ class _OtpVerificationState extends State<OtpVerification> {
               } else if (widget.from == fromAutoPayCreate) {
                 dynamic payload = widget.data;
                 payload['otp'] = otp;
-                log(jsonEncode(payload), name: "Create autopay paload ::");
+                logConsole(jsonEncode(payload), "Create autopay paload ::");
                 BlocProvider.of<OtpCubit>(context).createAutopay(payload);
               } else if (widget.from == fromUpcomingDisable) {
                 // disable api call
                 BlocProvider.of<OtpCubit>(context).disableUpcomingPay(
                     widget.data!['id'], widget.data!['status'], otp);
               } else if (widget.from == fromAddnewBillOtp) {
-                log(jsonEncode(widget.data).toString(),
-                    name: "at otpValidation :: fromAddnewBillOtp ::: ");
+                logConsole(jsonEncode(widget.data).toString(),
+                    "at otpValidation :: fromAddnewBillOtp ::: ");
                 BlocProvider.of<OtpCubit>(context).addNewBiller(
                     widget.data!['billerId'],
                     widget.data!['inputSignatures'],
@@ -364,6 +364,7 @@ class _OtpVerificationState extends State<OtpVerification> {
                       widget.data!['quickPay'],
                       widget.data!['inputSignature'],
                       widget.data!['otherAmount'],
+                      widget.data!['autoPayStatus'],
                       widget.data!['billerData'],
                       otp);
                 } else {
@@ -423,7 +424,7 @@ class _OtpVerificationState extends State<OtpVerification> {
               if (!Loader.isShown) {
                 showLoader(context);
               }
-              log("action done${state.from}");
+              logInfo("action done${state.from}");
 
               if (state.from == fromAutoPayDelete) {
                 customDialog(
@@ -447,7 +448,7 @@ class _OtpVerificationState extends State<OtpVerification> {
                     "message": "\nhas been updated successfully."
                   }
                 ];
-                log(customMessage.toString(), name: "OtpActionSuccess");
+                logConsole(customMessage.toString(), "OtpActionSuccess");
                 customDialogMultiText(
                     context: context,
                     dialogHeight: height(context) / 2.6,
@@ -480,8 +481,8 @@ class _OtpVerificationState extends State<OtpVerification> {
                     "message": "\nhas been created successfully."
                   }
                 ];
-                log(customMessage.toString(),
-                    name: "OtpActionSuccess :: fromAutoPayCreate");
+                logConsole(customMessage.toString(),
+                    "OtpActionSuccess :: fromAutoPayCreate");
 
                 customDialogMultiText(
                     context: context,
@@ -541,10 +542,10 @@ class _OtpVerificationState extends State<OtpVerification> {
                     Loader.hide();
                   }
                   // state.data!['billerData'].forEach((currentValue, index) {
-                  //   log(currentValue.toString(), name: "billerData ${index}");
+                  //  logConsole(currentValue.toString(), name: "billerData ${index}");
                   // });
                   // state.data!['inputParameters'].forEach((currentValue, index) {
-                  //   log(currentValue.toString(),
+                  //  logConsole(currentValue.toString(),
                   //       name: "inputParameters ${index}");
                   // });
 
@@ -557,12 +558,12 @@ class _OtpVerificationState extends State<OtpVerification> {
                     },
                     {"type": "bold", "message": "Do you want to pay now?"}
                   ];
-                  // log(customMessage.toString(), name: "ComplaintSubmitSuccess");
+                  //logConsole(customMessage.toString(), name: "ComplaintSubmitSuccess");
                   SavedBillersData? savedBillerData;
                   BillersData? billerData = state.data!['billerData'];
 
-                  log(billerData!.bILLERNAME.toString(),
-                      name: "state.data!===========");
+                  logConsole(billerData!.bILLERNAME.toString(),
+                      "state.data!===========");
                   inspect(state.data);
                   PARAMETERS parameters;
                   List<PARAMETERS> inputParameters = [];
@@ -571,8 +572,9 @@ class _OtpVerificationState extends State<OtpVerification> {
                   PARAMETERS newparam;
                   List newTest = [];
 
-                  log(jsonEncode(state.data!['inputParameters']).toString(),
-                      name: " state.data!['inputParameters']");
+                  logConsole(
+                      jsonEncode(state.data!['inputParameters']).toString(),
+                      " state.data!['inputParameters']");
                   int dataLength = state.data!['inputParameters'].length;
                   for (int i = 0; i < dataLength; i++) {
                     adbillerpayloadModel = state.data!['inputParameters'][i];
@@ -593,12 +595,13 @@ class _OtpVerificationState extends State<OtpVerification> {
                   //   newparam = PARAMETERS.fromJson(modifiedInputParam);
                   //   inputParameters.add(newparam);
                   // });
-                  log(jsonEncode(inputParameters).toString(),
-                      name: "AFTER CHANGING ::");
+                  logConsole(jsonEncode(inputParameters).toString(),
+                      "AFTER CHANGING ::");
                   inspect(state.data!['billerData']);
                   inspect(inputParameters);
-                  log(jsonEncode(state.data).toString(), name: "AT utils ");
-                  print("&&&&&&&&&&& ${jsonEncode(state.data!['billerData'])}");
+                  logConsole(jsonEncode(state.data).toString(), "AT utils ");
+                  debugPrint(
+                      "&&&&&&&&&&& ${jsonEncode(state.data!['billerData'])}");
 
                   /***
                              * 
@@ -637,9 +640,9 @@ pARAMETERS;
                     "BILL_NAME": state.data!['billName'],
                     "PARAMETERS": newTest,
                   };
-                  // log(jsonDecode(state.data!['billerData'].toString()));
+                  //logConsole(jsonDecode(state.data!['billerData'].toString()));
 
-                  print("=========newData ${newData}");
+                  debugPrint("=========newData ${newData}");
                   savedBillerData = SavedBillersData.fromJson(newData);
                   isSavedBillFrom = true;
                   isMobilePrepaidFrom = false;
@@ -666,7 +669,7 @@ pARAMETERS;
                                       }),
                          */
                         txtOtpController.clear();
-                        // log(state.data!['inputParameters'],
+                        //logConsole(state.data!['inputParameters'],
                         //     name: "near gotoData");
                         goToData(context, confirmPaymentRoute, {
                           "name": state.data!['name'],
@@ -694,9 +697,9 @@ pARAMETERS;
                     },
                     iconSvg: iconSuccessSvg);
               } else if (state.from == fromConfirmPaymentOtp) {
-                print("fromConfirmPaymentOtp========= ${state.data}");
-                log(jsonEncode(state.data).toString(),
-                    name: "at otp validation from confirmpayment");
+                debugPrint("fromConfirmPaymentOtp========= ${state.data}");
+                logConsole(jsonEncode(state.data).toString(),
+                    "at otp validation from confirmpayment");
                 inspect(state.data);
                 Map<String, dynamic>? temp = {};
                 temp = state.data;
@@ -809,8 +812,8 @@ pARAMETERS;
                           "Unable to fetch the current status of the Transaction.Please check the status of the transaction from Transacton History."
                     },
                   ];
-                  log(customMessage.toString(),
-                      name: "OtpActionSuccess:: timout");
+                  logConsole(
+                      customMessage.toString(), "OtpActionSuccess:: timout");
                   customDialogMultiText(
                       context: context,
                       dialogHeight: height(context) / 2.6,
@@ -927,7 +930,7 @@ pARAMETERS;
                                   cellwidth: width(context) / 1.5)),
                           verticalSpacer(15.2),
                           Image.asset(
-                            "assets/images/loader.gif",
+                            LoaderGif,
                             height: height(context) * 0.07,
                             width: height(context) * 0.07,
                           )
@@ -1251,7 +1254,7 @@ class _OtpVerificationUIState extends State<OtpVerificationUI> {
                       Visibility(
                         visible: widget.isLoading!,
                         child: Image.asset(
-                          "assets/images/loader.gif",
+                          LoaderGif,
                           height: height(context) * 0.07,
                           width: height(context) * 0.07,
                         ),

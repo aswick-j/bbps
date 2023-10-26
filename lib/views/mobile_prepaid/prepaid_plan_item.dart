@@ -1,17 +1,16 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:bbps/model/prepaid_fetch_plans_model.dart';
+import 'package:bbps/utils/commen.dart';
+import 'package:bbps/utils/const.dart';
+import 'package:bbps/utils/utils.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:intl/intl.dart';
-
-import '../../model/prepaid_fetch_plans_model.dart';
-import '../../utils/commen.dart';
-import '../../utils/const.dart';
-import '../../utils/utils.dart';
 
 class PrepaidPlanItem extends StatefulWidget {
   String? categoryType;
@@ -57,9 +56,9 @@ class _PrepaidPlanItemState extends State<PrepaidPlanItem> {
       prepaidPlansData = tempList!;
     });
 
-    // log(prepaidPlansData.length.toString(), name: "prepaidPlansData lengths::");
+    //logConsole(prepaidPlansData.length.toString(), name: "prepaidPlansData lengths::");
 
-    log(jsonEncode(prepaidPlansData).toString(), name: "prepaidPlansData::");
+    logConsole(jsonEncode(prepaidPlansData).toString(), "prepaidPlansData::");
   }
 
   NumberFormat rupeeFormatWithSymbol =
@@ -84,7 +83,7 @@ class _PrepaidPlanItemState extends State<PrepaidPlanItem> {
             },
             child: Container(
               margin: EdgeInsets.only(
-                top: width(context) * 0.02,
+                bottom: width(context) * 0.02,
                 right: width(context) * 0.02,
                 left: width(context) * 0.02,
               ),

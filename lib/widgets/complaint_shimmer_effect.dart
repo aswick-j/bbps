@@ -1,10 +1,9 @@
+import 'package:bbps/utils/commen.dart';
+import 'package:bbps/utils/const.dart';
+import 'package:bbps/utils/utils.dart';
+import 'package:bbps/widgets/shimmerCell.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-
-import '../utils/commen.dart';
-import '../utils/const.dart';
-import '../utils/utils.dart';
-import 'shimmerCell.dart';
 
 class ComplaintShimmerEffect extends StatelessWidget {
   const ComplaintShimmerEffect({super.key});

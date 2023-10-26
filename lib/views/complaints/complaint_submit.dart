@@ -1,5 +1,7 @@
 import 'dart:developer';
 
+import 'package:bbps/bloc/complaint/complaint_cubit.dart';
+import 'package:bbps/model/history_model.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,9 +10,7 @@ import 'package:flutter_overlay_loader/flutter_overlay_loader.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 // import 'package:timeago/timeago.dart' as timeago;
-import '../../bloc/complaint/complaint_cubit.dart';
 import '../../model/complaints_config_model.dart';
-import '../../model/history_model.dart';
 import '../../utils/commen.dart';
 import '../../utils/const.dart';
 import '../../utils/utils.dart';
@@ -51,7 +51,7 @@ class _ComplaintSubmitState extends State<ComplaintSubmit> {
               },
               {"type": "bold", "message": state.data}
             ];
-            log(customMessage.toString(), name: "ComplaintSubmitSuccess");
+            logConsole(customMessage.toString(), "ComplaintSubmitSuccess");
             customDialogMultiText(
                 context: context,
                 dialogHeight: height(context) / 2.6,
@@ -481,7 +481,7 @@ class _ComplaintSubmitUIState extends State<ComplaintSubmitUI> {
                                       .txnData!.tRANSACTIONREFERENCEID
                                       .toString()
                                 };
-                                log('$data', name: "onpress complaint");
+                                logConsole('$data', "onpress complaint");
                                 BlocProvider.of<ComplaintCubit>(context)
                                     .submitComplaint(data);
                               } else {

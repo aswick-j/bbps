@@ -21,4 +21,3 @@ class HistoryError extends HistoryState {
   final String? message;
   HistoryError({@required this.message});
 }
-

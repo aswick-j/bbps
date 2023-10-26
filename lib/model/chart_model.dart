@@ -115,6 +115,7 @@ class ChartBillerData {
   int? aUTOPAYID;
   List<PARAMETERS>? pARAMETERS;
   String? lASTPAIDDATE;
+  int? uNSAVEDBILL;
   var lASTBILLAMOUNT;
 
   ChartBillerData(
@@ -136,7 +137,8 @@ class ChartBillerData {
       this.aUTOPAYID,
       this.pARAMETERS,
       this.lASTPAIDDATE,
-      this.lASTBILLAMOUNT});
+      this.lASTBILLAMOUNT,
+      this.uNSAVEDBILL});
 
   ChartBillerData.fromJson(Map<String, dynamic> json) {
     cUSTOMERBILLID = json['CUSTOMER_BILL_ID'];
@@ -155,6 +157,7 @@ class ChartBillerData {
     vALIDATEBILLALLOWED = json['VALIDATE_BILL_ALLOWED'];
     cATEGORYNAME = json['CATEGORY_NAME'];
     aUTOPAYID = json['AUTOPAY_ID'];
+    uNSAVEDBILL = json['UNSAVED_BILL'];
     if (json['PARAMETERS'] != null) {
       pARAMETERS = <PARAMETERS>[];
       json['PARAMETERS'].forEach((v) {
@@ -183,6 +186,7 @@ class ChartBillerData {
     data['VALIDATE_BILL_ALLOWED'] = this.vALIDATEBILLALLOWED;
     data['CATEGORY_NAME'] = this.cATEGORYNAME;
     data['AUTOPAY_ID'] = this.aUTOPAYID;
+    data['UNSAVED_BILL'] = this.uNSAVEDBILL;
     if (this.pARAMETERS != null) {
       data['PARAMETERS'] = this.pARAMETERS!.map((v) => v.toJson()).toList();
     }

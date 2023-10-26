@@ -1,13 +1,11 @@
-import 'dart:developer';
-
+import 'package:bbps/bloc/home/home_cubit.dart';
+import 'package:bbps/model/categories_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_overlay_loader/flutter_overlay_loader.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../bloc/home/home_cubit.dart';
-import '../../model/categories_model.dart';
 import '../../utils/commen.dart';
 import '../../utils/const.dart';
 import '../../utils/utils.dart';
@@ -24,37 +22,51 @@ billCategory(
     children: [
       InkWell(
         onTap: () {
-          log(name.toString(), name: "category name ::::");
-          if (name.toString().toLowerCase().contains("mobile prepaid")) {
-            if (baseUrl.toString().toLowerCase().contains("digiservicesuat")) {
-              goToData(context, billFlowRoute, {
-                "id": id,
-                "name": name,
-              });
-            } else {
-              customDialog(
-                  context: context,
-                  message: "This is an upcoming feature.",
-                  message2: "",
-                  message3: "",
-                  title: "Alert!",
-                  buttonName: "Okay",
-                  dialogHeight: height(context) / 2.5,
-                  buttonAction: () {
-                    Navigator.pop(context, true);
-                  },
-                  iconSvg: alertSvg);
-            }
-          } else {
-            goToData(context, billFlowRoute, {
-              "id": id,
-              "name": name,
-            });
-          }
+          // log(name.toString(), name: "category name ::::");
+          // if (name.toString().toLowerCase().contains("mobile prepaid")) {
+          //   if (baseUrl.toString().toLowerCase().contains("digiservicesuat")) {
+          //     goToData(context, billFlowRoute, {
+          //       "id": id,
+          //       "name": name,
+          //     });
+          //   } else {
+          //     customDialog(
+          //         context: context,
+          //         message: "This is an upcoming feature.",
+          //         message2: "",
+          //         message3: "",
+          //         title: "Alert!",
+          //         buttonName: "Okay",
+          //         dialogHeight: height(context) / 2.5,
+          //         buttonAction: () {
+          //           Navigator.pop(context, true);
+          //         },
+          //         iconSvg: alertSvg);
+          //   }
+          // } else {
+          goToData(context, billFlowRoute, {
+            "id": id,
+            "name": name,
+          });
+          // }
         },
-        child: SvgPicture.asset(
-          img,
-          height: width(context) * 0.15,
+        child: Container(
+          width: width(context) * 0.13,
+          height: height(context) * 0.06,
+          decoration: BoxDecoration(boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: Offset(0, 0), // changes position of shadow
+            ),
+          ], borderRadius: BorderRadius.circular(8), color: Colors.white),
+          child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SvgPicture.asset(
+                CatLogo(img ?? "-"),
+                // height: height(context) * 0.07,
+              )),
         ),
       ),
       Padding(
@@ -146,13 +158,13 @@ class _BillCategoryUIState extends State<BillCategoryUI> {
               ),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 4,
-                mainAxisSpacing: height(context) * 0.028,
+                mainAxisSpacing: height(context) * 0.014,
               ),
               physics: const BouncingScrollPhysics(),
               children: [
                 for (int i = 0; i < widget.categoriesData!.length; i++)
                   billCategory(
-                    CatIcon(widget.categoriesData![i].cATEGORYNAME.toString()),
+                    widget.categoriesData![i].cATEGORYNAME.toString(),
                     widget.categoriesData![i].cATEGORYNAME,
                     widget.categoriesData![i].iD,
                     context,
@@ -170,8 +182,7 @@ class _BillCategoryUIState extends State<BillCategoryUI> {
                     bottom: width(context) * 0.064),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 4,
-                  crossAxisSpacing: width(context) * 0.064,
-                  mainAxisSpacing: width(context) * 0.044,
+                  mainAxisSpacing: height(context) * 0.014,
                 ),
                 physics: const BouncingScrollPhysics(),
                 children: [

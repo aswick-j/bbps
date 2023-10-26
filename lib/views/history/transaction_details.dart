@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
+
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 // import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
@@ -9,9 +11,8 @@ import 'package:open_file_plus/open_file_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:printing/printing.dart';
+
 import '../../model/history_model.dart';
 import '../../utils/commen.dart';
 import '../../utils/const.dart';
@@ -93,25 +94,25 @@ class _TransactionDetailsUIState extends State<TransactionDetailsUI> {
 
   helperFunc() async {
     Map<String, dynamic> decodedToken = await getDecodedToken();
-    log(decodedToken.toString(), name: "at helperFunc :: TRANSACTION_DETAILS");
+    logConsole(decodedToken.toString(), "at helperFunc :: TRANSACTION_DETAILS");
 
     setState(() {
       accountMobileNumber = decodedToken['mobileNumber'];
       decodedTokenAccounts = decodedToken['accounts'];
     });
-    log(accountMobileNumber.toString(),
-        name: "HERERE  accountMobileNumber *******");
+    logConsole(
+        accountMobileNumber.toString(), "HERERE  accountMobileNumber *******");
 
-    log(decodedTokenAccounts.toString(),
-        name: "HERERE decodedTokenAccounts *******");
+    logConsole(
+        decodedTokenAccounts.toString(), "HERERE decodedTokenAccounts *******");
   }
 
   @override
   void initState() {
-    log(jsonEncode(widget.historyData).toString(),
-        name: "TRANSACTION_DETAILS PAGE");
+    logConsole(
+        jsonEncode(widget.historyData).toString(), "TRANSACTION_DETAILS PAGE");
     helperFunc();
-    log(jsonEncode(myAccounts).toString(), name: "AT TRANSACTION_DETAILS");
+    logConsole(jsonEncode(myAccounts).toString(), "AT TRANSACTION_DETAILS");
     super.initState();
     // askPermission();
 
@@ -239,8 +240,11 @@ class _TransactionDetailsUIState extends State<TransactionDetailsUI> {
               .toLocal())
           .toString(),
       "status": widget.historyData!.tRANSACTIONSTATUS!
-              .toLowerCase()
-              .contains("bbps-timeout")
+                  .toLowerCase()
+                  .contains("bbps-timeout") ||
+              widget.historyData!.tRANSACTIONSTATUS!
+                  .toLowerCase()
+                  .contains("bbps-in-progress")
           ? "PENDING"
           : widget.historyData!.tRANSACTIONSTATUS!
                   .toString()
@@ -248,13 +252,15 @@ class _TransactionDetailsUIState extends State<TransactionDetailsUI> {
                   .contains("success")
               ? "SUCCESS"
               : "FAILURE",
+      "reason": getTransactionReason(
+          widget.historyData!.tRANSACTIONSTATUS!.toString()),
+      "categotyName": widget.historyData!.cATEGORYNAME
     };
     goToData(context, pdfPreviewPageRoute, {"data": transactionReceiptData});
   }
 
   Future writeOnPdf() async {
-    final ByteData bytes =
-        await rootBundle.load('assets/images/be_assured_logo.png');
+    final ByteData bytes = await rootBundle.load(bbpsAssuredLogo);
     Uint8List byteList = bytes.buffer.asUint8List();
     final pdf = pw.Document();
     inspect(pdf);
@@ -423,6 +429,15 @@ class _TransactionDetailsUIState extends State<TransactionDetailsUI> {
                               ? "SUCCESS"
                               : "FAILURE",
                     ],
+                    if (widget.historyData!.tRANSACTIONSTATUS!
+                            .toString()
+                            .toLowerCase() !=
+                        "success")
+                      [
+                        'Reason',
+                        getTransactionReason(
+                            widget.historyData!.tRANSACTIONSTATUS!.toString())
+                      ]
                   ]),
             ],
           ); // Center
@@ -432,11 +447,12 @@ class _TransactionDetailsUIState extends State<TransactionDetailsUI> {
         "${dir.path}/${widget.historyData!.bILLERNAME}-${dlTime.toString()}.pdf");
     // file.writeAsBytesSync(await pdf.save());
 
-    print("DOCUMENT SAVED");
+    debugPrint("DOCUMENT SAVED");
     file.writeAsBytes(await pdf.save(), mode: FileMode.append);
 
-    log("${dir.path}/${widget.historyData!.bILLERNAME}-${dlTime.toString()}.pdf",
-        name: "FILE PATH ::");
+    logConsole(
+        "${dir.path}/${widget.historyData!.bILLERNAME}-${dlTime.toString()}.pdf",
+        "FILE PATH ::");
   }
 
   @override
@@ -464,7 +480,7 @@ class _TransactionDetailsUIState extends State<TransactionDetailsUI> {
           Column(
             children: [
               Container(
-                height: height(context) / 1.31,
+                height: height(context) / 1.3,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
                   color: txtColor,
@@ -589,18 +605,81 @@ class _TransactionDetailsUIState extends State<TransactionDetailsUI> {
                                                     .tRANSACTIONSTATUS ==
                                                 'success'
                                             ? "Successful"
-                                            : "Failed",
+                                            : widget.historyData!
+                                                        .tRANSACTIONSTATUS ==
+                                                    'bbps-timeout'
+                                                ? "Pending"
+                                                : "Failed",
                                         size: width(context) * 0.04,
                                         color: widget.historyData!
                                                     .tRANSACTIONSTATUS ==
                                                 'success'
                                             ? alertSuccessColor
-                                            : alertFailedColor,
+                                            : widget.historyData!
+                                                        .tRANSACTIONSTATUS ==
+                                                    'bbps-timeout'
+                                                ? alertPendingColor
+                                                : alertFailedColor,
                                         weight: FontWeight.w600),
                                   ),
                                 ],
                               ),
-                            )
+                            ),
+                            if (widget.historyData!.tRANSACTIONSTATUS!
+                                    .toString()
+                                    .toLowerCase() !=
+                                "success")
+                              Divider(
+                                thickness: 1,
+                                color: divideColor,
+                              ),
+                            if (widget.historyData!.tRANSACTIONSTATUS!
+                                    .toString()
+                                    .toLowerCase() !=
+                                "success")
+                              SizedBox(
+                                height: height(context) * 0.07,
+                                child: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    appText(
+                                        data: "Reason",
+                                        size: width(context) * 0.04,
+                                        color: txtSecondaryColor),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 11, vertical: 2.2),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(4)),
+                                        color: widget.historyData!
+                                                        .tRANSACTIONSTATUS ==
+                                                    'bbps-timeout' ||
+                                                widget.historyData!
+                                                        .tRANSACTIONSTATUS ==
+                                                    'bbps-in-progress'
+                                            ? alertPendingColor.withOpacity(0.1)
+                                            : alertFailedColor.withOpacity(0.1),
+                                      ),
+                                      child: appText(
+                                          data: getTransactionReason(widget
+                                              .historyData!.tRANSACTIONSTATUS!
+                                              .toString()),
+                                          color: widget.historyData!
+                                                          .tRANSACTIONSTATUS ==
+                                                      'bbps-timeout' ||
+                                                  widget.historyData!
+                                                          .tRANSACTIONSTATUS ==
+                                                      'bbps-in-progress'
+                                              ? alertPendingColor
+                                              : alertFailedColor,
+                                          weight: FontWeight.w600),
+                                    ),
+                                  ],
+                                ),
+                              )
                           ],
                         ),
                       ),
@@ -610,7 +689,8 @@ class _TransactionDetailsUIState extends State<TransactionDetailsUI> {
               ),
               Expanded(
                 child: Container(
-                  padding: EdgeInsets.only(top: 8, bottom: 16),
+                  padding:
+                      EdgeInsets.only(top: height(context) * 0.03, bottom: 16),
                   child: myAppButton(
                     context: context,
                     buttonName: "Download",
@@ -637,7 +717,7 @@ class _TransactionDetailsUIState extends State<TransactionDetailsUI> {
                                 // sendNotification("Download Completed",
                                 //     "${widget.historyData!.bILLERNAME}-${dlTime.toString()}.pdf");
                               } else {
-                                print("already exist");
+                                debugPrint("already exist");
                               }
                             }
                           });

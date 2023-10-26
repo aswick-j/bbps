@@ -31,6 +31,7 @@ class billerResponseData {
   String? txnRefKey;
   Fees? fees;
   String? paymentMode;
+  int? customerbillId;
 
   billerResponseData(
       {this.bankBranch,
@@ -39,7 +40,8 @@ class billerResponseData {
       this.rc,
       this.txnRefKey,
       this.fees,
-      this.paymentMode});
+      this.paymentMode,
+      this.customerbillId});
 
   billerResponseData.fromJson(Map<String, dynamic> json) {
     bankBranch = json['bankBranch'];
@@ -49,6 +51,7 @@ class billerResponseData {
     txnRefKey = json['txnRefKey'];
     fees = json['fees'] != null ? Fees.fromJson(json['fees']) : null;
     paymentMode = json['paymentMode'];
+    customerbillId = json['customerbillId'];
   }
 
   Map<String, dynamic> toJson() {
@@ -64,6 +67,7 @@ class billerResponseData {
       data['fees'] = this.fees!.toJson();
     }
     data['paymentMode'] = this.paymentMode;
+    data['customerbillId'] = this.customerbillId;
     return data;
   }
 }

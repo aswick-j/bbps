@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:bbps/bloc/complaint/complaint_cubit.dart';
+import 'package:bbps/model/complaints_model.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 
-import '../../bloc/complaint/complaint_cubit.dart';
-import '../../model/complaints_model.dart';
 import '../../utils/commen.dart';
 import '../../utils/const.dart';
 import '../../utils/utils.dart';
@@ -57,7 +57,8 @@ class ComplaintViewUI extends StatefulWidget {
 class _ComplaintViewUIState extends State<ComplaintViewUI> {
   @override
   void initState() {
-    log(jsonEncode(widget.complaintData).toString(), name: "AT COMPLAINT VIEW");
+    logConsole(
+        jsonEncode(widget.complaintData).toString(), "AT COMPLAINT VIEW");
     super.initState();
   }
 

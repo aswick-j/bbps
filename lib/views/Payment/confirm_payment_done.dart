@@ -1,17 +1,18 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+
+import 'package:bbps/utils/const.dart';
 import 'package:dotted_line/dotted_line.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_overlay_loader/flutter_overlay_loader.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:flutter/material.dart';
 // import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 import 'package:open_file_plus/open_file_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../bloc/home/home_cubit.dart';
@@ -20,7 +21,6 @@ import '../../model/biller_model.dart';
 import '../../model/confirm_done_model.dart';
 import '../../model/saved_billers_model.dart';
 import '../../utils/commen.dart';
-import '../../utils/const.dart';
 import '../../utils/utils.dart';
 
 class ConfirmPaymentDone extends StatefulWidget {
@@ -164,6 +164,7 @@ class _ConfirmPaymentDoneState extends State<ConfirmPaymentDone> {
                   ? "Pending"
                   : "FAILURE"
           : "FAILURE",
+      "categotyName": isMobilePrepaid ? "mobile prepaid" : ""
     };
     goToData(context, pdfPreviewPageRoute, {"data": transactionReceiptData});
   }
@@ -205,7 +206,7 @@ class _ConfirmPaymentDoneState extends State<ConfirmPaymentDone> {
     tnxResponse = confirmDoneData.fromJson(widget.tnxData['res']);
     billData = jsonDecode(tnxResponse!.paymentDetails!.tran!.bill.toString());
     // inspect(jsonEncode(widget.tnxData['savedBiller']));
-    print("Confrim payment done ==========>");
+    debugPrint("Confrim payment done ==========>");
     inspect(widget.tnxData);
     inspect(tnxResponse);
     if (widget.tnxData['isMobilePrepaid'] == null ||
@@ -219,7 +220,7 @@ class _ConfirmPaymentDoneState extends State<ConfirmPaymentDone> {
       });
     }
     if (isSavedBillFrom) {
-      log("isSavedBillFrom :: TRUE");
+      logInfo("isSavedBillFrom :: TRUE");
       savedBillerData = widget.tnxData['billerData'];
       billerTypeResult = getBillerType(
           savedBillerData!.fETCHREQUIREMENT,
@@ -227,7 +228,7 @@ class _ConfirmPaymentDoneState extends State<ConfirmPaymentDone> {
           savedBillerData!.sUPPORTBILLVALIDATION,
           savedBillerData!.pAYMENTEXACTNESS);
     } else {
-      log("isSavedBillFrom :: FALSE");
+      logInfo("isSavedBillFrom :: FALSE");
 
       billerData = widget.tnxData['billerData'];
       billerTypeResult = getBillerType(
@@ -242,25 +243,26 @@ class _ConfirmPaymentDoneState extends State<ConfirmPaymentDone> {
     helperFunc();
 
     super.initState();
+    // BlocProvider.of<HomeCubit>(context).getAutopay();
 
     // initialseNotifications();
-    if (paymentDetails!['success'] && isSavedBillFrom && !isMobilePrepaidFrom)
-      deleteUpcomingDue();
+    if (paymentDetails!['success'] && !isMobilePrepaidFrom) deleteUpcomingDue();
+    if (paymentDetails!['success'] && !isMobilePrepaidFrom) UpdateUpcomingDue();
   }
 
   helperFunc() async {
     Map<String, dynamic> decodedToken = await getDecodedToken();
-    log(decodedToken.toString(), name: "at helperFunc :: TRANSACTION_DETAILS");
+    logConsole(decodedToken.toString(), "at helperFunc :: TRANSACTION_DETAILS");
 
     setState(() {
       accountMobileNumber = decodedToken['mobileNumber'];
       decodedTokenAccounts = decodedToken['accounts'];
     });
-    log(accountMobileNumber.toString(),
-        name: "HERERE  accountMobileNumber *******");
+    logConsole(
+        accountMobileNumber.toString(), "HERERE  accountMobileNumber *******");
 
-    log(decodedTokenAccounts.toString(),
-        name: "HERERE decodedTokenAccounts *******");
+    logConsole(
+        decodedTokenAccounts.toString(), "HERERE decodedTokenAccounts *******");
   }
 
   @override
@@ -271,20 +273,24 @@ class _ConfirmPaymentDoneState extends State<ConfirmPaymentDone> {
   }
 
   void deleteUpcomingDue() {
-    BlocProvider.of<HomeCubit>(context)
-        .deleteUpcomingDue(savedBillerData!.cUSTOMERBILLID);
+    BlocProvider.of<HomeCubit>(context).deleteUpcomingDue(!isSavedBillFrom
+        ? widget.tnxData!["customerBillID"]
+        : savedBillerData!.cUSTOMERBILLID);
+  }
+
+  void UpdateUpcomingDue() {
+    BlocProvider.of<HomeCubit>(context).getAddUpdateUpcomingDue();
   }
 
   final iconImage = Image.asset(bbSvg);
   List<AllConfigurations>? autoPayData = [];
   AllConfigurationsData? _autoPaydata;
   Future writeOnPdf() async {
-    final ByteData bytes =
-        await rootBundle.load('assets/images/be_assured_logo.png');
+    final ByteData bytes = await rootBundle.load(bbpsAssuredLogo);
     Uint8List byteList = bytes.buffer.asUint8List();
     final pdf = pw.Document();
     inspect(pdf);
-    print("DOCUMENT GENERATED");
+    debugPrint("DOCUMENT GENERATED");
     pdf.addPage(pw.Page(
         pageFormat: PdfPageFormat.a4,
         build: (pw.Context context) {
@@ -350,47 +356,45 @@ class _ConfirmPaymentDoneState extends State<ConfirmPaymentDone> {
                       // paymentDetails!['mobileNumber'].toString(),
                       accountMobileNumber ?? "-"
                     ],
-                    [
-                      'Bill Number',
-                      // billData['data']['BillerResponse']['billNumber']
-                      //     .toString(),
-                      /* isSavedBillFrom
-                          ? savedBillerData!.pARAMETERS![0].pARAMETERVALUE
-                              .toString()
-                          : isMobilePrepaid
-                              ? widget
-                                  .tnxData['inputSignature'][0].pARAMETERVALUE
-                              : widget.tnxData['inputSignature'][0]
-                                  ['PARAMETER_VALUE'], */
-
-                      isSavedBillFrom && !isMobilePrepaid
-                          ? savedBillerData!.pARAMETERS![0].pARAMETERVALUE
-                              .toString()
-                          : isSavedBillFrom && isMobilePrepaid
-                              // ? savedBillerData!.pARAMETERS!
-                              //     .firstWhere(
-                              //       (param) =>
-                              //           param.pARAMETERNAME
-                              //               .toString()
-                              //               .toLowerCase() ==
-                              //           'mobile number',
-                              //     )
-                              //     .pARAMETERVALUE
-                              ? "-"
-                              : !isSavedBillFrom && isMobilePrepaid
-                                  // ? widget.tnxData['inputSignature']!
-                                  //     .firstWhere(
-                                  //       (param) =>
-                                  //           param.pARAMETERNAME
-                                  //               .toString()
-                                  //               .toLowerCase() ==
-                                  //           'mobile number',
-                                  //     )
-                                  //     .pARAMETERVALUE
-                                  ? "-"
-                                  : widget.tnxData['inputSignature'][0]
-                                      .pARAMETERVALUE,
-                    ],
+                    // if ((isSavedBillFrom && isMobilePrepaid) ||
+                    //     (!isSavedBillFrom && isMobilePrepaid))
+                    //   [
+                    //     'Mobile Number',
+                    //     isSavedBillFrom && isMobilePrepaid
+                    //         ? savedBillerData!.pARAMETERS!
+                    //                 .firstWhere(
+                    //                   (param) =>
+                    //                       param.pARAMETERNAME
+                    //                           .toString()
+                    //                           .toLowerCase() ==
+                    //                       'mobile number',
+                    //                 )
+                    //                 .pARAMETERVALUE ??
+                    //             "-"
+                    //         : !isSavedBillFrom && isMobilePrepaid
+                    //             ? widget.tnxData['inputSignature']!
+                    //                     .firstWhere(
+                    //                       (param) =>
+                    //                           param.pARAMETERNAME
+                    //                               .toString()
+                    //                               .toLowerCase() ==
+                    //                           'mobile number',
+                    //                     )
+                    //                     .pARAMETERVALUE ??
+                    //                 "-"
+                    //             : widget.tnxData['inputSignature'][0]
+                    //                 .pARAMETERVALUE,
+                    //   ],
+                    if ((isSavedBillFrom && !isMobilePrepaid) ||
+                        (!isSavedBillFrom && !isMobilePrepaid))
+                      [
+                        'Bill Number',
+                        isSavedBillFrom && !isMobilePrepaid
+                            ? savedBillerData!.pARAMETERS![0].pARAMETERVALUE
+                                .toString()
+                            : widget
+                                .tnxData['inputSignature'][0].pARAMETERVALUE,
+                      ],
                     [
                       'Transaction Reference Id',
                       tnxResponse!.paymentDetails?.toJson().length != null
@@ -493,6 +497,13 @@ class _ConfirmPaymentDoneState extends State<ConfirmPaymentDone> {
                                   : "FAILURE"
                           : "FAILURE",
                     ],
+                    if (!paymentDetails!['success'])
+                      [
+                        'Reason',
+                        paymentDetails!['fund-transfer-failed']
+                            ? "Fund Transfer failed from Bank"
+                            : "Bill Payment failed",
+                      ]
                   ]),
             ],
           ); // Center
@@ -502,7 +513,7 @@ class _ConfirmPaymentDoneState extends State<ConfirmPaymentDone> {
         "${dir.path}/${isSavedBillFrom ? savedBillerData!.bILLERNAME : billerData!.bILLERNAME}-${dlTime.toString()}.pdf");
     // file.writeAsBytesSync(await pdf.save());
 
-    print("DOCUMENT SAVED");
+    debugPrint("DOCUMENT SAVED");
     file.writeAsBytes(await pdf.save(), mode: FileMode.append);
   }
 
@@ -554,6 +565,15 @@ class _ConfirmPaymentDoneState extends State<ConfirmPaymentDone> {
     );
   }
 
+  // checkAutopay(customerBillID) {
+  //   savedBillerData;
+  //   if (isSavedBillFrom) {
+  //     return savedBillerData!.aUTOPAYID.toString() != "null" ? true : false;
+  //   } else {
+  //     return autoPayData;
+  //   }
+  // }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -563,42 +583,43 @@ class _ConfirmPaymentDoneState extends State<ConfirmPaymentDone> {
       child: Scaffold(
           backgroundColor: primaryBodyColor,
           body: BlocConsumer<HomeCubit, HomeState>(listener: (context, state) {
-            if (state is AutoPayLoading) {
-              if (!Loader.isShown) {
-                showLoader(context);
-              }
-            } else if (state is AutopaySuccess) {
-              autoPayData = state.autoScheduleData!.allConfigurations;
-              inspect(autoPayData);
-              if (Loader.isShown) {
-                Loader.hide();
-              }
-              for (var i = 0; i < autoPayData!.length; i++) {
-                _autoPaydata = autoPayData![i]
-                    .data!
-                    .where((element) =>
-                        element.cUSTOMERBILLID ==
-                        savedBillerData!.cUSTOMERBILLID)
-                    .first;
-                print(i.toString() + autoPayData!.length.toString());
-                if (i + 1 == autoPayData!.length) {
-                  print("_autoPaydata ====> ${jsonEncode(_autoPaydata)}");
+            // if (state is AutoPayLoading) {
+            //   if (!Loader.isShown) {
+            //     showLoader(context);
+            //   }
+            // } else if (state is AutopaySuccess) {
+            //   autoPayData = state.autoScheduleData!.allConfigurations;
+            //   debugPrint(autoPayData);
+            //   // inspect(autoPayData);
+            //   // if (Loader.isShown) {
+            //   //   Loader.hide();
+            //   // }
+            //   // for (var i = 0; i < autoPayData!.length; i++) {
+            //   //   _autoPaydata = autoPayData![i]
+            //   //       .data!
+            //   //       .where((element) =>
+            //   //           element.cUSTOMERBILLID ==
+            //   //           savedBillerData!.cUSTOMERBILLID)
+            //   //       .first;
+            //   //   debugPrint(i.toString() + autoPayData!.length.toString());
+            //   //   if (i + 1 == autoPayData!.length) {
+            //   //     debugPrint("_autoPaydata ====> ${jsonEncode(_autoPaydata)}");
 
-                  if (_autoPaydata != null) {
-                    goToData(context, autoPayEditRoute, {
-                      "customerBillID": savedBillerData!.cUSTOMERBILLID,
-                      "paidAmount": widget.tnxData['billAmount'],
-                      "inputSignatures": widget.tnxData['inputSignature'],
-                      "billName": _autoPaydata!.bILLNAME,
-                      "billerName": _autoPaydata!.bILLERNAME,
-                      "limit": "0"
-                    });
-                  }
-                }
-              }
-            } else if (state is AutopayFailed) {
-              showSnackBar(state.message, context);
-            }
+            //   //     if (_autoPaydata != null) {
+            //   //       goToData(context, autoPayEditRoute, {
+            //   //         "customerBillID": savedBillerData!.cUSTOMERBILLID,
+            //   //         "paidAmount": widget.tnxData['billAmount'],
+            //   //         "inputSignatures": widget.tnxData['inputSignature'],
+            //   //         "billName": _autoPaydata!.bILLNAME,
+            //   //         "billerName": _autoPaydata!.bILLERNAME,
+            //   //         "limit": "0"
+            //   //       });
+            //   //     }
+            //   //   }
+            //   // }
+            // } else if (state is AutopayFailed) {
+            //   showSnackBar(state.message, context);
+            // }
           }, builder: (context, state) {
             return ListView(
               physics: const BouncingScrollPhysics(),
@@ -608,15 +629,15 @@ class _ConfirmPaymentDoneState extends State<ConfirmPaymentDone> {
                   children: [
                     Center(
                       child: paymentDetails!['success']
-                          ? Image.asset("assets/images/clrpappers.png")
-                          : Image.asset("assets/images//clrpappersfail.png"),
+                          ? Image.asset(clrpappersLogo)
+                          : Image.asset(clrpappersFailLogo),
                     ),
                     Positioned(
                       top: height(context) * 0.025,
                       left: width(context) * 0.35,
                       child: paymentDetails!['success']
-                          ? Image.asset("assets/images/tickmark.png")
-                          : Image.asset("assets/images/icon_failur_png.png"),
+                          ? Image.asset(tickmarkLogo)
+                          : Image.asset(iconFailure),
                     ),
                     Positioned(
                       top: height(context) * 0.2,
@@ -717,7 +738,7 @@ class _ConfirmPaymentDoneState extends State<ConfirmPaymentDone> {
                                     : isMobilePrepaid &&
                                             widget.tnxData['billName'] ==
                                                 "CHANGE_HERE"
-                                        ? ""
+                                        ? "-"
                                         : widget.tnxData['billName']),
                           ),
                         ],
@@ -758,32 +779,45 @@ class _ConfirmPaymentDoneState extends State<ConfirmPaymentDone> {
                             //               savedBillerData!.cUSTOMERBILLID)
                             //           .first;
                             //     }
-                            //     print("_autoPaydata ====>" +
+                            //     debugPrint("_autoPaydata ====>" +
                             //         jsonEncode(_autoPaydata));
                             //   }
                             //   return paymentDetails!['success']
                             //       ?
 
-                            isSavedBillFrom && !isMobilePrepaidFrom
+                            !widget.tnxData!["autopayStatus"] &&
+                                    !isMobilePrepaidFrom &&
+                                    billerTypeResult!['fetchBill']
                                 ? GestureDetector(
                                     onTap: !paymentDetails!['success']
                                         ? null
                                         : () {
                                             inspect(savedBillerData);
+                                            inspect(widget.tnxData);
 
                                             goToData(
                                                 context, setupAutoPayRoute, {
-                                              "customerBillID": savedBillerData!
-                                                  .cUSTOMERBILLID
-                                                  .toString(),
+                                              "customerBillID": !isSavedBillFrom
+                                                  ? widget.tnxData![
+                                                          "customerBillID"]
+                                                      .toString()
+                                                  : savedBillerData!
+                                                      .cUSTOMERBILLID
+                                                      .toString(),
                                               "paidAmount":
                                                   widget.tnxData['billAmount'],
                                               "inputSignatures":
-                                                  savedBillerData!.pARAMETERS,
-                                              "billname":
-                                                  savedBillerData!.bILLNAME,
-                                              "billername":
-                                                  savedBillerData!.bILLERNAME,
+                                                  !isSavedBillFrom
+                                                      ? widget.tnxData![
+                                                          "inputSignature"]
+                                                      : savedBillerData!
+                                                          .pARAMETERS,
+                                              "billname": !isSavedBillFrom
+                                                  ? widget.tnxData!["billName"]
+                                                  : savedBillerData!.bILLNAME,
+                                              "billername": !isSavedBillFrom
+                                                  ? billerData!.bILLERNAME
+                                                  : savedBillerData!.bILLERNAME,
                                               "limit": "0"
                                             });
                                             // BlocProvider.of<HomeCubit>(context)
@@ -809,114 +843,16 @@ class _ConfirmPaymentDoneState extends State<ConfirmPaymentDone> {
                                       ),
                                     ),
                                   )
-                                : !isSavedBillFrom && isMobilePrepaidFrom
-                                    ? InkWell(
-                                        onTap: () {
-                                          goToData(context, addNewBill, {
-                                            "billerData": billerDataTemp,
-                                            "inputSignatureData":
-                                                inputSignaturesModelTemp
-                                          });
-                                        },
-                                        child: Text(
-                                          'Save Biller for Future Payments',
-                                          style: TextStyle(
-                                            color: txtAmountColor,
-                                            fontWeight: FontWeight.w600,
-                                            decoration:
-                                                TextDecoration.underline,
-                                          ),
-                                        ),
-                                      )
-                                    : GestureDetector(
-                                        onTap: () async {
-                                          if (Platform.isIOS) {
-                                            iosPdfGenerate();
-                                          } else {
-                                            checkPermissionAndFolder()
-                                                .then((value) async {
-                                              final _dltime = DateTime.now()
-                                                  .millisecondsSinceEpoch;
-                                              setState(() {
-                                                dlTime = _dltime.toString();
-                                              });
-                                              if (value == true) {
-                                                File file = File(
-                                                    '${dir.path}/${isSavedBillFrom ? savedBillerData!.bILLERNAME : billerData!.bILLERNAME}-${dlTime.toString()}.pdf"');
+                                : Align(
+                                    alignment: Alignment.center,
+                                    child: appText(
+                                        textAlign: TextAlign.center,
+                                        data: "Download Receipt",
+                                        color: Colors.grey,
+                                        size: width(context) * 0.033,
+                                        weight: FontWeight.bold),
+                                  ),
 
-                                                if (!await file.exists()) {
-                                                  await writeOnPdf();
-                                                  // await savePdf();
-                                                  await OpenFile.open(
-                                                      "${dir.path}/${isSavedBillFrom ? savedBillerData!.bILLERNAME : billerData!.bILLERNAME}-${dlTime.toString()}.pdf");
-                                                  // sendNotification("Download Completed",
-                                                  //     "${widget.historyData!.bILLERNAME}-${dlTime.toString()}.pdf");
-                                                } else {
-                                                  print("already exist");
-                                                }
-                                                // if (await File(
-                                                //         "${dir.path}/${savedBillerData!.bILLERNAME}-${savedBillerData!.cOMPLETIONDATE.toString()}.pdf")
-                                                //     .exists()) {
-                                                //   print("already exist");
-                                                //   OpenFile.open(
-                                                //       "${dir.path}/${savedBillerData!.bILLERNAME}-${savedBillerData!.cOMPLETIONDATE.toString()}.pdf");
-                                                // } else {
-                                                //   await writeOnPdf();
-                                                //   // await savePdf();
-                                                //   print("file created");
-                                                //   sendNotification("Download Completed",
-                                                //       "${savedBillerData!.bILLERNAME}-${savedBillerData!.cOMPLETIONDATE.toString()}.pdf");
-                                                // }
-                                              }
-                                            });
-
-                                            // if (permissionGranted == true) {
-                                            //   File file = File(
-                                            //       '${dir}/"${savedBillerData!.bILLERNAME}-${dlTime.toString()}.pdf"');
-
-                                            //   if (!await file.exists()) {
-                                            //     await writeOnPdf();
-                                            //     // await savePdf();
-                                            //     sendNotification("Download Completed",
-                                            //         "${savedBillerData!.bILLERNAME}-${dlTime.toString()}.pdf");
-                                            //   } else {
-                                            //     print("already exist");
-                                            //   }
-                                            // } else {
-                                            //   customDialog(
-                                            //       context: context,
-                                            //       dialogHeight: height(context) / 3.2,
-                                            //       iconHeight: height(context) * 0.1,
-                                            //       message: "",
-                                            //       message2: "",
-                                            //       message3: "",
-                                            //       title: "Storage Permission Not Granted",
-                                            //       buttonName: "Okay",
-                                            //       buttonAction: () {
-                                            //         Navigator.pop(context);
-                                            //       },
-                                            //       iconSvg: alertSvg);
-                                            // }
-                                          }
-                                        },
-                                        child: Container(
-                                          width: width(context) / 2.3,
-                                          padding: EdgeInsets.all(
-                                              width(context) * 0.024),
-                                          decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(5.0),
-                                              color: const Color(0xFFFF7F50)),
-                                          child: Align(
-                                            alignment: Alignment.center,
-                                            child: appText(
-                                                textAlign: TextAlign.center,
-                                                data: "Download Receipt",
-                                                size: width(context) * 0.033,
-                                                weight: FontWeight.bold),
-                                          ),
-                                        ),
-                                      ),
                             IconButton(
                                 onPressed: () async {
                                   if (Platform.isIOS) {
@@ -941,18 +877,18 @@ class _ConfirmPaymentDoneState extends State<ConfirmPaymentDone> {
                                           // sendNotification("Download Completed",
                                           //     "${widget.historyData!.bILLERNAME}-${dlTime.toString()}.pdf");
                                         } else {
-                                          print("already exist");
+                                          debugPrint("already exist");
                                         }
                                         // if (await File(
                                         //         "${dir.path}/${savedBillerData!.bILLERNAME}-${savedBillerData!.cOMPLETIONDATE.toString()}.pdf")
                                         //     .exists()) {
-                                        //   print("already exist");
+                                        //   debugPrint("already exist");
                                         //   OpenFile.open(
                                         //       "${dir.path}/${savedBillerData!.bILLERNAME}-${savedBillerData!.cOMPLETIONDATE.toString()}.pdf");
                                         // } else {
                                         //   await writeOnPdf();
                                         //   // await savePdf();
-                                        //   print("file created");
+                                        //   debugPrint("file created");
                                         //   sendNotification("Download Completed",
                                         //       "${savedBillerData!.bILLERNAME}-${savedBillerData!.cOMPLETIONDATE.toString()}.pdf");
                                         // }
@@ -969,7 +905,7 @@ class _ConfirmPaymentDoneState extends State<ConfirmPaymentDone> {
                                     //     sendNotification("Download Completed",
                                     //         "${savedBillerData!.bILLERNAME}-${dlTime.toString()}.pdf");
                                     //   } else {
-                                    //     print("already exist");
+                                    //     debugPrint("already exist");
                                     //   }
                                     // } else {
                                     //   customDialog(
@@ -988,8 +924,7 @@ class _ConfirmPaymentDoneState extends State<ConfirmPaymentDone> {
                                     // }
                                   }
                                 },
-                                icon: Image.asset(
-                                    'assets/images/iconDownload.png'))
+                                icon: Image.asset(iconDownload))
                           ],
                         ),
                       ),
@@ -1048,45 +983,66 @@ class _ConfirmPaymentDoneState extends State<ConfirmPaymentDone> {
                                     : billerData!.bILLERNAME)),
                       ),
                       divideLine(),
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: width(context) * 0.04,
-                          vertical: width(context) * 0.02,
+                      if ((isSavedBillFrom && isMobilePrepaid) ||
+                          (!isSavedBillFrom && isMobilePrepaid))
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: width(context) * 0.04,
+                            vertical: width(context) * 0.02,
+                          ),
+                          child: SizedBox(
+                            height: height(context) * 0.05,
+                            width: width(context),
+                            child: columnText(
+                              context,
+                              "Mobile Number",
+                              isSavedBillFrom && isMobilePrepaid
+                                  ? savedBillerData!.pARAMETERS!
+                                          .firstWhere(
+                                            (param) =>
+                                                param.pARAMETERNAME
+                                                    .toString()
+                                                    .toLowerCase() ==
+                                                'mobile number',
+                                          )
+                                          .pARAMETERVALUE ??
+                                      "-"
+                                  : !isSavedBillFrom && isMobilePrepaid
+                                      ? widget.tnxData['inputSignature']!
+                                              .firstWhere(
+                                                (param) =>
+                                                    param.pARAMETERNAME
+                                                        .toString()
+                                                        .toLowerCase() ==
+                                                    'mobile number',
+                                              )
+                                              .pARAMETERVALUE ??
+                                          "-"
+                                      : widget.tnxData['inputSignature'][0]
+                                          .pARAMETERVALUE,
+                            ),
+                          ),
                         ),
-                        child: SizedBox(
-                          height: height(context) * 0.05,
-                          width: width(context),
-                          child: columnText(
-                            context,
-                            "Bill Number",
-                            isSavedBillFrom && !isMobilePrepaid
-                                ? savedBillerData!.pARAMETERS![0].pARAMETERVALUE
-                                    .toString()
-                                : isSavedBillFrom && isMobilePrepaid
-                                    // ? savedBillerData!.pARAMETERS!
-                                    //     .firstWhere(
-                                    //       (param) =>
-                                    //           param.pARAMETERNAME
-                                    //               .toString()
-                                    //               .toLowerCase() ==
-                                    //           'mobile number',
-                                    //     )
-                                    //     .pARAMETERVALUE
-                                    ? "-"
-                                    : !isSavedBillFrom && isMobilePrepaid
-                                        // ? widget.tnxData['inputSignature']!
-                                        //     .firstWhere(
-                                        //       (param) =>
-                                        //           param.pARAMETERNAME
-                                        //               .toString()
-                                        //               .toLowerCase() ==
-                                        //           'mobile number',
-                                        //     )
-                                        //     .pARAMETERVALUE
-                                        ? "-"
-                                        : widget.tnxData['inputSignature'][0]
-                                            .pARAMETERVALUE,
-                            /* isSavedBillFrom
+                      if ((isSavedBillFrom && !isMobilePrepaid) ||
+                          (!isSavedBillFrom && !isMobilePrepaid))
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: width(context) * 0.04,
+                            vertical: width(context) * 0.02,
+                          ),
+                          child: SizedBox(
+                            height: height(context) * 0.05,
+                            width: width(context),
+                            child: columnText(
+                              context,
+                              "Bill Number",
+                              isSavedBillFrom && !isMobilePrepaid
+                                  ? savedBillerData!
+                                      .pARAMETERS![0].pARAMETERVALUE
+                                      .toString()
+                                  : widget.tnxData['inputSignature'][0]
+                                      .pARAMETERVALUE,
+                              /* isSavedBillFrom
                                   ? savedBillerData!
                                       .pARAMETERS![0].pARAMETERVALUE
                                       .toString()
@@ -1095,9 +1051,9 @@ class _ConfirmPaymentDoneState extends State<ConfirmPaymentDone> {
                                           .pARAMETERVALUE
                                       : widget.tnxData['inputSignature'][0]
                                           ['PARAMETER_VALUE'], */
+                            ),
                           ),
                         ),
-                      ),
                       divideLine(),
                       Padding(
                         padding: EdgeInsets.symmetric(
@@ -1194,7 +1150,9 @@ class _ConfirmPaymentDoneState extends State<ConfirmPaymentDone> {
                     right: width(context) * 0.04,
                     left: width(context) * 0.04,
                   ),
-                  height: height(context) / 2.8,
+                  constraints: BoxConstraints(
+                    maxHeight: double.infinity,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.all(
@@ -1252,19 +1210,24 @@ class _ConfirmPaymentDoneState extends State<ConfirmPaymentDone> {
                       Align(
                         alignment: Alignment.center,
                         child: Image.asset(
-                          "assets/images/be_assured_logo.png",
+                          bbpsAssuredLogo,
                           height: height(context) * 0.07,
                         ),
                       ),
-                      Align(
-                          alignment: Alignment.center,
-                          child: appText(
-                            data:
-                                'All billing details are verified by Bharat Billpay',
-                            size: width(context) * 0.03,
-                            color: txtSecondaryColor,
-                            maxline: 1,
-                          ))
+                      Padding(
+                        padding: EdgeInsets.only(
+                          bottom: width(context) * 0.04,
+                        ),
+                        child: Align(
+                            alignment: Alignment.center,
+                            child: appText(
+                              data:
+                                  'All billing details are verified by Bharat Billpay',
+                              size: width(context) * 0.03,
+                              color: txtSecondaryColor,
+                              maxline: 1,
+                            )),
+                      )
                     ],
                   ),
                 ),

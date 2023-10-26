@@ -1,8 +1,11 @@
 //Colors
+import 'dart:convert';
+import 'dart:developer' as developer;
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../../model/biller_model.dart';
 import '../../model/saved_billers_model.dart';
 
@@ -57,6 +60,9 @@ const String pdfPreviewPageRoute = "/pdf_preview_page";
 const requestTimeoutDuration = 120;
 
 // Urls
+/// The line `// const String baseUrl = "https://digiservicesuat.equitasbank.com/api";` is a commented
+/// out line of code. It is not being executed or used in the program. It is likely a URL that was used
+/// in development or testing but is not currently being used in the production version of the code.
 const String baseUrl = "https://digiservicesuat.equitasbank.com/api";
 // const String baseUrl = "http://192.168.25.237:5000/api";
 // const String baseUrl = "http://192.168.1.33:5000/api";
@@ -103,6 +109,7 @@ const String accountInfoUrl = "/payment/account-info";
 const String prepaidFetchPlansUrl = "/payment/prepaid-fetch-plans";
 const String validateBillUrl = "/payment/validate-bill";
 const String addUpdateUpcomingDueUrl = "/billers/add-update-upcoming-due";
+const String updateUpcomingDueUrl = "/billers/update-upcoming-dues";
 
 const String chartUrl = '/charts';
 const String complaintsConfigUrl = '/complaints/config';
@@ -157,74 +164,51 @@ Color divideDarkColor = const Color(0xffe9eaf5);
 //Smooth page indicator
 Color smoothPageIndicatorColor = const Color(0xffDAD3E4);
 
-const String airtelLogo = 'assets/images/airtel.svg';
-const String tnebLogo = 'assets/images/tneb.svg';
-const String jioLogo = 'assets/images/jio.svg';
-const String flashLogo = 'assets/images/flash.svg';
-const String historyLogo = "assets/images/history.svg";
-const String complaintsLogo = "assets/images/complaints.svg";
-const String alertSvg = "assets/images/Alert.svg";
-const String bbSvg = "assets/images/b_mnemonic.svg";
-//Bill Category Images
-const String iconMobilePostpaidSvg = "assets/images/mobilepostpaid.svg";
-const String iconDthSvg = "assets/images/DTH.svg";
-const String iconElectricityBillSvg = "assets/images/eb.svg";
-const String iconSvg = "assets/images/mobilepostpaid.svg";
-const String iconBroadbandPostpaidSvg = "assets/images/broadband.svg";
-const String iconWaterTaxSvg = "assets/images/water_tax.svg";
-const String iconLpgGasSvg = "assets/images/lpg.svg";
-const String iconGasBookingSvg = "assets/images/gas_booking.svg";
-const String iconLandlinePostpaidSvg = "assets/images/landline.svg";
-const String iconSuccessSvg = "assets/images/success.svg";
-const String iconAppHomeSvg = "assets/images/app_home_icon.svg";
+const String flashLogo = 'packages/bbps/packages/bbps/assets/images/flash.svg';
+const String historyLogo = "packages/bbps/assets/images/history.svg";
+const String complaintsLogo = "packages/bbps/assets/images/complaints.svg";
+const String complaintsLogoNew =
+    "packages/bbps/assets/logo/logo_complaints.svg";
+const String alertSvg = "packages/bbps/assets/images/Alert.svg";
+const String bbSvg = "packages/bbps/assets/images/b_mnemonic.svg";
+
+const String iconSuccessSvg = "packages/bbps/assets/images/success.svg";
+const String iconAppHomeSvg = "packages/bbps/assets/images/app_home_icon.svg";
 const String iconAppHomeSelectedSvg =
-    "assets/images/app_home_icon_selected.svg";
-const String iconMyBillSvg = "assets/images/my_bills_icon.svg";
-const String iconMyBillSelectedSvg = "assets/images/my_bills_icon_selected.svg";
-const String iconAutoPaySvg = "assets/images/auto_pay_icon.svg";
-const String iconAutoPaySelectedSvg =
-    "assets/images/auto_pay_icon_selected.svg";
-const String iconOtherOptionsSvg = "assets/images/other_options_icon.svg";
-const String iconOtherOptionsSelectedSvg =
-    "assets/images/other_options_icon_selected.svg";
+    "packages/bbps/assets/images/app_home_icon_selected.svg";
+const String iconMyBillSvg = "packages/bbps/assets/images/my_bills_icon.svg";
+const String iconMyBillSelectedSvg =
+    "packages/bbps/assets/images/my_bills_icon_selected.svg";
 
-const String iconCableSvg = "assets/images/iconCableSvg.svg";
-const String iconClubsAssociationsSvg =
-    "assets/images/iconClubsAssociationsSvg.svg";
-const String iconCreditCardSvg = "assets/images/iconCreditCardSvg.svg";
-const String iconEducationFeeSvg = "assets/images/iconEducationFeeSvg.svg";
-const String iconFastagFeeSvg = "assets/images/iconFastagFeeSvg.svg";
-const String iconHealthInsuranceSvg =
-    "assets/images/iconHealthInsuranceSvg.svg";
-const String iconHospitalServicesSvg =
-    "assets/images/iconHospitalServicesSvg.svg";
-const String iconHousingSocietuSvg = "assets/images/iconHousingSocietuSvg.svg";
-const String iconInsuranceSvg = "assets/images/iconInsuranceSvg.svg";
-const String iconPrepaidSvg = "assets/images/Icon_MobilePrepaid.svg";
-
-const String iconLifeInsuranceSvg = "assets/images/iconLifeInsuranceSvg.svg";
-const String iconLoanPaymentSvg = "assets/images/iconLoanPaymentSvg.svg";
-const String iconMunicipalServicesSvg =
-    "assets/images/iconMunicipalServicesSvg.svg";
-const String iconMunicipalTaxesSvg = "assets/images/iconMunicipalTaxesSvg.svg";
-const String iconSubscriptionSvg = "assets/images/iconSubscriptionSvg.svg";
-const String noUpcomingDues = 'assets/images/noAutoPayment.svg';
-const String noUpcomingPayment = 'assets/images/noUpcomingPayments.svg';
-// const String bNeumonic = 'assets/images/b_new_neumonic.svg';
+const String noUpcomingDues = 'packages/bbps/assets/images/noAutoPayment.svg';
+const String noUpcomingPayment =
+    'packages/bbps/assets/images/noUpcomingPayments.svg';
+// const String bNeumonic = 'packages/bbps/assets/images/b_new_neumonic.svg';
 
 // Symbol Images
-const String rupeeSvg = "assets/images/rupee.svg";
+const String rupeeSvg = "packages/bbps/assets/images/rupee.svg";
 
-const String NodataFoundSvg = "assets/images/NoDataFound.svg";
+const String NodataFoundSvg = "packages/bbps/assets/images/NoDataFound.svg";
 
 //Png images
-const String jiopPngLogo = 'assets/images/jiopng.png';
-const String BLogo = 'assets/images/BB_default.png';
-const String tnepPngLogo = 'assets/images/tnebpng.png';
-const String airtelPngLogo = 'assets/images/airtelpng.png';
-const String bbpspngLogo = 'assets/images/BBPSpng.png';
-const String equitaspngLogo = 'assets/images/Equitaspng.png';
-const String bNeumonic = 'assets/images/b_new_neumonic.png';
+const String BLogo = 'packages/bbps/assets/images/BB_default.png';
+
+const String bbpspngLogo = 'packages/bbps/assets/images/BBPSpng.png';
+const String equitaspngLogo = 'packages/bbps/assets/images/Equitaspng.png';
+const String bNeumonic = 'packages/bbps/assets/images/b_new_neumonic.png';
+
+const String LoaderGif = 'packages/bbps/assets/images/loader.gif';
+
+const String iconCalender = 'packages/bbps/assets/images/iconCalender.png';
+
+const String bbpsAssuredLogo =
+    'packages/bbps/assets/images/be_assured_logo.png';
+const String clrpappersLogo = 'packages/bbps/assets/images/clrpappers.png';
+const String clrpappersFailLogo =
+    'packages/bbps/assets/images/clrpappersfail.png';
+const String tickmarkLogo = 'packages/bbps/assets/images/tickmark.png';
+const String iconFailure = 'packages/bbps/assets/images/icon_failur_png.png';
+const String iconDownload = 'packages/bbps/assets/images/iconDownload.png';
 
 //
 final String todaysDate =
@@ -240,3 +224,49 @@ int autoRedirectSeconds = 5;
 
 const String tcTextContent = "By continuing, you agree to accept our ";
 const String tcText = "Terms and Conditions";
+
+//Black Text
+void logInfo(String msg) {
+  developer.log('\x1b[47m\x1b[5m\x1B[30m$msg\x1B[0m');
+}
+
+// Green text
+void logSuccess(String msg, String? name) {
+  developer.log('\x1B[92m$msg\x1B[0m', name: '\x1B[32m$name\x1B[0m');
+}
+
+// Yellow text
+void logWarning(String msg, String? name) {
+  developer.log('\x1B[93m$msg\x1B[0m', name: '\x1B[33m$name\x1B[0m');
+}
+
+// Red text
+void logError(String msg, String? name) {
+  developer.log('\x1B[91m$msg\x1B[0m', name: '\x1B[31m$name\x1B[0m');
+}
+
+//Cyan Text
+void logConsole(String msg, String? name) {
+  developer.log('\x1B[90m$msg\x1B[0m', name: '\x1B[93m$name\x1B[0m');
+}
+
+//API ERROR
+errorResponseLog(e, from, method) {
+  developer.log('\x1b[47m\x1b[5m\x1B[31m${e.toString()}',
+      name:
+          '\x1b[47m\x1b[5m\x1B[30m${'[$method method] Error at $from api call =>\x1B[0m'}');
+}
+
+//API RES
+
+debugLog(reponse, from, data) {
+  if (data.statusCode == 200) {
+    developer.log(
+      '\x1b[32m${jsonEncode(reponse)}',
+      name: '\x1B[93m(${data.request.method}) $from API RESPONSE =>',
+    );
+  } else {
+    developer.log('\x1b[47m\x1b[5m\x1B[31m${jsonEncode(reponse)}',
+        name: '\x1b[32m { Error at $from api call =>\x1B[0m');
+  }
+}

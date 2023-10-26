@@ -113,6 +113,7 @@ class AllConfigurationsData {
   String? bILLERICON;
   String? bILLERNAME;
   int? pAID;
+  int? aMOUNTLIMIT;
 
   AllConfigurationsData(
       {this.iD,
@@ -128,7 +129,8 @@ class AllConfigurationsData {
       this.bILLERID,
       this.bILLERICON,
       this.bILLERNAME,
-      this.pAID});
+      this.pAID,
+      this.aMOUNTLIMIT});
 
   AllConfigurationsData.fromJson(Map<String, dynamic> json) {
     iD = json['ID'];
@@ -145,6 +147,7 @@ class AllConfigurationsData {
     bILLERICON = json['BILLER_ICON'];
     bILLERNAME = json['BILLER_NAME'];
     pAID = json['PAID'];
+    aMOUNTLIMIT = json['AMOUNT_LIMIT'];
   }
 
   Map<String, dynamic> toJson() {
@@ -163,6 +166,7 @@ class AllConfigurationsData {
     data['BILLER_ICON'] = this.bILLERICON;
     data['BILLER_NAME'] = this.bILLERNAME;
     data['PAID'] = this.pAID;
+    data['AMOUNT_LIMIT'] = this.aMOUNTLIMIT;
     return data;
   }
 }
@@ -206,6 +210,7 @@ class UpcomingPaymentsData {
   String? dUEAMOUNT;
   String? dUEDATE;
   int? cUSTOMERBILLID;
+  String? cATEGORYNAME;
   String? bILLNAME;
   String? bILLERID;
   String? bILLERICON;
@@ -224,6 +229,7 @@ class UpcomingPaymentsData {
       this.dUEAMOUNT,
       this.dUEDATE,
       this.cUSTOMERBILLID,
+      this.cATEGORYNAME,
       this.bILLNAME,
       this.bILLERID,
       this.bILLERICON,
@@ -242,6 +248,7 @@ class UpcomingPaymentsData {
     dUEAMOUNT = json['DUE_AMOUNT'];
     dUEDATE = json['DUE_DATE'];
     cUSTOMERBILLID = json['CUSTOMER_BILL_ID'];
+    cATEGORYNAME = json['CATEGORY_NAME'];
     bILLNAME = json['BILL_NAME'];
     bILLERID = json['BILLER_ID'];
     bILLERICON = json['BILLER_ICON'];
@@ -262,6 +269,7 @@ class UpcomingPaymentsData {
     data['DUE_AMOUNT'] = this.dUEAMOUNT;
     data['DUE_DATE'] = this.dUEDATE;
     data['CUSTOMER_BILL_ID'] = this.cUSTOMERBILLID;
+    data['CATEGORY_NAME'] = this.cATEGORYNAME;
     data['BILL_NAME'] = this.bILLNAME;
     data['BILLER_ID'] = this.bILLERID;
     data['BILLER_ICON'] = this.bILLERICON;

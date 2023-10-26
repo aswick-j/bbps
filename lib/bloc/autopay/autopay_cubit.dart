@@ -1,13 +1,14 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:bbps/model/edit_autopay_model.dart';
+import 'package:bbps/model/fetch_auto_pay_max_amount_model.dart';
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 
 import '../../api/api_repository.dart';
 import '../../model/auto_schedule_pay_model.dart';
-import '../../model/edit_autopay_model.dart';
-import '../../model/fetch_auto_pay_max_amount_model.dart';
+import '../../utils/const.dart';
 
 part 'autopay_state.dart';
 
@@ -26,8 +27,8 @@ class AutopayCubit extends Cubit<AutopayState> {
             if (value['status'] == 200) {
               FetchAutoPayMaxAmountModel? fetchAutoPayMaxAmountModel =
                   FetchAutoPayMaxAmountModel.fromJson(value);
-              log(jsonEncode(fetchAutoPayMaxAmountModel),
-                  name: "fetchAutoPayMaxAmount() :::");
+              logConsole(jsonEncode(fetchAutoPayMaxAmountModel),
+                  "fetchAutoPayMaxAmount() :::");
               if (!isClosed) {
                 emit(FetchAutoPayMaxAmountSuccess(
                     fetchAutoPayMaxAmountModel: fetchAutoPayMaxAmountModel));
@@ -49,7 +50,7 @@ class AutopayCubit extends Cubit<AutopayState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::fetchAutoPayMaxAmount:::");
+      logConsole(e.toString(), "CUBIT::fetchAutoPayMaxAmount:::");
     }
   }
 
@@ -64,7 +65,7 @@ class AutopayCubit extends Cubit<AutopayState> {
             if (value['status'] == 200) {
               AutoSchedulePayModel? autoSchedulePayModel =
                   AutoSchedulePayModel.fromJson(value);
-              log(jsonEncode(autoSchedulePayModel), name: "getAutopay() :::");
+              logConsole(jsonEncode(autoSchedulePayModel), "getAutopay() :::");
               if (!isClosed) {
                 emit(AutopaySuccess(autoSchedulePayData: autoSchedulePayModel));
               }
@@ -85,7 +86,7 @@ class AutopayCubit extends Cubit<AutopayState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getAutopay:::");
+      logConsole(e.toString(), "CUBIT::getAutopay:::");
     }
   }
 
@@ -121,7 +122,7 @@ class AutopayCubit extends Cubit<AutopayState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getUpcomingPay:::");
+      logConsole(e.toString(), "CUBIT::getUpcomingPay:::");
     }
   }
 
@@ -157,7 +158,7 @@ class AutopayCubit extends Cubit<AutopayState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getEditData:::");
+      logConsole(e.toString(), "CUBIT::getEditData:::");
     }
   }
 }

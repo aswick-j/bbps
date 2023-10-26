@@ -32,6 +32,7 @@ class ConfirmFetchBillData {
   Fees? fees;
   String? rc;
   String? paymentMode;
+  int? customerbillId;
 
   ConfirmFetchBillData(
       {this.bankBranch,
@@ -40,7 +41,8 @@ class ConfirmFetchBillData {
       this.bill,
       this.fees,
       this.rc,
-      this.paymentMode});
+      this.paymentMode,
+      this.customerbillId});
 
   ConfirmFetchBillData.fromJson(Map<String, dynamic> json) {
     bankBranch = json['bankBranch'];
@@ -50,6 +52,7 @@ class ConfirmFetchBillData {
     fees = json['fees'] != null ? new Fees.fromJson(json['fees']) : null;
     rc = json['rc'];
     paymentMode = json['paymentMode'];
+    customerbillId = json['customerbillId'];
   }
 
   Map<String, dynamic> toJson() {
@@ -65,6 +68,7 @@ class ConfirmFetchBillData {
     }
     data['rc'] = this.rc;
     data['paymentMode'] = this.paymentMode;
+    data['customerbillId'] = this.customerbillId;
     return data;
   }
 }

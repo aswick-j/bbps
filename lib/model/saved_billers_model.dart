@@ -54,6 +54,7 @@ class SavedBillersData {
   var bILLAMOUNT;
   String? cATEGORYNAME;
   String? bILLNAME;
+  int? uNSAVEDBILL;
   List<PARAMETERS>? pARAMETERS;
 
   SavedBillersData(
@@ -83,7 +84,8 @@ class SavedBillersData {
       this.bILLNAME,
       this.lASTPAIDDATE,
       this.lASTBILLAMOUNT,
-      this.pARAMETERS});
+      this.pARAMETERS,
+      this.uNSAVEDBILL});
 
   SavedBillersData.fromJson(Map<String, dynamic> json) {
     bILLERID = json['BILLER_ID'];
@@ -112,6 +114,7 @@ class SavedBillersData {
     bILLNAME = json['BILL_NAME'];
     lASTPAIDDATE = json['LAST_PAID_DATE'];
     lASTBILLAMOUNT = json['LAST_BILL_AMOUNT'];
+    uNSAVEDBILL = json["UNSAVED_BILL"];
     if (json['PARAMETERS'] != null) {
       pARAMETERS = <PARAMETERS>[];
       json['PARAMETERS'].forEach((v) {
@@ -148,6 +151,7 @@ class SavedBillersData {
     data['BILL_NAME'] = this.bILLNAME;
     data['LAST_PAID_DATE'] = this.lASTPAIDDATE;
     data['LAST_BILL_AMOUNT'] = this.lASTBILLAMOUNT;
+    data['UNSAVED_BILL'] = this.uNSAVEDBILL;
     if (this.pARAMETERS != null) {
       data['PARAMETERS'] = this.pARAMETERS!.map((v) => v.toJson()).toList();
     }

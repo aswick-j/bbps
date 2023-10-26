@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 
 import '../../bloc/history/history_cubit.dart';
@@ -11,8 +12,6 @@ import '../../model/history_model.dart';
 import '../../utils/commen.dart';
 import '../../utils/const.dart';
 import '../../utils/utils.dart';
-import '../../widgets/history_shimmer.dart';
-import '../../widgets/history_shimmer_effect.dart';
 import 'transaction_item.dart';
 
 class HistoryTabViewScreen extends StatefulWidget {
@@ -36,6 +35,7 @@ class _HistoryTabViewScreenState extends State<HistoryTabViewScreen> {
   List<HistoryData>? historyData = [];
   String _selectedPeriod = "This Week";
   List<HistoryData>? cloneData = [];
+
   String dateRange = "Enter From & To Date";
   bool isLoading = true;
   bool showSearch = false;
@@ -65,14 +65,14 @@ class _HistoryTabViewScreenState extends State<HistoryTabViewScreen> {
         appBar: AppBar(
           centerTitle: false,
           backgroundColor: showSearch ? txtColor : primaryColor,
-          leading: IconButton(
-            splashRadius: 25,
-            onPressed: () => Navigator.pop(context),
-            icon: Icon(
-              Icons.arrow_back_ios,
-              color: !showSearch ? txtColor : primaryColor,
-            ),
-          ),
+          // leading: IconButton(
+          //   splashRadius: 25,
+          //   onPressed: () => Navigator.pop(context),
+          //   icon: Icon(
+          //     Icons.arrow_back_ios,
+          //     color: !showSearch ? txtColor : primaryColor,
+          //   ),
+          // ),
           title: !showSearch
               ? appText(
                   data: "History",
@@ -90,8 +90,7 @@ class _HistoryTabViewScreenState extends State<HistoryTabViewScreen> {
                             .toLowerCase()
                             .contains(searchTxt.toLowerCase()))
                         .toList();
-                    print(searchTxt);
-                    print(searchData);
+                    debugPrint(searchTxt);
                     setState(() {
                       historyData = searchData;
                     });
@@ -101,7 +100,8 @@ class _HistoryTabViewScreenState extends State<HistoryTabViewScreen> {
                   autocorrect: false,
                   enableSuggestions: false,
                   inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'^[a-z0-9A-Z ]*'))
+                    FilteringTextInputFormatter.allow(
+                        RegExp(r'^[a-z0-9A-Z. ]*'))
                   ],
                   decoration: InputDecoration(
                     suffixIcon: GestureDetector(
@@ -128,6 +128,7 @@ class _HistoryTabViewScreenState extends State<HistoryTabViewScreen> {
                     disabledBorder: InputBorder.none,
                   ),
                 ),
+
           actions: showSearch
               ? null
               : [
@@ -140,10 +141,92 @@ class _HistoryTabViewScreenState extends State<HistoryTabViewScreen> {
                       Icons.search,
                       color: txtColor,
                     ),
-                  )
+                  ),
+                  InkWell(
+                      onTap: () => goTo(context, complaintRoute),
+                      child: Container(
+                        margin: EdgeInsets.only(top: 10, bottom: 10, right: 20),
+                        width: 40,
+                        decoration: ShapeDecoration(
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(100.0),
+                          ),
+                        ),
+                        child: Container(
+                          width: width(context) * 0.13,
+                          height: height(context) * 0.06,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              gradient: LinearGradient(
+                                  begin: Alignment.bottomRight,
+                                  stops: [
+                                    0.1,
+                                    0.9
+                                  ],
+                                  colors: [
+                                    Colors.deepPurple.withOpacity(.16),
+                                    Colors.grey.withOpacity(.08)
+                                  ])),
+                          child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: SvgPicture.asset(complaintsLogoNew)),
+                        ),
+                      )
+                      // Container(
+                      //   decoration: BoxDecoration(
+                      //       borderRadius:
+                      //           BorderRadius.circular(90), // radius of 10
+                      //       color: Colors.white // green as background color
+                      //       ),
+                      //   child: SvgPicture.asset(
+                      //     complaintsLogo,
+                      //     height: width(context) * 0.15,
+                      //   ),
+                      // ),
+                      )
+                  // IconButton(
+                  //   splashRadius: 25,
+                  //   onPressed: () => goTo(context, complaintRoute),
+                  //   icon: Icon(
+                  //     Icons.assignment_outlined,
+                  //     color: txtColor,
+                  //   ),
+                  // )
                 ],
           elevation: 0,
         ),
+        // body: BlocConsumer<HistoryCubit, HistoryState>(
+        //   listener: (context, state){ if (state is HistoryLoading) {
+        //       isLoading = true;
+        //     } else if (state is HistorySuccess) {
+        //       historyData = state.historyData;
+        //       cloneData = historyData;
+        //       isLoading = false;
+        //     } else if (state is HistoryFailed) {
+        //       isLoading = false;
+        //       showSnackBar(state.message, context);
+        //     } else if (state is HistoryError) {
+        //       isLoading = false;
+        //       goToUntil(context, splashRoute);
+        //     }},
+        //   builder:(context,state){
+        //     return  BlocConsumer<MybillCubit, MybillState>(
+        //       listener:  (context, state){
+        //     if (state is UpcomingDueLoading) {
+        //     } else if (state is UpcomingDueSuccess) {
+        //       upcomingDuesData = state.upcomingDuesData;
+        //       log(upcomingDuesData!.length.toString(),
+        //           name: "upcomingDuesData LENGTH ::: ");
+        //     } else if (state is UpcomingDueFailed) {
+        //       isLoading = false;
+        //       showSnackBar(state.message, context);
+        //     } else if (state is UpcomingDueError) {
+        //       isLoading = false;
+        //       goToUntil(context, splashRoute);
+        //     }
+
+        //   },
         body: BlocConsumer<HistoryCubit, HistoryState>(
           listener: (context, state) {
             if (state is HistoryLoading) {
@@ -161,217 +244,283 @@ class _HistoryTabViewScreenState extends State<HistoryTabViewScreen> {
             }
           },
           builder: (context, state) {
-            return Column(
-              children: [
-                verticalSpacer(width(context) * 0.016),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
+            return isLoading
+                ?
+                // ? Stack(
+                //     children: [
+                //       Container(
+                //         height: height(context) * 0.045,
+                //         decoration: BoxDecoration(
+                //             boxShadow: [
+                //               BoxShadow(spreadRadius: 1, color: divideColor)
+                //             ],
+                //             color: primaryColor,
+                //             borderRadius: BorderRadius.only(
+                //                 bottomLeft: Radius.circular(10.0),
+                //                 bottomRight: Radius.circular(10.0))),
+                //       ),
+                //       Column(
+                //         mainAxisAlignment: MainAxisAlignment.start,
+                //         children: [
+                //           Container(
+                //             height: height(context) * 0.045,
+                //             decoration: BoxDecoration(
+                //                 boxShadow: [
+                //                   BoxShadow(spreadRadius: 1, color: divideColor)
+                //                 ],
+                //                 color: primaryColor,
+                //                 borderRadius: BorderRadius.only(
+                //                     bottomLeft: Radius.circular(10.0),
+                //                     bottomRight: Radius.circular(10.0))),
+                //           ),
+                //           Container(
+                //             height: height(context) * 0.7,
+                //child:
+                Center(
+                    child: Image.asset(
+                      LoaderGif,
+                      height: height(context) * 0.07,
+                      width: height(context) * 0.07,
+                    ),
+                  )
+                //         ),
+                //       ],
+                //     )
+                //   ],
+                // )
+                : Stack(children: [
                     Container(
-                      width: _selectedPeriod == "Custom"
-                          ? width(context) / 2.7
-                          : width(context) / 1.07,
-                      margin: _selectedPeriod != "Custom"
-                          ? EdgeInsets.symmetric(
-                              horizontal: width(context) * 0.03,
-                              vertical: width(context) * 0.02)
-                          : EdgeInsets.symmetric(
-                              horizontal: width(context) * 0.01,
-                              vertical: width(context) * 0.01),
-                      height: height(context) * 0.055,
+                      height: height(context) * 0.045,
                       decoration: BoxDecoration(
                           boxShadow: [
                             BoxShadow(spreadRadius: 1, color: divideColor)
                           ],
-                          color: txtColor,
-                          borderRadius: BorderRadius.circular(7)),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButtonFormField(
-                          alignment: Alignment.center,
-                          icon: const Icon(
-                            Icons.keyboard_arrow_down,
-                            color: Colors.grey,
-                          ),
-                          isDense: false,
-                          menuMaxHeight: height(context) * 0.5,
-                          itemHeight: 55,
-                          decoration: InputDecoration(
-                              prefixIcon: ImageIcon(
-                                const AssetImage(
-                                    "assets/images/iconCalender.png"),
-                                color: txtCheckBalanceColor,
-                              ),
-                              contentPadding:
-                                  EdgeInsets.all(width(context) * 0.016),
-                              border: InputBorder.none),
-                          items: Periods.map<DropdownMenuItem<String>>(
-                              (String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child:
-                                  Text(value, overflow: TextOverflow.ellipsis),
-                              onTap: () {
-                                if (value != "Custom") {
-                                  getDataPeriodRange(value);
-                                }
-                                setState(() {
-                                  _selectedPeriod = value;
-                                });
-                              },
-                            );
-                          }).toList(),
-                          value: _selectedPeriod,
-                          isExpanded: true,
-                          onChanged: (period) {
-                            if (period == "Custom") {
-                              showDateRangePicker(
-                                context: context,
-                                firstDate: DateTime(1940),
-                                lastDate: DateTime.now(),
-                                saveText: "Select",
-                                initialEntryMode:
-                                    DatePickerEntryMode.calendarOnly,
-                                builder: (context, child) {
-                                  return Theme(
-                                    data: Theme.of(context).copyWith(
-                                      colorScheme: ColorScheme.light(
-                                        primary: primaryColor,
-                                        onPrimary: Colors.white,
-                                        onSurface: txtAmountColor,
-                                      ),
-                                      textButtonTheme: TextButtonThemeData(
-                                        style: TextButton.styleFrom(
-                                          primary: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                    child: child!,
-                                  );
-                                },
-                              ).then((DateValue) {
-                                if (DateValue != null) {
-                                  var dates =
-                                      DateValue.toString().split('- ').toList();
-                                  print(DateFormat('dd/MM/yyyy').format(
-                                      DateTime.parse(dates[0]
-                                              .toString()
-                                              .substring(0, 10))
-                                          .toLocal()));
-
-                                  print(dates.toString());
-
-                                  BlocProvider.of<HistoryCubit>(context)
-                                      .getHistoryDetails({
-                                    "startDate": dates[0].toString(),
-                                    "endDate": dates[1].toString(),
-                                  }, true);
-
-                                  setState(() {
-                                    dateRange =
-                                        "${DateFormat('dd/MM/yyyy').format(DateTime.parse(dates[0].toString().substring(0, 10)).toLocal())} - ${DateFormat('dd/MM/yyyy').format(DateTime.parse(dates[1].toString().substring(0, 10)).toLocal())}";
-                                  });
-                                } else {
-                                  log("No Date Selected");
-                                }
-                              });
-                            }
-                          },
-                        ),
-                      ),
+                          color: primaryColor,
+                          borderRadius: BorderRadius.only(
+                              bottomLeft: Radius.circular(10.0),
+                              bottomRight: Radius.circular(10.0))),
                     ),
-                    if (_selectedPeriod == "Custom")
-                      InkWell(
-                        onTap: () {
-                          showDateRangePicker(
-                            context: context,
-                            firstDate: DateTime(1940),
-                            saveText: "Select",
-                            lastDate: DateTime.now(),
-                            initialEntryMode: DatePickerEntryMode.calendarOnly,
-                            builder: (context, child) {
-                              return Theme(
-                                data: Theme.of(context).copyWith(
-                                  colorScheme: ColorScheme.light(
-                                    primary: primaryColor,
-                                    onPrimary: Colors.white,
-                                    onSurface: txtAmountColor,
+                    Column(
+                      children: [
+                        verticalSpacer(width(context) * 0.016),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Container(
+                              width: _selectedPeriod == "Custom"
+                                  ? width(context) / 2.7
+                                  : width(context) / 1.07,
+                              margin: _selectedPeriod != "Custom"
+                                  ? EdgeInsets.symmetric(
+                                      horizontal: width(context) * 0.03,
+                                      vertical: width(context) * 0.02)
+                                  : EdgeInsets.symmetric(
+                                      horizontal: width(context) * 0.01,
+                                      vertical: width(context) * 0.01),
+                              height: height(context) * 0.055,
+                              decoration: BoxDecoration(
+                                  boxShadow: [
+                                    BoxShadow(
+                                        spreadRadius: 1, color: divideColor)
+                                  ],
+                                  color: txtColor,
+                                  borderRadius: BorderRadius.circular(7)),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButtonFormField(
+                                  alignment: Alignment.center,
+                                  icon: const Icon(
+                                    Icons.keyboard_arrow_down,
+                                    color: Colors.grey,
                                   ),
-                                  textButtonTheme: TextButtonThemeData(
-                                    style: TextButton.styleFrom(
-                                      primary: Colors.white,
-                                    ),
-                                  ),
+                                  isDense: false,
+                                  menuMaxHeight: height(context) * 0.5,
+                                  itemHeight: 55,
+                                  decoration: InputDecoration(
+                                      prefixIcon: ImageIcon(
+                                        const AssetImage(iconCalender),
+                                        color: txtCheckBalanceColor,
+                                      ),
+                                      contentPadding: EdgeInsets.all(
+                                          width(context) * 0.016),
+                                      border: InputBorder.none),
+                                  items: Periods.map<DropdownMenuItem<String>>(
+                                      (String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value,
+                                          overflow: TextOverflow.ellipsis),
+                                      onTap: () {
+                                        if (value != "Custom") {
+                                          getDataPeriodRange(value);
+                                        }
+                                        setState(() {
+                                          _selectedPeriod = value;
+                                        });
+                                      },
+                                    );
+                                  }).toList(),
+                                  value: _selectedPeriod,
+                                  isExpanded: true,
+                                  onChanged: (period) {
+                                    if (period == "Custom") {
+                                      showDateRangePicker(
+                                        context: context,
+                                        firstDate: DateTime(1940),
+                                        lastDate: DateTime.now(),
+                                        saveText: "Select",
+                                        initialEntryMode:
+                                            DatePickerEntryMode.calendarOnly,
+                                        builder: (context, child) {
+                                          return Theme(
+                                            data: Theme.of(context).copyWith(
+                                              colorScheme: ColorScheme.light(
+                                                primary: primaryColor,
+                                                onPrimary: Colors.white,
+                                                onSurface: txtAmountColor,
+                                              ),
+                                              textButtonTheme:
+                                                  TextButtonThemeData(
+                                                style: TextButton.styleFrom(
+                                                  primary: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                            child: child!,
+                                          );
+                                        },
+                                      ).then((DateValue) {
+                                        if (DateValue != null) {
+                                          var dates = DateValue.toString()
+                                              .split('- ')
+                                              .toList();
+                                          debugPrint(DateFormat('dd/MM/yyyy')
+                                              .format(DateTime.parse(dates[0]
+                                                      .toString()
+                                                      .substring(0, 10))
+                                                  .toLocal()));
+
+                                          debugPrint(dates.toString());
+
+                                          BlocProvider.of<HistoryCubit>(context)
+                                              .getHistoryDetails({
+                                            "startDate": dates[0].toString(),
+                                            "endDate": dates[1].toString(),
+                                          }, true);
+
+                                          setState(() {
+                                            dateRange =
+                                                "${DateFormat('dd/MM/yyyy').format(DateTime.parse(dates[0].toString().substring(0, 10)).toLocal())} - ${DateFormat('dd/MM/yyyy').format(DateTime.parse(dates[1].toString().substring(0, 10)).toLocal())}";
+                                          });
+                                        } else {
+                                          logInfo("No Date Selected");
+                                        }
+                                      });
+                                    }
+                                  },
                                 ),
-                                child: child!,
-                              );
-                            },
-                          ).then((DateValue) {
-                            if (DateValue != null) {
-                              var dates =
-                                  DateValue.toString().split('- ').toList();
-                              print(DateFormat('dd/MM/yyyy').format(
-                                  DateTime.parse(
-                                          dates[0].toString().substring(0, 10))
-                                      .toLocal()));
-                              print(dates.toString());
+                              ),
+                            ),
+                            if (_selectedPeriod == "Custom")
+                              InkWell(
+                                onTap: () {
+                                  showDateRangePicker(
+                                    context: context,
+                                    firstDate: DateTime(1940),
+                                    saveText: "Select",
+                                    lastDate: DateTime.now(),
+                                    initialEntryMode:
+                                        DatePickerEntryMode.calendarOnly,
+                                    builder: (context, child) {
+                                      return Theme(
+                                        data: Theme.of(context).copyWith(
+                                          colorScheme: ColorScheme.light(
+                                            primary: primaryColor,
+                                            onPrimary: Colors.white,
+                                            onSurface: txtAmountColor,
+                                          ),
+                                          textButtonTheme: TextButtonThemeData(
+                                            style: TextButton.styleFrom(
+                                              primary: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                        child: child!,
+                                      );
+                                    },
+                                  ).then((DateValue) {
+                                    if (DateValue != null) {
+                                      var dates = DateValue.toString()
+                                          .split('- ')
+                                          .toList();
+                                      debugPrint(DateFormat('dd/MM/yyyy')
+                                          .format(DateTime.parse(dates[0]
+                                                  .toString()
+                                                  .substring(0, 10))
+                                              .toLocal()));
+                                      debugPrint(dates.toString());
 
-                              BlocProvider.of<HistoryCubit>(context)
-                                  .getHistoryDetails({
-                                "startDate": dates[0].toString(),
-                                "endDate": dates[1].toString(),
-                              }, true);
+                                      BlocProvider.of<HistoryCubit>(context)
+                                          .getHistoryDetails({
+                                        "startDate": dates[0].toString(),
+                                        "endDate": dates[1].toString(),
+                                      }, true);
 
-                              setState(() {
-                                dateRange =
-                                    "${DateFormat('dd/MM/yyyy').format(DateTime.parse(dates[0].toString().substring(0, 10)).toLocal())} - ${DateFormat('dd/MM/yyyy').format(DateTime.parse(dates[1].toString().substring(0, 10)).toLocal())}";
-                              });
-                            } else {
-                              log("no Date selected");
-                            }
-                          });
-                        },
-                        child: Container(
-                            width: _selectedPeriod == "Custom"
-                                ? width(context) / 1.9
-                                : width(context),
-                            margin: _selectedPeriod != "Custom"
-                                ? EdgeInsets.symmetric(
-                                    horizontal: width(context) * 0.03,
-                                    vertical: width(context) * 0.02)
-                                : EdgeInsets.symmetric(
-                                    horizontal: width(context) * 0.01,
-                                    vertical: width(context) * 0.01),
-                            alignment: Alignment.center,
-                            height: height(context) * 0.055,
-                            decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(spreadRadius: 1, color: divideColor)
-                                ],
-                                color: txtColor,
-                                borderRadius: BorderRadius.circular(7)),
-                            child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  appText(
-                                      data: dateRange,
-                                      size: width(context) * 0.033,
-                                      weight: FontWeight.w500,
-                                      color: primaryColor),
-                                  horizondalSpacer(width(context) * 0.016),
-                                  ImageIcon(
-                                    const AssetImage(
-                                        "assets/images/iconCalender.png"),
-                                    color: txtCheckBalanceColor,
-                                  ),
-                                ])),
-                      )
-                  ],
-                ),
-                isLoading
-                    ? const Expanded(child: historyShimmer())
-                    : Expanded(child: HistoryUI(historyData: historyData))
-              ],
-            );
+                                      setState(() {
+                                        dateRange =
+                                            "${DateFormat('dd/MM/yyyy').format(DateTime.parse(dates[0].toString().substring(0, 10)).toLocal())} - ${DateFormat('dd/MM/yyyy').format(DateTime.parse(dates[1].toString().substring(0, 10)).toLocal())}";
+                                      });
+                                    } else {
+                                      logInfo("no Date selected");
+                                    }
+                                  });
+                                },
+                                child: Container(
+                                    width: _selectedPeriod == "Custom"
+                                        ? width(context) / 1.9
+                                        : width(context),
+                                    margin: _selectedPeriod != "Custom"
+                                        ? EdgeInsets.symmetric(
+                                            horizontal: width(context) * 0.03,
+                                            vertical: width(context) * 0.02)
+                                        : EdgeInsets.symmetric(
+                                            horizontal: width(context) * 0.01,
+                                            vertical: width(context) * 0.01),
+                                    alignment: Alignment.center,
+                                    height: height(context) * 0.055,
+                                    decoration: BoxDecoration(
+                                        boxShadow: [
+                                          BoxShadow(
+                                              spreadRadius: 1,
+                                              color: divideColor)
+                                        ],
+                                        color: txtColor,
+                                        borderRadius: BorderRadius.circular(7)),
+                                    child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          appText(
+                                              data: dateRange,
+                                              size: width(context) * 0.033,
+                                              weight: FontWeight.w500,
+                                              color: primaryColor),
+                                          horizondalSpacer(
+                                              width(context) * 0.016),
+                                          ImageIcon(
+                                            const AssetImage(iconCalender),
+                                            color: txtCheckBalanceColor,
+                                          ),
+                                        ])),
+                              )
+                          ],
+                        ),
+                        Expanded(
+                            child: HistoryUI(
+                          historyData: historyData,
+                        ))
+                      ],
+                    ),
+                  ]);
           },
         ));
   }
@@ -379,7 +528,10 @@ class _HistoryTabViewScreenState extends State<HistoryTabViewScreen> {
 
 class HistoryUI extends StatelessWidget {
   List<HistoryData>? historyData;
-  HistoryUI({Key? key, this.historyData}) : super(key: key);
+  HistoryUI({
+    Key? key,
+    this.historyData,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -394,8 +546,8 @@ class HistoryUI extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Container(
                   margin: EdgeInsets.only(
-                      left: width(context) * 0.032,
-                      right: width(context) * 0.032,
+                      left: width(context) * 0.052,
+                      right: width(context) * 0.052,
                       top: width(context) * 0.032,
                       bottom: 0),
                   // height: (historyData![index].aUTOPAYID == null &&
@@ -409,9 +561,22 @@ class HistoryUI extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: txtColor,
                     borderRadius: BorderRadius.circular(10),
+                    // border: Border.all(
+                    //   color: txtHintColor, // red as border color
+                    // ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 1,
+                        blurRadius: 5,
+                        offset: Offset(0, 0), // changes position of shadow
+                      ),
+                    ],
                   ),
-                  child:
-                      TransactionItem(historyData: historyData, index: index),
+                  child: TransactionItem(
+                    historyData: historyData,
+                    index: index,
+                  ),
                 ),
               ),
             ),

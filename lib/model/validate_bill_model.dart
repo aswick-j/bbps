@@ -8,7 +8,6 @@ class ValidateBillModel {
   ValidateBillModel.fromJson(Map<String, dynamic> json) {
     message = json['message'];
     status = json['status'];
-
     data = json['data'] != null
         ? ValidateBillResponseData.fromJson(
             Map<String, dynamic>.from(json['data']))
@@ -48,7 +47,7 @@ class ValidateBillResponseData {
 
   ValidateBillResponseData.fromJson(Map<String, dynamic> json) {
     data = json['data'] != null
-        ? ValidateBillTransactionData.fromJson(json['data'])
+        ? new ValidateBillTransactionData.fromJson(json['data'])
         : null;
     bankBranch = json['bankBranch'];
     txnRefKey = json['txnRefKey'];
@@ -102,11 +101,10 @@ class ValidateBillTransactionData {
     bankRRN = json['BankRRN'];
     bbpsTranlogId = json['BbpsTranlogId'];
     actCode = json['ActCode'];
-    // data = ValidateBillTransactionData.fromJson(
-    //     Map<String, dynamic>.from(json['data'])) as String?;
     data = json['Data'] != null
         ? ValidateBillTransactionData.fromJson(json['Data'])
         : null;
+
     extraData = json['ExtraData'];
     ssTxnId = json['SsTxnId'];
   }

@@ -1,18 +1,17 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:bbps/bloc/splash/splash_cubit.dart';
+import 'package:bbps/utils/commen.dart';
+import 'package:bbps/utils/const.dart';
+import 'package:bbps/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_overlay_loader/flutter_overlay_loader.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import '../bloc/splash/splash_cubit.dart';
+
 import '../model/decoded_model.dart';
-import '../utils/commen.dart';
-import '../utils/const.dart';
-import '../utils/utils.dart';
 
 class SplashScreen extends StatefulWidget {
   Map<String, dynamic> redirectData = {};
@@ -35,22 +34,37 @@ class _SplashScreenState extends State<SplashScreen> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   checkRedirect() async {
     if (await isConnected()) {
-      print("AT SplashScreen : isConnected true");
-
-      print("At check Redirect");
-      print(widget.redirectData);
+      logInfo(widget.redirectData.toString());
       BlocProvider.of<SplashCubit>(context)
           .checkRedirection(widget.redirectData, widget.checkSum);
       // if (widget.redirectData.isNotEmpty) {
 
       // } else {
-      //   print("No Initial Data Received");
+      //   debugPrint("No Initial Data Received");
       // }
     } else {
-      print("No Initial Data Received");
-
-      log("No Initial Data Received");
+      debugPrint("No Initial Data Received");
     }
+  }
+
+  triggerDialog() {
+    customDialog(
+        context: context,
+        message: "Something Went Wrong.Please try again later.",
+        message2: "",
+        message3: "",
+        title: "Alert!",
+        buttonName: "Back to Payments",
+        isMultiBTN: false,
+        dialogHeight: height(context) / 2.5,
+        buttonAction: () {
+          if (Platform.isAndroid) {
+            SystemNavigator.pop(animated: true);
+          } else {
+            platform_channel.invokeMethod("exitBbpsModule", "");
+          }
+        },
+        iconSvg: alertSvg);
   }
 
   triggerTimer() {
@@ -68,11 +82,12 @@ class _SplashScreenState extends State<SplashScreen> {
             timer?.cancel();
           });
         }
-        if (Platform.isAndroid) {
-          SystemNavigator.pop(animated: true);
-        } else {
-          platform_channel.invokeMethod("exitBbpsModule", "");
-        }
+
+        // if (Platform.isAndroid) {
+        //   SystemNavigator.pop(animated: true);
+        // } else {
+        //   platform_channel.invokeMethod("exitBbpsModule", "");
+        // }
       }
       if (!mounted) {
         timer?.cancel();
@@ -91,7 +106,7 @@ class _SplashScreenState extends State<SplashScreen> {
     //   log("No Initial Data Received");
     // }
 
-    myAssetImage = AssetImage("assets/images/loader.gif");
+    myAssetImage = AssetImage(LoaderGif);
     // loaderImage = Image(
     //   image: myAssetImage!,
     //   fit: BoxFit.cover,
@@ -124,9 +139,7 @@ class _SplashScreenState extends State<SplashScreen> {
           if (state is SplashLoading) {
             showLoaderSplash(context, loaderImage);
           } else if (state is SplashSuccess) {
-            Loader.hide();
-
-            log(state.redirectModel!.data.toString());
+            logInfo(state.redirectModel!.data.toString());
             var id = state.redirectModel!.data
                 .toString()
                 .split('&')[0]
@@ -135,14 +148,15 @@ class _SplashScreenState extends State<SplashScreen> {
                 .toString()
                 .split('&')[1]
                 .split('=')[1];
-            log('At splashScreen : id : $id ');
-            log('At splashScreen : hash : $hash');
-            print('At splashScreen : id : $id ');
-            print('At splashScreen : hash : $hash');
+            logConsole(' $id ', 'At splashScreen : id ::::');
+            logConsole(' $hash ', 'At splashScreen : hash ::::');
+
             BlocProvider.of<SplashCubit>(context).login(id, hash);
+            Loader.hide();
           } else if (state is SplashFailed) {
             Loader.hide();
             message = state.message;
+            triggerDialog();
             triggerTimer();
           } else if (state is SplashError) {
             Loader.hide();
@@ -151,6 +165,7 @@ class _SplashScreenState extends State<SplashScreen> {
             showSnackBar("Please try later", context);
           } else if (state is SplashLoginLoading) {
             showLoaderSplash(context, loaderImage);
+            // triggerDialog();
             triggerTimer();
           } else if (state is SplashLoginSuccess) {
             Loader.hide();
@@ -233,49 +248,48 @@ class _SplashScreenUIState extends State<SplashScreenUI> {
                                     MainAxisAlignment.spaceAround,
                                 children: [
                                   // SvgPicture.asset(alertSvg),
-                                  Text(
-                                    widget.message!,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w500,
-                                        color: txtRejectColor,
-                                        fontSize: width(context) * 0.05),
-                                  ),
+                                  // Text(
+                                  //   widget.message!,
+                                  //   textAlign: TextAlign.center,
+                                  //   style: TextStyle(
+                                  //       fontWeight: FontWeight.w500,
+                                  //       color: txtRejectColor,
+                                  //       fontSize: width(context) * 0.05),
+                                  // ),
                                   verticalSpacer(height(context) * 0.20),
-                                  RichText(
-                                    overflow: TextOverflow.visible,
-                                    textAlign: TextAlign.center,
-                                    softWrap: true,
-                                    text: TextSpan(
-                                      text: " Automatically redirecting in ",
-                                      style: TextStyle(
-                                          color: txtPrimaryColor,
-                                          fontSize: width(context) * 0.06),
-                                      children: <TextSpan>[
-                                        TextSpan(
-                                            text:
-                                                '\n ${widget.timerValue.toString()} ',
-                                            style: TextStyle(
-                                              color: alertWaitingColor,
-                                              fontSize: width(context) * 0.07,
-                                            )),
-                                        TextSpan(
-                                            text: 'seconds',
-                                            style: TextStyle(
-                                              color: txtPrimaryColor,
-                                              fontSize: width(context) * 0.06,
-                                            )),
-                                      ],
-                                    ),
-                                  ),
+                                  // RichText(
+                                  //   overflow: TextOverflow.visible,
+                                  //   textAlign: TextAlign.center,
+                                  //   softWrap: true,
+                                  //   text: TextSpan(
+                                  //     text: " Automatically redirecting in ",
+                                  //     style: TextStyle(
+                                  //         color: txtPrimaryColor,
+                                  //         fontSize: width(context) * 0.06),
+                                  //     children: <TextSpan>[
+                                  //       TextSpan(
+                                  //           text:
+                                  //               '\n ${widget.timerValue.toString()} ',
+                                  //           style: TextStyle(
+                                  //             color: alertWaitingColor,
+                                  //             fontSize: width(context) * 0.07,
+                                  //           )),
+                                  //       TextSpan(
+                                  //           text: 'seconds',
+                                  //           style: TextStyle(
+                                  //             color: txtPrimaryColor,
+                                  //             fontSize: width(context) * 0.06,
+                                  //           )),
+                                  //     ],
+                                  //   ),
+                                  // ),
                                 ]),
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              Image.asset(
-                                equitaspngLogo,
-                              ),
+                              Image.asset(equitaspngLogo),
+                              // Image.asset(bbpspngLogo),
                             ],
                           ),
                         ],
@@ -312,50 +326,49 @@ class _SplashScreenUIState extends State<SplashScreenUI> {
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               // SvgPicture.asset(alertSvg),
-                              Text(
-                                widget.message!,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    color: txtRejectColor,
-                                    fontSize: width(context) * 0.05),
-                              ),
+                              // Text(
+                              //   widget.message!,
+                              //   textAlign: TextAlign.center,
+                              //   style: TextStyle(
+                              //       fontWeight: FontWeight.w500,
+                              //       color: txtRejectColor,
+                              //       fontSize: width(context) * 0.05),
+                              // ),
                               verticalSpacer(height(context) * 0.20),
 
-                              RichText(
-                                overflow: TextOverflow.visible,
-                                textAlign: TextAlign.center,
-                                softWrap: true,
-                                text: TextSpan(
-                                  text: " Automatically redirecting in ",
-                                  style: TextStyle(
-                                      color: txtPrimaryColor,
-                                      fontSize: width(context) * 0.06),
-                                  children: <TextSpan>[
-                                    TextSpan(
-                                        text:
-                                            '\n ${widget.timerValue.toString()} ',
-                                        style: TextStyle(
-                                          color: alertWaitingColor,
-                                          fontSize: width(context) * 0.07,
-                                        )),
-                                    TextSpan(
-                                        text: 'seconds',
-                                        style: TextStyle(
-                                          color: txtPrimaryColor,
-                                          fontSize: width(context) * 0.06,
-                                        )),
-                                  ],
-                                ),
-                              ),
+                              // RichText(
+                              //   overflow: TextOverflow.visible,
+                              //   textAlign: TextAlign.center,
+                              //   softWrap: true,
+                              //   text: TextSpan(
+                              //     text: " Automatically redirecting in ",
+                              //     style: TextStyle(
+                              //         color: txtPrimaryColor,
+                              //         fontSize: width(context) * 0.06),
+                              //     children: <TextSpan>[
+                              //       TextSpan(
+                              //           text:
+                              //               '\n ${widget.timerValue.toString()} ',
+                              //           style: TextStyle(
+                              //             color: alertWaitingColor,
+                              //             fontSize: width(context) * 0.07,
+                              //           )),
+                              //       TextSpan(
+                              //           text: 'seconds',
+                              //           style: TextStyle(
+                              //             color: txtPrimaryColor,
+                              //             fontSize: width(context) * 0.06,
+                              //           )),
+                              //     ],
+                              //   ),
+                              // ),
                             ]),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          Image.asset(
-                            equitaspngLogo,
-                          ),
+                          Image.asset(equitaspngLogo),
+                          // Image.asset(bbpspngLogo),
                         ],
                       ),
                     ],

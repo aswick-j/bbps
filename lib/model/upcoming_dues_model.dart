@@ -36,6 +36,7 @@ class UpcomingDuesData {
   String? billerName;
   BillerParams? billerParams;
   int? categoryID;
+  String? categoryName;
   int? customerBillID;
   String? fetchRequirement;
   String? paymentExactness;
@@ -53,6 +54,7 @@ class UpcomingDuesData {
       this.billerName,
       this.billerParams,
       this.categoryID,
+      this.categoryName,
       this.customerBillID,
       this.fetchRequirement,
       this.paymentExactness,
@@ -72,6 +74,7 @@ class UpcomingDuesData {
         ? new BillerParams.fromJson(json['billerParams'])
         : null;
     categoryID = json['categoryID'];
+    categoryName = json['categoryName'];
     customerBillID = json['customerBillID'];
     fetchRequirement = json['fetchRequirement'];
     paymentExactness = json['paymentExactness'];
@@ -93,6 +96,7 @@ class UpcomingDuesData {
       data['billerParams'] = this.billerParams!.toJson();
     }
     data['categoryID'] = this.categoryID;
+    data['categoryName'] = this.categoryName;
     data['customerBillID'] = this.customerBillID;
     data['fetchRequirement'] = this.fetchRequirement;
     data['paymentExactness'] = this.paymentExactness;

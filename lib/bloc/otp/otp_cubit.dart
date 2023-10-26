@@ -1,13 +1,13 @@
 import 'dart:developer';
 
+import 'package:bbps/model/oto_model.dart';
+import 'package:bbps/utils/const.dart';
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 
 import '../../api/api_repository.dart';
 import '../../model/confirm_done_model.dart';
 import '../../model/edit_autopay_model.dart';
-import '../../model/oto_model.dart';
-import '../../utils/const.dart';
 
 part 'otp_state.dart';
 
@@ -23,7 +23,7 @@ class OtpCubit extends Cubit<OtpState> {
       await repository!
           .generateOtp(templateName: templateName, billerName: billerName)
           .then((value) {
-        log('$templateName generateOtp cubit');
+        logInfo('$templateName generateOtp cubit');
 
         if (value != null) {
           if (!value.toString().contains("Invalid token")) {
@@ -50,7 +50,7 @@ class OtpCubit extends Cubit<OtpState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::generateOtp:::");
+      logConsole(e.toString(), "CUBIT::generateOtp:::");
     }
   }
 
@@ -95,7 +95,7 @@ class OtpCubit extends Cubit<OtpState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT:::validateOTP:::");
+      logConsole(e.toString(), "CUBIT:::validateOTP:::");
     }
   }
 
@@ -105,7 +105,7 @@ class OtpCubit extends Cubit<OtpState> {
     }
     try {
       await repository!.removeAutoPay(id, otp).then((value) {
-        log(value.toString());
+        logInfo(value.toString());
         if (value != null) {
           if (!value.toString().contains("Invalid token")) {
             if (value['status'] == 200) {
@@ -132,7 +132,7 @@ class OtpCubit extends Cubit<OtpState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::deleteAutoPay:::");
+      logConsole(e.toString(), "CUBIT::deleteAutoPay:::");
     }
   }
 
@@ -142,7 +142,7 @@ class OtpCubit extends Cubit<OtpState> {
     }
     try {
       await repository!.editAutopayData(id, data).then((value) {
-        log(value.toString());
+        logInfo(value.toString());
         if (value != null) {
           if (!value.toString().contains("Invalid token")) {
             if (value['status'] == 200) {
@@ -173,19 +173,19 @@ class OtpCubit extends Cubit<OtpState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::editAutoPay:::");
+      logConsole(e.toString(), "CUBIT::editAutoPay:::");
     }
   }
 
   void createAutopay(data) async {
-    print("createAutopay payload ===>");
+    logInfo("createAutopay payload ===>");
     inspect(data);
     if (!isClosed) {
       emit(OtpActionLoading());
     }
     try {
       await repository!.createAutopayData(data).then((value) {
-        log(value.toString());
+        logInfo(value.toString());
         if (value != null) {
           if (!value.toString().contains("Invalid token")) {
             if (value['status'] == 400) {
@@ -222,7 +222,7 @@ class OtpCubit extends Cubit<OtpState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::createAutopay:::");
+      logConsole(e.toString(), "CUBIT::createAutopay:::");
     }
   }
 
@@ -258,7 +258,7 @@ class OtpCubit extends Cubit<OtpState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT:::disableUpcomingPay:::");
+      logConsole(e.toString(), "CUBIT:::disableUpcomingPay:::");
     }
   }
 
@@ -322,7 +322,7 @@ class OtpCubit extends Cubit<OtpState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT:::addNewBiller:::");
+      logConsole(e.toString(), "CUBIT:::addNewBiller:::");
     }
   }
 
@@ -425,6 +425,24 @@ class OtpCubit extends Cubit<OtpState> {
                     );
                   }
                 }
+              } else {
+                emit(
+                  OtpActionFailed(
+                    from: fromConfirmPaymentOtp,
+                    message: value['message'],
+                    data: {
+                      "isMobilePrepaid": isMobilePrepaid,
+                      "errData": value['data'],
+                      "billerID": billerID,
+                      "acNo": acNo,
+                      "billerName": billerName,
+                      "billAmount": billAmount,
+                      "customerBillID": customerBillID,
+                      "mobileNumber": mobileNumberToPay,
+                      "inputSignature": inputSignature,
+                    },
+                  ),
+                );
               }
             } else if (value['status'] == 500 &&
                 !(value['message']
@@ -482,7 +500,7 @@ class OtpCubit extends Cubit<OtpState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT:::prepaidPayBill:::");
+      logConsole(e.toString(), "CUBIT:::prepaidPayBill:::");
     }
   }
 
@@ -497,6 +515,7 @@ class OtpCubit extends Cubit<OtpState> {
     bool quickPay,
     dynamic inputSignature,
     bool otherAmount,
+    bool autopayStatus,
     dynamic billerData,
     String otp,
   ) async {
@@ -535,6 +554,7 @@ class OtpCubit extends Cubit<OtpState> {
                           "quickPay": quickPay,
                           "inputSignature": inputSignature,
                           "otherAmount": otherAmount,
+                          "autopayStatus": autopayStatus,
                           "billerData": billerData,
                         },
                       ),
@@ -614,7 +634,7 @@ class OtpCubit extends Cubit<OtpState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT:::payBill:::");
+      logConsole(e.toString(), "CUBIT:::payBill:::");
     }
   }
 
@@ -649,7 +669,7 @@ class OtpCubit extends Cubit<OtpState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT:::deleteBiller:::");
+      logConsole(e.toString(), "CUBIT:::deleteBiller:::");
     }
   }
 }

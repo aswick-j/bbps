@@ -1,15 +1,15 @@
 import 'dart:convert';
 
+import 'package:bbps/bloc/complaint/complaint_cubit.dart';
+import 'package:bbps/model/complaints_config_model.dart';
+import 'package:bbps/views/complaints/transaction_item_radio_btn.dart';
+import 'package:bbps/widgets/complaint_shimmer_effect.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'transaction_item_radio_btn.dart';
-import '../../bloc/complaint/complaint_cubit.dart';
-import '../../model/complaints_config_model.dart';
 import '../../model/history_model.dart';
 import '../../utils/commen.dart';
 import '../../utils/const.dart';
 import '../../utils/utils.dart';
-import '../../widgets/complaint_shimmer_effect.dart';
 
 class ComplaintYesterdayTxns extends StatefulWidget {
   const ComplaintYesterdayTxns({Key? key}) : super(key: key);
@@ -42,11 +42,11 @@ class _ComplaintYesterdayTxnsState extends State<ComplaintYesterdayTxns> {
             // historyData = state.transactionList;
 
             //Avoid listing failed transaction
-            historyData = state.transactionList
-                ?.where((element) => !element.tRANSACTIONSTATUS!
-                    .toLowerCase()
-                    .contains("failed"))
-                .toList();
+            historyData = state.transactionList;
+            // ?.where((element) => !element.tRANSACTIONSTATUS!
+            //     .toLowerCase()
+            //     .contains("failed"))
+            // .toList();
           } else if (state is ComplaintTransactionFailed) {
             showSnackBar(state.message, context);
           } else if (state is ComplaintTransactionError) {

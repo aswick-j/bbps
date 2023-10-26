@@ -8,6 +8,7 @@ import '../../api/api_repository.dart';
 import '../../model/complaints_config_model.dart';
 import '../../model/complaints_model.dart';
 import '../../model/history_model.dart';
+import '../../utils/const.dart';
 import '../../utils/utils.dart';
 
 part 'complaint_state.dart';
@@ -47,7 +48,7 @@ class ComplaintCubit extends Cubit<ComplaintState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getAllComplaints:::");
+      logConsole(e.toString(), "CUBIT::getAllComplaints:::");
     }
   }
 
@@ -82,7 +83,7 @@ class ComplaintCubit extends Cubit<ComplaintState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getAllTransactions:::");
+      logConsole(e.toString(), "CUBIT::getAllTransactions:::");
     }
   }
 
@@ -118,7 +119,7 @@ class ComplaintCubit extends Cubit<ComplaintState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getComplaintConfig:::");
+      logConsole(e.toString(), "CUBIT::getComplaintConfig:::");
     }
   }
 
@@ -131,9 +132,9 @@ class ComplaintCubit extends Cubit<ComplaintState> {
 
     Map<String, dynamic> dateData =
         await getTransactionDateForComplaint(DateRange);
-    log(dateData['startDate'], name: 'DateData');
-    log(dateData['endDate'], name: 'DateData');
-    log(dateData.toString(), name: "get transactions :: daterange ::");
+    logConsole(dateData['startDate'], 'DateData');
+    logConsole(dateData['endDate'], 'DateData');
+    logConsole(dateData.toString(), "get transactions :: daterange ::");
 
     payload = {
       "startDate": dateData['startDate'],
@@ -144,7 +145,7 @@ class ComplaintCubit extends Cubit<ComplaintState> {
         if (value != null) {
           if (!value.toString().contains("Invalid token")) {
             if (value['status'] == 200) {
-              log(jsonEncode(value).toString(), name: "AT COMPLAINT CUBIT");
+              logConsole(jsonEncode(value).toString(), "AT COMPLAINT CUBIT");
               HistoryModel? historyModel = HistoryModel.fromJson(value);
               //  success emit
               if (!isClosed) {
@@ -171,7 +172,7 @@ class ComplaintCubit extends Cubit<ComplaintState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getHistoryDetails:::");
+      logConsole(e.toString(), "CUBIT::getHistoryDetails:::");
     }
   }
 
@@ -184,7 +185,7 @@ class ComplaintCubit extends Cubit<ComplaintState> {
         if (value != null) {
           if (!value.toString().contains("Invalid token")) {
             if (value['status'] == 200) {
-              log(jsonEncode(value).toString(), name: "AT COMPLAINT CUBIT");
+              logConsole(jsonEncode(value).toString(), "AT COMPLAINT CUBIT");
               // //  success emit
               if (!isClosed) {
                 emit(ComplaintSubmitSuccess(
@@ -210,7 +211,7 @@ class ComplaintCubit extends Cubit<ComplaintState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::submitComplaint:::");
+      logConsole(e.toString(), "CUBIT::submitComplaint:::");
     }
   }
 }

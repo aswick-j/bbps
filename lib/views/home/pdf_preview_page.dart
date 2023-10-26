@@ -1,13 +1,12 @@
 import 'dart:developer';
 
+import 'package:bbps/utils/commen.dart';
+import 'package:bbps/utils/const.dart';
+import 'package:bbps/utils/utils.dart';
+import 'package:bbps/views/home/pdf_generate.dart';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
-
-import '../../utils/commen.dart';
-import '../../utils/const.dart';
-import '../../utils/utils.dart';
-import 'pdf_generate.dart';
 
 class PdfPreviewPage extends StatefulWidget {
   Map<String, dynamic> transactionReceiptData;
@@ -23,8 +22,8 @@ class _PdfPreviewPageState extends State<PdfPreviewPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    log(widget.transactionReceiptData['pdf_file_name'].toString(),
-        name: "AT PDF generate :: 2 :::");
+    logConsole(widget.transactionReceiptData['pdf_file_name'].toString(),
+        "AT PDF generate :: 2 :::");
   }
 
   @override

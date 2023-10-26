@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import '../model/decoded_model.dart';
-import '../model/edit_autopay_model.dart';
-import '../model/login_model.dart';
+import 'package:bbps/model/login_model.dart';
+import 'package:bbps/utils/Mock_Params.dart';
+import 'package:flutter/material.dart';
+
 import '../model/redirect_model.dart';
 import '../utils/const.dart';
-import '../utils/dev_param.dart';
 import '../utils/utils.dart';
 
 abstract class Repository {
@@ -51,6 +51,7 @@ abstract class Repository {
   Future addNewBiller(String BillID, dynamic inputSignatures, String Billname,
       String otp) async {}
   Future validateBill(payload) async {}
+  Future PrepaidFetchvalidateBill(payload) async {}
   Future prepaidPayBillApi(
       String billerID,
       String acNo,
@@ -79,387 +80,46 @@ abstract class Repository {
     pageNumber,
   ) async {}
   Future fetchBill(validateBill, billerID, billerParams, quickPay,
-      quickPayAmount, adHocBillValidationRefKey) async {}
+      quickPayAmount, adHocBillValidationRefKey, billName) async {}
   Future getAccountInfo(account) async {}
   Future fetchPrepaidFetchPlans(dynamic id) async {}
 
   Future updateBillDetails(payload) async {}
-  Future getAddUpdateUpcomingDue(customerBillID, dueAmount, dueDate) async {}
+  Future getAddUpdateUpcomingDue(
+      customerBillID, dueAmount, dueDate, billDate, billPeriod) async {}
 
   Future deleteUpcomingDue(customerBillID);
+
+  Future updateUpcomingdue() async {}
 }
 
 class ApiCall implements Repository {
   @override
   Future redirect(whom, initParams, initCheckSum) async {
-    Map<String, dynamic> param = {};
-    var checkSum = '';
-
-    var one = {
-      "IPAddress": "1.1.1.1",
-      "platform": "IB",
-      "service": "bbps",
-      "data": {
-        "customer": {
-          "custId": "7738591",
-          "gndr": "M",
-          "mblNb": "919884358125",
-          "emailId": "testmail@headstrait.com",
-        },
-        "accounts": [
-          {
-            "acctTp": "SA",
-            "acctId": "100002396268",
-            "custRltnsp": "JOO",
-            "prdNm": "1020-Wings Savings Account",
-            "crntSts": "8",
-            "avlBal": "3258400.27",
-            "crntStsDesc": "ACCOUNT OPEN REGULAR",
-            "entityType": "I",
-          },
-        ],
-      },
-    };
-    var checkSumOne =
-        "342ef1dce74e40091daefaff0e9cb1949887378eb3ecc5c216521316127cb6e7823cd5d47621af15463c688740074a9f5c045cf6acc57d013f84eab7b54e8988";
-
-    var two = {
-      "IPAddress": '1.1.1.1',
-      "platform": 'IB',
-      "service": 'bbps',
-      "data": {
-        "otpPreference": 'SMS',
-        "customer": {
-          "custId": '7738591',
-          "gndr": 'M',
-          "mblNb": '919884358125',
-          "emailId": 'testmail@headstrait.com',
-        },
-        "accounts": [
-          {
-            "acctTp": 'SA',
-            "acctId": '100002396268',
-            "custRltnsp": 'JOO',
-            "prdNm": '1020-Wings Savings Account',
-            "crntSts": '8',
-            "avlBal": '3258400.27',
-            "crntStsDesc": 'ACCOUNT OPEN REGULAR',
-            "entityType": 'I',
-          },
-        ],
-      },
-    };
-    var checkSumTwo =
-        "5ca36c155f4e75b6327934acc823c83fa8b73a0fdb1aaa9845c13aefbf7fe5978d30ca7c2751eb92bf1ea0531e563a69087620577baeae1b462a26c362ca9d0c";
-
-    var three = {
-      "IPAddress": "1.1.1.1",
-      "platform": "MB",
-      "service": "bbps",
-      "data": {
-        "accounts": [
-          {
-            "avlBal": "792935.15",
-            "entityType": "I",
-            "acctTp": "SA",
-            "crntSts": "8",
-            "acctId": "100002703208",
-            "custRltnsp": "SOW",
-            "prdNm": "1031-Equitas Eva",
-            "crntStsDesc": "ACCOUNT OPEN REGULAR"
-          }
-        ],
-        "otpPreference": "SMS",
-        "customer": {
-          "gndr": "M",
-          "mblNb": "916382721614",
-          "dob": "1988-01-28",
-          "custId": "7969305",
-          "emailId": "A_MARIAJEGAN@EQUITASBANK.COM"
-        }
-      }
-    };
-    var checkSumThree =
-        "d686efb089b88d2e3e06327a2174fa3780ab3534264315d3fd00ad3b378acf56180df3f705f9a892a89af8a483b4f10aa8a058e0f210abd59012a506f23295b1";
-
-    var four = {
-      "IPAddress": '1.1.1.1',
-      "platform": 'IB',
-      "service": 'bbps',
-      "data": {
-        "otpPreference": 'SMS',
-        "customer": {
-          "custId": '7648685',
-          "gndr": 'F',
-          "mblNb": '919884358125',
-          "emailId": 'testmail@headstrait.com',
-        },
-        "accounts": [
-          {
-            "acctTp": 'SA',
-            "acctId": '100002359065',
-            "custRltnsp": 'JOF',
-            "prdNm": '1020-Wings Savings Account',
-            "crntSts": '8',
-            "avlBal": '100000.841',
-            "crntStsDesc": 'ACCOUNT OPEN REGULAR',
-            "entityType": 'I',
-          },
-        ],
-      },
-    };
-
-    var checkSumFour =
-        "327d2cc2ce5549b7cc5414d4b8b8d818e06cb846883a390edfd9d0b9adcc1412544854535f26081719b3dda5f5a5165c387b721369771a50da3d67c59225297a";
-
-    var five = {
-      "IPAddress": '1.1.1.1',
-      "platform": 'IB',
-      "service": 'bbps',
-      "data": {
-        "otpPreference": 'SMS',
-        "customer": {
-          "custId": '7695507',
-          "gndr": 'F',
-          "mblNb": '919884358125',
-          "emailId": 'testmail@headstrait.com',
-        },
-        "accounts": [
-          {
-            "acctTp": 'SA',
-            "acctId": '100002372851',
-            "custRltnsp": 'JOO',
-            "prdNm": '1005-Regular Savings',
-            "crntSts": '6',
-            "avlBal": '5840000.841',
-            "crntStsDesc": 'ACCOUNT OPEN TODAY',
-            "entityType": 'I',
-          },
-          {
-            "acctTp": 'SA',
-            "acctId": '100002372877',
-            "custRltnsp": 'JOF',
-            "prdNm": '1005-Regular Savings',
-            "crntSts": '6',
-            "avlBal": '5840000.841',
-            "crntStsDesc": 'ACCOUNT OPEN TODAY',
-            "entityType": 'I',
-          },
-        ],
-      },
-    };
-    var checkSumFive =
-        "c5916e6f25f9396ed49a980337fa3be4fa4396646d6c18db4be577170bac5664973e971759c13e654de28442000d229e7a1fd7e65f0ad84ecdce1b2bd8184716";
-
-    var seven = {
-      "data": {
-        "accounts": [
-          {
-            "avlBal": "531211",
-            "entityType": "I",
-            "acctTp": "SA",
-            "crntSts": "3",
-            "acctId": "100002467080",
-            "custRltnsp": "SOW",
-            "prdNm": "1006-Value Plus Savings",
-            "crntStsDesc": "ACCOUNT OPEN - NO DEBIT"
-          },
-          {
-            "avlBal": "2474900",
-            "entityType": "I",
-            "acctTp": "CA",
-            "crntSts": "3",
-            "acctId": "200000552249",
-            "custRltnsp": "SOW",
-            "prdNm": "2004-Advance Current",
-            "crntStsDesc": "ACCOUNT OPEN - NO DEBIT"
-          },
-          {
-            "avlBal": "1548261",
-            "entityType": "I",
-            "acctTp": "SA",
-            "crntSts": "8",
-            "acctId": "918754412249",
-            "custRltnsp": "JOF",
-            "prdNm": "1005-Regular Savings",
-            "crntStsDesc": "ACCOUNT OPEN REGULAR"
-          }
-        ],
-        "otpPreference": "SMS",
-        "customer": {
-          "gndr": "M",
-          "mblNb": "919344059603",
-          "dob": "1996-03-10",
-          "custId": "7576603",
-          "emailId": ""
-        }
-      },
-      "service": "bbps",
-      "IPAddress": "1.1.1.1",
-      "platform": "IB"
-    };
-    var six = {
-      "IPAddress": "1.1.1.1",
-      "platform": "IB",
-      "service": "bbps",
-      "data": {
-        "customer": {
-          "custId": "7868081",
-          "gndr": "M",
-          "mblNb": "919842010206",
-          "emailId": "a_thangavelm@equitasbank.com"
-        },
-        "accounts": [
-          {
-            "acctTp": "SA",
-            "acctId": "100002484686",
-            "custRltnsp": "JOO",
-            "prdNm": "1020-Wings Savings Account",
-            "crntSts": "8",
-            "avlBal": "1020796.00",
-            "crntStsDesc": "ACCOUNT OPEN REGULAR",
-            "entityType": "I"
-          }
-        ],
-        "otpPreference": "both"
-      }
-    };
-    var ysix = {
-      "IPAddress": "1.1.1.1",
-      "platform": "IB",
-      "service": "bbps",
-      "data": {
-        "customer": {
-          "custId": "7738591",
-          "gndr": "M",
-          "mblNb": "919884350000",
-          "emailId": "testmail@gmail.com"
-        },
-        "accounts": [
-          {
-            "acctTp": "SA",
-            "acctId": "100002396268",
-            "custRltnsp": "JOO",
-            "prdNm": "1020-Wings Savings Account",
-            "crntSts": "8",
-            "avlBal": "3258400.27",
-            "crntStsDesc": "ACCOUNT OPEN REGULAR",
-            "entityType": "I"
-          }
-        ],
-        "otpPreference": "both"
-      }
-    };
-
-    var checkSumSeven =
-        "ad2e081bb184cc28d9917083c8ed6369d50991697ef2c2a80d520fc0da20da50fe0ef942a310f2d308098896a4a645e30b5b48d7dbdbc19277a9c120ee36bcc1";
-    var ycheckSumSix =
-        "68f0fc8797cef13e2975d661d2a869693a1accdf7ed517069d18b0ab9f486e15c763ea56a96427268c083f7b2637d462b625b9b46bc032fc4622c55f11d5ff25";
-    var checkSumSix =
-        "0d391ddc6d963e04d90a881add3de7b278d7256c11ff4035747c5528826c10e470761409ac91787c723716a11ad4e9ece7bd38b10ea8493e7e959708fb038b70";
-    // var seven = {
-    //   "IPAddress": "1.1.1.1",
-    //   "platform": "IB",
-    //   "service": "bbps",
-    //   "data": {
-    //     "customer": {
-    //       "custId": "4235350",
-    //       "gndr": "M",
-    //       "mblNb": "919004162024",
-    //       "emailId": "bhavin.kalsariya@headstrait.com",
-    //       "custName": "Bhavin Kalsariya",
-    //     },
-    //     "accounts": [
-    //       {
-    //         "acctTp": "SA",
-    //         "acctId": "100002110058",
-    //         "custRltnsp": "JOO",
-    //         "avlBal": "5034802.27",
-    //         "crntStsDesc": "ACCOUNT OPEN REGULAR",
-    //         "prdNm": "1004-Standard Savings",
-    //         "crntSts": "8",
-    //         "entityType": "I",
-    //       },
-    //       {
-    //         "acctTp": "SA",
-    //         "acctId": "100002110042",
-    //         "custRltnsp": "JOO",
-    //         "avlBal": "4934802.27",
-    //         "crntStsDesc": "ACCOUNT OPEN REGULAR",
-    //         "prdNm": "1004-Standard Savings",
-    //         "crntSts": "8",
-    //         "entityType": "I",
-    //       },
-    //     ],
-    //   }
-    // };
-
-    // var checkSumSeven =
-    //     "dc2c60a05927b175b2111d26ef2e962a486f2b93db7fdc9d3df3c97604b65679b55516bcd0ab697762613399321ffe98f6eb21f2cbd56232ebfc064d9d2c011c";
-
-    switch (whom) {
-      case "one":
-        param = one;
-        checkSum = checkSumOne;
-        break;
-      case "two":
-        param = two;
-        checkSum = checkSumTwo;
-        break;
-      case "three":
-        param = three;
-        checkSum = checkSumThree;
-        break;
-      case "four":
-        param = four;
-        checkSum = checkSumFour;
-        break;
-      case "five":
-        param = five;
-        checkSum = checkSumFive;
-        break;
-      case "six":
-        param = six;
-        checkSum = checkSumSix;
-        break;
-      case "seven":
-        param = seven;
-        checkSum = checkSumSeven;
-        break;
-      case "initData":
-        param = initParams;
-        checkSum = initCheckSum;
-    }
-
     try {
       var response = await api(
           method: "post",
           url: baseUrl + redirectUrl,
-          body: param,
-          checkSum: checkSum,
+          body: initParams,
+          checkSum: initCheckSum,
           token: false);
       var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes));
-      log(decodedResponse.toString(), name: "REDIRECT RESPONSE ::: ");
+      logSuccess(decodedResponse.toString(), "REDIRECT RESPONSE ::: ");
       return decodedResponse;
     } catch (e) {
-      log(e.toString(), name: "REDIRECTION ERROR");
+      logWarning(e.toString(), "REDIRECTION ERROR");
     }
   }
 
   Future parentRedirect(params, checkSum) async {
-    print(params);
-    print(checkSum);
     RedirectModel? module;
     String id = getUniqId().toString().substring(1, 5);
-    log(id, name: "ID : ");
+    logConsole(id, "ID ::::: ");
 
-    print("FLUTTER :: REDIRECT PARAMS");
-    print(params);
-    print("FLUTTER :: REDIRECT checksum");
-    print(checkSum);
-
-    // log(param1['redirectionRequest']!['msgBdy'].toString(), name: "TEST 1");
-    // log(param1['redirectionRequest']!['checkSum'].toString(), name: "TEST 2");
+    // debugPrint("FLUTTER :: REDIRECT PARAMS");
+    // debugPrint(params);
+    // debugPrint("FLUTTER :: REDIRECT checksum");
+    // debugPrint(checkSum);
 
     try {
       var response = await api(
@@ -470,21 +130,14 @@ class ApiCall implements Repository {
           body: p7['redirectionRequest']!['msgBdy'] as Map<String, dynamic>,
           checkSum: p7['redirectionRequest']!['checkSum'],
           token: false);
-      // var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes));
-      // module = RedirectModel.fromJson(decodedResponse);
-      // log(module.status.toString(), name: "REDIRECT MODEL ::: ");
-      // log(module.message.toString(), name: "REDIRECT MESSAGE ::: ");
-      // log(decodedResponse.toString(), name: "REDIRECT RESPONSE ::: ");
-
-      // return decodedResponse;
 
       if (!response.body.toString().contains("<html>")) {
         var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes));
-        debugLog(decodedResponse, "parentRedirect", response);
+        logSuccess(decodedResponse.toString(), "PARENT REDIRECT RESPONSE ::: ");
         return decodedResponse;
       } else {
-        log(response.statusCode.toString(), name: "AT parentRedirect : ");
-        log(response.body.toString(), name: "AT parentRedirect : ");
+        logError(response.statusCode.toString(), "AT parentRedirect ");
+        logError(response.body.toString(), "AT parentRedirect :::: ");
         return {
           "status": 500,
           "message": "Something went wrong",
@@ -500,7 +153,7 @@ class ApiCall implements Repository {
       };
     }
     // } catch (e) {
-    //   log(e.toString(), name: "REDIRECTION ERROR");
+    //   logConsole(e.toString(), name: "REDIRECTION ERROR");
     // }
   }
 
@@ -511,8 +164,8 @@ class ApiCall implements Repository {
       Map<String, dynamic>? requestBody = {
         "hash": hash,
       };
-      log(baseUrl + loginUrl + id, name: "API URL");
-      log(requestBody.toString());
+      logConsole(baseUrl + loginUrl + id, "API URL ::::");
+      logConsole(requestBody.toString(), "REQUEST BODY :::::");
       var response = await api(
           method: "post",
           url: baseUrl + loginUrl + id,
@@ -521,7 +174,7 @@ class ApiCall implements Repository {
       var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes));
       return decodedResponse;
     } catch (e) {
-      log(e.toString());
+      logError(e.toString(), "LOGIN API :::;");
     }
   }
 
@@ -529,7 +182,7 @@ class ApiCall implements Repository {
     Map<String, dynamic> body = payload;
 
     try {
-      log(baseUrl + historyUrl);
+      logConsole(baseUrl + historyUrl, "HISTORY URL ::::");
       var response = await api(
           method: "post",
           url: baseUrl + historyUrl,
@@ -763,9 +416,9 @@ class ApiCall implements Repository {
   @override
   Future disableUpcoming(id, status, otp) async {
     try {
-      print(id.toString());
+      debugPrint(id.toString());
       Map<String, dynamic> body = {"status": int.parse(status), "otp": otp};
-      log(body.toString(), name: "disableUpcomingPay payload=>");
+      logConsole(body.toString(), "disableUpcomingPay payload=>");
       var response = await api(
           method: "put",
           url: baseUrl + upcomingDisableUrl + id.toString(),
@@ -917,9 +570,9 @@ class ApiCall implements Repository {
         debugLog(decodedResponse, "fetchPrepaidFetchPlans", response);
         return decodedResponse;
       } else {
-        log(response.statusCode.toString(),
-            name: "AT fetchPrepaidFetchPlans : ");
-        log(response.body.toString(), name: "AT fetchPrepaidFetchPlans : ");
+        logConsole(
+            response.statusCode.toString(), "AT fetchPrepaidFetchPlans : ");
+        logConsole(response.body.toString(), "AT fetchPrepaidFetchPlans : ");
         return {
           "status": 500,
           "message": "Something went wrong",
@@ -944,8 +597,8 @@ class ApiCall implements Repository {
 
     try {
       Map<String, dynamic> body = {"accountInfo": account};
-      print("====================================");
-      print(jsonEncode(account));
+      debugPrint("====================================");
+      debugPrint(jsonEncode(account));
       var response = await api(
           method: "post",
           url: baseUrl + accountInfoUrl,
@@ -961,8 +614,8 @@ class ApiCall implements Repository {
         debugLog(decodedResponse, "getAccountInfo", response);
         return decodedResponse;
       } else {
-        log(response.statusCode.toString(), name: "AT getAccountInfo : ");
-        log(response.body.toString(), name: "AT getAccountInfo : ");
+        logConsole(response.statusCode.toString(), "AT getAccountInfo : ");
+        logConsole(response.body.toString(), "AT getAccountInfo : ");
         return {
           "status": 500,
           "message": "Something went wrong",
@@ -982,8 +635,8 @@ class ApiCall implements Repository {
   @override
   Future deleteUpcomingDue(customerBillID) async {
     try {
-      log(customerBillID.toString(),
-          name: "deleteUpcomingDue ::customerBillID ");
+      logConsole(
+          customerBillID.toString(), "deleteUpcomingDue ::customerBillID ");
       var response = await api(
         method: "delete",
         url: baseUrl + deleteUpcomingDueUrl + customerBillID.toString(),
@@ -997,9 +650,9 @@ class ApiCall implements Repository {
         debugLog(decodedResponse, "deleteUpcomingDue", response);
         return decodedResponse;
       } else {
-        log(response.statusCode.toString(), name: "AT deleteUpcomingDue : ");
+        logConsole(response.statusCode.toString(), "AT deleteUpcomingDue : ");
 
-        log(response.body.toString(), name: "AT deleteUpcomingDue : ");
+        logConsole(response.body.toString(), "AT deleteUpcomingDue : ");
         return {
           "status": 500,
           "message": "Something went wrong",
@@ -1019,22 +672,38 @@ class ApiCall implements Repository {
   }
 
   @override
-  Future getAddUpdateUpcomingDue(customerBillID, dueAmount, dueDate) async {
+  Future getAddUpdateUpcomingDue(
+      customerBillID, dueAmount, dueDate, billDate, billPeriod) async {
     /**
      {"data":{"billName":"Aishu","billerAcceptsAdhoc":"Y","billerCoverage":"IND","billerID":"OTO125007XXA63","billerIcon":"OTO12","billerName":"OTO12","billerParams":{"a":"26","a b":"70","a b c":"688","a b c d":"572","a b c d e":"582"},"categoryID":5,"customerBillID":2395,"fetchRequirement":"OPTIONAL","paymentExactness":"Exact","supportBillValidation":"NOT_SUPPORTED","validateBillAllowed":"N","dueAmount":"1000.00","dueDate":"2015-06-20"},"message":"Successfully added upcoming due","status":200}
      */
     try {
+      var response;
+
       Map<String, dynamic> body = {
         "customerBillID": customerBillID,
         "dueAmount": dueAmount,
         "dueDate": dueDate,
+        "billDate": billDate,
+        "billPeriod": billPeriod
       };
-      var response = await api(
-          method: "post",
-          url: baseUrl + addUpdateUpcomingDueUrl,
-          body: body,
-          token: true,
-          checkSum: false);
+
+      if (customerBillID != null && dueAmount != null && dueDate != null) {
+        response = await api(
+            method: "post",
+            url: baseUrl + addUpdateUpcomingDueUrl,
+            body: body,
+            token: true,
+            checkSum: false);
+      } else {
+        logInfo("Update Upcoming DUE");
+        var response = await api(
+            method: "get",
+            url: baseUrl + updateUpcomingDueUrl,
+            token: true,
+            checkSum: false);
+      }
+
       // var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes));
       // debugLog(decodedResponse, "getAddUpdateUpcomingDue", response);
       // return decodedResponse;
@@ -1044,9 +713,9 @@ class ApiCall implements Repository {
         debugLog(decodedResponse, "getAddUpdateUpcomingDue", response);
         return decodedResponse;
       } else {
-        log(response.statusCode.toString(),
-            name: "AT getAddUpdateUpcomingDue : ");
-        log(response.body.toString(), name: "AT getAddUpdateUpcomingDue : ");
+        logConsole(
+            response.statusCode.toString(), "AT getAddUpdateUpcomingDue : ");
+        logConsole(response.body.toString(), "AT getAddUpdateUpcomingDue : ");
         return {
           "status": 500,
           "message": "Something went wrong",
@@ -1065,7 +734,7 @@ class ApiCall implements Repository {
 
   @override
   Future fetchBill(validateBill, billerID, billerParams, quickPay,
-      quickPayAmount, adHocBillValidationRefKey) async {
+      quickPayAmount, adHocBillValidationRefKey, billName) async {
     /**
          {"message":"Successfully retrieved the bill Details","status":200,"data":{"bankBranch":true,"data":{"Response":"Transaction Successful","BankRRN":"305510281912","BbpsTranlogId":"329008","ActCode":"0","Data":{"AdditionalInfo":{"Tag":[{"name":"a","value":"10"},{"name":"a b","value":"20"},{"name":"a b c","value":"30"},{"name":"a b c d","value":"40"}]},"BillerResponse":{"amount":"1000.00","dueDate":"2015-06-20","billDate":"2015-06-14","Tag":[{"name":"Late Payment Fee","value":"40"},{"name":"Fixed Charges","value":"50"},{"name":"Additional Charges","value":"60"}],"billNumber":"12303","customerName":"BBPS","billPeriod":"june"}},"ExtraData":"","SsTxnId":""},"success":true,"rc":"0","txnRefKey":"63b65efe-1a8c-4c85-8041-4ba8386743f5","fees":{"Response":"success","valid":"true","totalAmount":"1000.00","amount":"1000.00","ccf2":0,"ccf1":0,"ccf":0,"ActCode":"0"},"paymentMode":"Internet Banking"}}
 
@@ -1076,9 +745,10 @@ class ApiCall implements Repository {
       "billerParams": billerParams,
       "quickPay": quickPay,
       "quickPayAmount": quickPayAmount,
-      "adHocBillValidationRefKey": adHocBillValidationRefKey
+      "adHocBillValidationRefKey": adHocBillValidationRefKey,
+      "billName": billName
     };
-    log(body.toString(), name: "fetchBill payload=> ");
+    logConsole(body.toString(), "fetchBill payload=> ");
     try {
       var response = await api(
           method: "post",
@@ -1097,13 +767,35 @@ class ApiCall implements Repository {
       //   debugLog(decodedResponse, "deleteUpcomingDue", response);
       //   return decodedResponse;
       // } else {
-      //   log(response.statusCode.toString(), name: "AT fetchBill : ");
+      //   logConsole(response.statusCode.toString(), name: "AT fetchBill : ");
 
-      //   log(response.body.toString(), name: "AT fetchBill : ");
+      //   logConsole(response.body.toString(), name: "AT fetchBill : ");
       //   return {"status": 500, "message": "Request Timed Out", "data": "Error"};
       // }
     } catch (e) {
       errorResponseLog(e.toString(), "fetchBill", "fetchBill");
+      return {"status": 500, "message": "Request Timed Out", "data": "Error"};
+    }
+  }
+
+  @override
+  Future PrepaidFetchvalidateBill(payload) async {
+    logConsole(payload.toString(), "PrepaidFetchvalidateBill payload=> ");
+    try {
+      var response = await api(
+          method: "post",
+          url: baseUrl + fetchBillUrl,
+          body: payload,
+          token: true,
+          checkSum: false);
+      inspect(response);
+
+      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes));
+      debugLog(decodedResponse, "PrepaidFetchvalidateBill", response);
+      return decodedResponse;
+    } catch (e) {
+      errorResponseLog(
+          e.toString(), "PrepaidFetchvalidateBill", "PrepaidFetchvalidateBill");
       return {"status": 500, "message": "Request Timed Out", "data": "Error"};
     }
   }
@@ -1128,8 +820,8 @@ class ApiCall implements Repository {
         debugLog(decodedResponse, "getAmountByDate", response);
         return decodedResponse;
       } else {
-        log(response.statusCode.toString(), name: "AT getAmountByDate : ");
-        log(response.body.toString(), name: "AT getAmountByDate : ");
+        logConsole(response.statusCode.toString(), "AT getAmountByDate : ");
+        logConsole(response.body.toString(), "AT getAmountByDate : ");
         return {
           "status": 500,
           "message": "Something went wrong",
@@ -1169,8 +861,8 @@ class ApiCall implements Repository {
         debugLog(decodedResponse, "getSavedBillDetails", response);
         return decodedResponse;
       } else {
-        log(response.statusCode.toString(), name: "AT getSavedBillDetails : ");
-        log(response.body.toString(), name: "AT getSavedBillDetails : ");
+        logConsole(response.statusCode.toString(), "AT getSavedBillDetails : ");
+        logConsole(response.body.toString(), "AT getSavedBillDetails : ");
         return {
           "status": 500,
           "message": "Something went wrong",
@@ -1202,9 +894,9 @@ class ApiCall implements Repository {
         debugLog(decodedResponse, "getStatesData", response);
         return decodedResponse;
       } else {
-        log(response.statusCode.toString(), name: "AT getStatesData : ");
+        logConsole(response.statusCode.toString(), "AT getStatesData : ");
 
-        log(response.body.toString(), name: "AT getStatesData : ");
+        logConsole(response.body.toString(), "AT getStatesData : ");
         return {
           "status": 500,
           "message": "Something went wrong",
@@ -1234,9 +926,9 @@ class ApiCall implements Repository {
         debugLog(decodedResponse, "getChartData", response);
         return decodedResponse;
       } else {
-        log(response.statusCode.toString(), name: "AT getChartData : ");
+        logConsole(response.statusCode.toString(), "AT getChartData : ");
 
-        log(response.body.toString(), name: "AT getChartData : ");
+        logConsole(response.body.toString(), "AT getChartData : ");
         return {
           "status": 500,
           "message": "Something went wrong",
@@ -1271,8 +963,8 @@ class ApiCall implements Repository {
         debugLog(decodedResponse, "getInputSignature", response);
         return decodedResponse;
       } else {
-        log(response.statusCode.toString(), name: "AT getInputSignature : ");
-        log(response.body.toString(), name: "AT getInputSignature : ");
+        logConsole(response.statusCode.toString(), "AT getInputSignature : ");
+        logConsole(response.body.toString(), "AT getInputSignature : ");
         return {
           "status": 500,
           "message": "Something went wrong",
@@ -1300,7 +992,6 @@ class ApiCall implements Repository {
         "otp": otp
       };
 
-      log(body.toString());
       var response = await api(
           method: "post",
           url: baseUrl + addNewBillerUrl,
@@ -1318,9 +1009,9 @@ class ApiCall implements Repository {
         debugLog(decodedResponse, "addNewBiller", response);
         return decodedResponse;
       } else {
-        log(response.statusCode.toString(), name: "AT addNewBiller : ");
+        logConsole(response.statusCode.toString(), "AT addNewBiller : ");
 
-        log(response.body.toString(), name: "AT addNewBiller : ");
+        logConsole(response.body.toString(), "AT addNewBiller : ");
 
         /**
          * 
@@ -1362,7 +1053,7 @@ class ApiCall implements Repository {
   @override
   Future validateBill(payload) async {
     try {
-      log(payload.toString(), name: "AT VALIDATEBILL API");
+      logConsole(payload.toString(), "AT VALIDATEBILL API");
       var response = await api(
           method: "post",
           url: baseUrl + validateBillUrl,
@@ -1460,9 +1151,10 @@ class ApiCall implements Repository {
         // };
 
         //{"message":"Bill Payment failed for a transaction","data":{"paymentDetails":{"created":"2023-02-15T07:09:24.880Z","failed":true},"transactionSteps":[{"description":"Transaction Initiated","flag":true,"pending":false},{"description":"Fund Transfer Initiated by Bank","flag":false,"pending":false},{"description":"Bill processed by Biller","flag":false,"pending":false},{"description":"Bill Payment Completed","flag":false,"pending":false}],"reason":"fund transfer failure","equitasTransactionId":"-"},"status":500}
+
       } else {
-        log(response.statusCode.toString(), name: "AT payBill : ");
-        log(response.body.toString(), name: "AT payBill : ");
+        logConsole(response.statusCode.toString(), "AT payBill : ");
+        logConsole(response.body.toString(), "AT payBill : ");
         return {
           "status": 500,
           "message": "Something went wrong",
@@ -1517,7 +1209,7 @@ class ApiCall implements Repository {
         };
       }
 
-      log(jsonEncode(body));
+      logInfo(jsonEncode(body));
       var response = await api(
           method: "post",
           url: baseUrl + payBillUrl,
@@ -1541,9 +1233,10 @@ class ApiCall implements Repository {
         // };
 
         //{"message":"Bill Payment failed for a transaction","data":{"paymentDetails":{"created":"2023-02-15T07:09:24.880Z","failed":true},"transactionSteps":[{"description":"Transaction Initiated","flag":true,"pending":false},{"description":"Fund Transfer Initiated by Bank","flag":false,"pending":false},{"description":"Bill processed by Biller","flag":false,"pending":false},{"description":"Bill Payment Completed","flag":false,"pending":false}],"reason":"fund transfer failure","equitasTransactionId":"-"},"status":500}
+
       } else {
-        log(response.statusCode.toString(), name: "AT payBill : ");
-        log(response.body.toString(), name: "AT payBill : ");
+        logConsole(response.statusCode.toString(), "AT payBill : ");
+        logConsole(response.body.toString(), "AT payBill : ");
         return {
           "status": 500,
           "message": "Something went wrong",
@@ -1565,7 +1258,7 @@ class ApiCall implements Repository {
     try {
       Map<String, dynamic> body = updateBillPayload;
 
-      log(body.toString());
+      logInfo(body.toString());
       var response = await api(
           method: "put",
           url: baseUrl + updateBill,
@@ -1581,8 +1274,8 @@ class ApiCall implements Repository {
         debugLog(decodedResponse, "updateBillDetails", response);
         return decodedResponse;
       } else {
-        log(response.statusCode.toString(), name: "AT updateBillDetails : ");
-        log(response.body.toString(), name: "AT updateBillDetails : ");
+        logConsole(response.statusCode.toString(), "AT updateBillDetails : ");
+        logConsole(response.body.toString(), "AT updateBillDetails : ");
         return {
           "status": 500,
           "message": "Something went wrong",
@@ -1619,9 +1312,9 @@ class ApiCall implements Repository {
         debugLog(decodedResponse, "getPaymentInformation", response);
         return decodedResponse;
       } else {
-        log(response.statusCode.toString(),
-            name: "AT getPaymentInformation : ");
-        log(response.body.toString(), name: "AT getPaymentInformation : ");
+        logConsole(
+            response.statusCode.toString(), "AT getPaymentInformation : ");
+        logConsole(response.body.toString(), "AT getPaymentInformation : ");
         return {
           "status": 500,
           "message": "Something went wrong",
@@ -1654,8 +1347,8 @@ class ApiCall implements Repository {
         debugLog(decodedResponse, "getBbpsSettings", response);
         return decodedResponse;
       } else {
-        log(response.statusCode.toString(), name: "AT getBbpsSettings : ");
-        log(response.body.toString(), name: "AT getBbpsSettings : ");
+        logConsole(response.statusCode.toString(), "AT getBbpsSettings : ");
+        logConsole(response.body.toString(), "AT getBbpsSettings : ");
         return {
           "status": 500,
           "message": "Something went wrong",
@@ -1694,8 +1387,8 @@ class ApiCall implements Repository {
         debugLog(decodedResponse, "getComplaintConfig", response);
         return decodedResponse;
       } else {
-        log(response.statusCode.toString(), name: "AT getComplaintConfig : ");
-        log(response.body.toString(), name: "AT getComplaintConfig : ");
+        logConsole(response.statusCode.toString(), "AT getComplaintConfig : ");
+        logConsole(response.body.toString(), "AT getComplaintConfig : ");
         return {
           "status": 500,
           "message": "Something went wrong",
@@ -1729,8 +1422,8 @@ class ApiCall implements Repository {
         debugLog(decodedResponse, "submitTxnsComplaint", response);
         return decodedResponse;
       } else {
-        log(response.statusCode.toString(), name: "AT submitTxnsComplaint : ");
-        log(response.body.toString(), name: "AT submitTxnsComplaint : ");
+        logConsole(response.statusCode.toString(), "AT submitTxnsComplaint : ");
+        logConsole(response.body.toString(), "AT submitTxnsComplaint : ");
         return {
           "status": 500,
           "message": "Something went wrong",
@@ -1746,22 +1439,21 @@ class ApiCall implements Repository {
       };
     }
   }
-}
 
-errorResponseLog(e, from, method) {
-  log('\x1b[47m\x1b[5m\x1B[31m${e.toString()}',
-      name:
-          '\x1B[47m\x1b[1m\x1b[31m${'[$method method] Error at $from api call =>'}');
-}
+  @override
+  Future updateUpcomingdue() async {
+    try {
+      var response = await api(
+          method: "get",
+          url: baseUrl + updateUpcomingDueUrl,
+          token: true,
+          checkSum: false);
+      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes));
 
-debugLog(reponse, from, data) {
-  if (data.statusCode == 200) {
-    log(
-      '\x1b[32m${jsonEncode(reponse)}',
-      name: '\x1b[32m {${data.request.method}} $from Response =>',
-    );
-  } else {
-    log('\x1b[47m\x1b[5m\x1B[31m${jsonEncode(reponse)}',
-        name: '\x1b[32m { Error at $from api call =>');
+      debugLog(decodedResponse, "UpdateUpcomingDUE", response);
+      return decodedResponse;
+    } catch (e) {
+      errorResponseLog(e.toString(), "UpdateUpcomingDUE", "get");
+    }
   }
 }

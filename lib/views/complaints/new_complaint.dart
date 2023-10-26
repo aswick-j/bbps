@@ -1,10 +1,10 @@
+import 'package:bbps/bloc/complaint/complaint_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../bloc/complaint/complaint_cubit.dart';
 import '../../model/complaints_config_model.dart';
 import '../../model/history_model.dart';
 import '../../model/transection_model.dart';

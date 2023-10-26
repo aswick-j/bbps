@@ -1,13 +1,12 @@
 import 'dart:typed_data';
 
+import 'package:bbps/utils/const.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'dart:io';
-import 'package:flutter/services.dart' show rootBundle;
 
 Future<Uint8List> makePdf(Map<String, dynamic> pdfData) async {
-  final ByteData bytes =
-      await rootBundle.load('assets/images/be_assured_logo.png');
+  final ByteData bytes = await rootBundle.load(bbpsAssuredLogo);
   Uint8List byteList = bytes.buffer.asUint8List();
   final pdf = pw.Document();
 
@@ -77,7 +76,9 @@ Future<Uint8List> makePdf(Map<String, dynamic> pdfData) async {
                     'Mobile Number',
                     pdfData['mobile_number'],
                   ],
-                  ['Bill Number', pdfData['bill_number']],
+                  if (pdfData['categotyName'].toString().toLowerCase() !=
+                      "mobile prepaid")
+                    ['Bill Number', pdfData['bill_number']],
                   [
                     'Transaction Reference Id',
                     pdfData['transaction_reference_id']
@@ -122,6 +123,8 @@ Future<Uint8List> makePdf(Map<String, dynamic> pdfData) async {
                     'Status',
                     pdfData['status'],
                   ],
+                  if (pdfData['status'].toString().toLowerCase() != "success")
+                    ['Reason', pdfData['reason']]
                 ]),
           ],
         ); // Center

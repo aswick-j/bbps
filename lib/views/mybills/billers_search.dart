@@ -1,6 +1,10 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:bbps/bloc/home/home_cubit.dart';
+import 'package:bbps/utils/commen.dart';
+import 'package:bbps/utils/const.dart';
+import 'package:bbps/utils/utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,14 +14,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_overlay_loader/flutter_overlay_loader.dart';
 import 'package:flutter_svg/svg.dart';
 
-import '../../bloc/home/home_cubit.dart';
 import '../../model/biller_model.dart';
-import '../../model/billers_search_model.dart';
 import '../../model/categories_model.dart';
 import '../../model/saved_billers_model.dart';
-import '../../utils/commen.dart';
-import '../../utils/const.dart';
-import '../../utils/utils.dart';
 
 class BillersSearch extends StatefulWidget {
   const BillersSearch({super.key});
@@ -51,7 +50,6 @@ class _BillersSearchState extends State<BillersSearch> {
     BlocProvider.of<HomeCubit>(context).getAllCategories();
     BlocProvider.of<HomeCubit>(context).getStateAndCities();
     BlocProvider.of<HomeCubit>(context).getSavedBillers();
-    //Temporarily Im Setting Ms.Senthil
     BlocProvider.of<HomeCubit>(context)
         .searchBiller(" ", _selectedCategory, _selectedLocation);
     super.initState();
@@ -123,7 +121,8 @@ class _BillersSearchState extends State<BillersSearch> {
                   autocorrect: false,
                   enableSuggestions: false,
                   inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'^[a-z0-9A-Z ]*'))
+                    FilteringTextInputFormatter.allow(
+                        RegExp(r'^[a-z0-9A-Z. ]*'))
                   ],
                   onChanged: (searchQuery) {
                     if (lastSearchValue != searchQuery) {
@@ -180,6 +179,7 @@ class _BillersSearchState extends State<BillersSearch> {
           if (state is SavedBillerLoading) {
           } else if (state is SavedBillersSuccess) {
             SavedBiller = state.savedBillersData;
+
             findSavedBiller = state.savedBillersData;
           } else if (state is SavedBillersFailed) {
             showSnackBar(state.message, context);
@@ -282,7 +282,7 @@ class _BillersSearchState extends State<BillersSearch> {
                                       ),
                                     ),
                                     onChanged: (value) {
-                                      print(value.toString());
+                                      debugPrint(value.toString());
                                       setState(() {
                                         _selectedCategory = value!;
                                       });
@@ -384,24 +384,33 @@ class _BillersSearchState extends State<BillersSearch> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Container(
-                                            padding: const EdgeInsets.only(
-                                                top: 7, left: 16),
-                                            width: width(context),
-                                            decoration: BoxDecoration(
-                                              color: txtColor,
-                                              borderRadius:
-                                                  const BorderRadius.only(
-                                                      topLeft:
-                                                          Radius.circular(16),
-                                                      topRight:
-                                                          Radius.circular(16)),
-                                            ),
+                                          padding: const EdgeInsets.only(
+                                              top: 7, left: 16),
+                                          width: width(context),
+                                          decoration: BoxDecoration(
+                                            color: txtColor,
+                                            borderRadius:
+                                                const BorderRadius.only(
+                                                    topLeft:
+                                                        Radius.circular(16),
+                                                    topRight:
+                                                        Radius.circular(16)),
+                                          ),
+                                          child: Container(
+                                            margin: EdgeInsets.symmetric(
+                                                vertical:
+                                                    width(context) * 0.024,
+                                                horizontal:
+                                                    width(context) * 0.004),
+                                            alignment: Alignment.centerLeft,
                                             child: appText(
-                                                data: "Saved Biller",
-                                                size: width(context) * 0.05,
-                                                weight: FontWeight.bold,
-                                                align: TextAlign.left,
-                                                color: primaryColor)),
+                                              data: "Saved Biller",
+                                              size: width(context) * 0.05,
+                                              color: primaryColor,
+                                              weight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
                                         Container(
                                           constraints: BoxConstraints(
                                             minHeight: height(context) / 10,
@@ -434,13 +443,13 @@ class _BillersSearchState extends State<BillersSearch> {
                                                     findSavedBiller!.length,
                                                 itemBuilder: (context, index) {
                                                   return Container(
-                                                    margin:
-                                                        EdgeInsets.symmetric(
-                                                      horizontal:
-                                                          width(context) *
-                                                              0.008,
-                                                      vertical: width(context) *
-                                                          0.003,
+                                                    margin: EdgeInsets.only(
+                                                      top:
+                                                          width(context) * 0.02,
+                                                      right:
+                                                          width(context) * 0.02,
+                                                      left:
+                                                          width(context) * 0.02,
                                                     ),
                                                     decoration: BoxDecoration(
                                                       color: txtColor,
@@ -458,24 +467,72 @@ class _BillersSearchState extends State<BillersSearch> {
                                                       dense: true,
                                                       visualDensity: VisualDensity
                                                           .adaptivePlatformDensity,
-                                                      leading: Image.asset(
-                                                        bNeumonic,
+                                                      contentPadding:
+                                                          EdgeInsets.symmetric(
+                                                        horizontal:
+                                                            width(context) *
+                                                                0.036,
+                                                        vertical:
+                                                            width(context) *
+                                                                0.02,
+                                                      ),
+                                                      // leading: SvgPicture.asset(
+                                                      //   airtelLogo,
+                                                      // ),
+                                                      leading: Container(
+                                                        width: width(context) *
+                                                            0.13,
                                                         height:
                                                             height(context) *
-                                                                0.07,
+                                                                0.06,
+                                                        decoration: BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        8),
+                                                            gradient: LinearGradient(
+                                                                begin: Alignment
+                                                                    .bottomRight,
+                                                                stops: [
+                                                                  0.1,
+                                                                  0.9
+                                                                ],
+                                                                colors: [
+                                                                  Colors
+                                                                      .deepPurple
+                                                                      .withOpacity(
+                                                                          .16),
+                                                                  Colors.grey
+                                                                      .withOpacity(
+                                                                          .08)
+                                                                ])),
+                                                        child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(8.0),
+                                                            child: SvgPicture.asset(
+                                                                BillerLogo(
+                                                                    "-", "-")
+
+                                                                // height: height(context) * 0.07,
+                                                                )),
                                                       ),
-                                                      title: appText(
-                                                          data:
-                                                              findSavedBiller![
-                                                                      index]
-                                                                  .bILLERNAME
-                                                                  .toString(),
+
+                                                      title: Padding(
+                                                        padding: EdgeInsets.only(
+                                                            bottom:
+                                                                width(context) *
+                                                                    0.008),
+                                                        child: appText(
+                                                          data: SavedBiller![
+                                                                  index]
+                                                              .bILLNAME,
                                                           size: width(context) *
                                                               0.04,
                                                           color:
                                                               txtSecondaryColor,
-                                                          weight:
-                                                              FontWeight.w400),
+                                                        ),
+                                                      ),
                                                       subtitle: Column(
                                                           mainAxisAlignment:
                                                               MainAxisAlignment
@@ -485,10 +542,9 @@ class _BillersSearchState extends State<BillersSearch> {
                                                                   .start,
                                                           children: [
                                                             appText(
-                                                              data:
-                                                                  findSavedBiller![
-                                                                          index]
-                                                                      .bILLNAME,
+                                                              data: findSavedBiller![
+                                                                      index]
+                                                                  .bILLERNAME,
                                                               size: width(
                                                                       context) *
                                                                   0.034,
@@ -566,10 +622,10 @@ class _BillersSearchState extends State<BillersSearch> {
                                             maxHeight: findSavedBiller!.isEmpty
                                                 ? height(context) / 1.3
                                                 : findSavedBiller!.length == 1
-                                                    ? height(context) / 1.6
+                                                    ? height(context) / 1.74
                                                     : findSavedBiller!.length ==
                                                             2
-                                                        ? height(context) / 1.8
+                                                        ? height(context) / 2.1
                                                         : findSavedBiller!
                                                                     .length ==
                                                                 3
@@ -580,7 +636,7 @@ class _BillersSearchState extends State<BillersSearch> {
                                                                     3
                                                                 ? height(
                                                                         context) /
-                                                                    2.48
+                                                                    2.58
                                                                 : height(
                                                                         context) /
                                                                     1.41,
@@ -608,11 +664,11 @@ class _BillersSearchState extends State<BillersSearch> {
                                                     BillerSearchResults!.length,
                                                 itemBuilder: (context, index) =>
                                                     Container(
-                                                  margin: EdgeInsets.symmetric(
-                                                    horizontal:
-                                                        width(context) * 0.008,
-                                                    vertical:
-                                                        width(context) * 0.003,
+                                                  margin: EdgeInsets.only(
+                                                    top: width(context) * 0.02,
+                                                    right:
+                                                        width(context) * 0.02,
+                                                    left: width(context) * 0.02,
                                                   ),
                                                   decoration: BoxDecoration(
                                                     color: txtColor,
@@ -629,57 +685,56 @@ class _BillersSearchState extends State<BillersSearch> {
                                                           .toLowerCase()
                                                           .contains(
                                                               "mobile prepaid")) {
-                                                        if (baseUrl
-                                                            .toString()
-                                                            .toLowerCase()
-                                                            .contains(
-                                                                "digiservicesuat")) {
-                                                          goToData(
-                                                              context,
-                                                              prepaidAddBillerRoute,
-                                                              {
-                                                                "id": "",
-                                                                "name": BillerSearchResults![
-                                                                        index]
-                                                                    .cATEGORYNAME
-                                                                    .toString(),
-                                                                "billerData":
-                                                                    BillerSearchResults![
-                                                                        index],
-                                                                "isSavedBill":
-                                                                    false
-                                                              });
-                                                        } else {
-                                                          customDialog(
-                                                              context: context,
-                                                              message:
-                                                                  "This is an upcoming feature.",
-                                                              message2: "",
-                                                              message3: "",
-                                                              title: "Alert!",
-                                                              buttonName:
-                                                                  "Okay",
-                                                              dialogHeight:
-                                                                  height(context) /
-                                                                      2.5,
-                                                              buttonAction: () {
-                                                                Navigator.pop(
-                                                                    context,
-                                                                    true);
-                                                              },
-                                                              iconSvg:
-                                                                  alertSvg);
-                                                        }
+                                                        // if (baseUrl
+                                                        //     .toString()
+                                                        //     .toLowerCase()
+                                                        //     .contains(
+                                                        //         "digiservicesuat")) {
+                                                        goToData(
+                                                            context,
+                                                            prepaidAddBillerRoute,
+                                                            {
+                                                              "id": "",
+                                                              "name": BillerSearchResults![
+                                                                      index]
+                                                                  .cATEGORYNAME
+                                                                  .toString(),
+                                                              "billerData":
+                                                                  BillerSearchResults![
+                                                                      index],
+                                                              "isSavedBill":
+                                                                  false
+                                                            });
+                                                        // } else {
+                                                        //   customDialog(
+                                                        //       context: context,
+                                                        //       message:
+                                                        //           "This is an upcoming feature.",
+                                                        //       message2: "",
+                                                        //       message3: "",
+                                                        //       title: "Alert!",
+                                                        //       buttonName:
+                                                        //           "Okay",
+                                                        //       dialogHeight:
+                                                        //           height(context) /
+                                                        //               2.5,
+                                                        //       buttonAction: () {
+                                                        //         Navigator.pop(
+                                                        //             context,
+                                                        //             true);
+                                                        //       },
+                                                        //       iconSvg:
+                                                        //           alertSvg);
+                                                        // }
                                                       } else {
                                                         inspect(
                                                             BillerSearchResults![
                                                                 index]);
-                                                        log(
+                                                        logConsole(
                                                             jsonEncode(
                                                                 BillerSearchResults![
                                                                     index]),
-                                                            name:
-                                                                "BillerSearchResults![index");
+                                                            "BillerSearchResults![index");
                                                         goToData(context,
                                                             addNewBill, {
                                                           "billerData":
@@ -691,10 +746,48 @@ class _BillersSearchState extends State<BillersSearch> {
                                                     dense: true,
                                                     visualDensity: VisualDensity
                                                         .adaptivePlatformDensity,
-                                                    leading: Image.asset(
-                                                      bNeumonic,
+                                                    leading: Container(
+                                                      width:
+                                                          width(context) * 0.13,
                                                       height: height(context) *
-                                                          0.07,
+                                                          0.06,
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(8),
+                                                          gradient: LinearGradient(
+                                                              begin: Alignment
+                                                                  .bottomRight,
+                                                              stops: [
+                                                                0.1,
+                                                                0.9
+                                                              ],
+                                                              colors: [
+                                                                Colors
+                                                                    .deepPurple
+                                                                    .withOpacity(
+                                                                        .16),
+                                                                Colors.grey
+                                                                    .withOpacity(
+                                                                        .08)
+                                                              ])),
+                                                      child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(8.0),
+                                                          child: SvgPicture.asset(
+                                                              BillerLogo(
+                                                                  BillerSearchResults![
+                                                                          index]
+                                                                      .bILLERNAME
+                                                                      .toString(),
+                                                                  BillerSearchResults![
+                                                                          index]
+                                                                      .cATEGORYNAME
+                                                                      .toString())
+
+                                                              // height: height(context) * 0.07,
+                                                              )),
                                                     ),
                                                     title: appText(
                                                         data:
@@ -735,7 +828,7 @@ class _BillersSearchState extends State<BillersSearch> {
                 )
               : Center(
                   child: Image.asset(
-                    "assets/images/loader.gif",
+                    LoaderGif,
                     height: height(context) * 0.07,
                     width: height(context) * 0.07,
                   ),

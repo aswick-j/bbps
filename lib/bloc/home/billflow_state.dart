@@ -1,13 +1,14 @@
+import 'package:bbps/model/account_info_model.dart';
+import 'package:bbps/model/add_update_upcoming_due_model.dart';
+import 'package:bbps/model/fetch_bill_model.dart';
+import 'package:bbps/model/saved_bill_details_model.dart';
+import 'package:bbps/model/validate_bill_model.dart';
 import 'package:flutter/material.dart';
 
 import '../../../model/bbps_settings_model.dart';
 import '../../../model/confirm_fetch_bill_model.dart';
 import '../../../model/paymentInformationModel.dart';
-import '../../model/account_info_model.dart';
-import '../../model/add_update_upcoming_due_model.dart';
-import '../../model/fetch_bill_model.dart';
-import '../../model/saved_bill_details_model.dart';
-import '../../model/validate_bill_model.dart';
+import '../../model/auto_schedule_pay_model.dart';
 
 @immutable
 abstract class billFlowState {}
@@ -133,6 +134,14 @@ class AccountInfoError extends billFlowState {
   AccountInfoError({@required this.message});
 }
 
+class UpdateUpcomingDueLoading extends billFlowState {}
+
+class UpdateUpcomingDueSuccess extends billFlowState {}
+
+class UpdateUpcomingDueFailed extends billFlowState {}
+
+class UpdateUpcomingDueError extends billFlowState {}
+
 class AddUpdateUpcomingDueLoading extends billFlowState {}
 
 class AddUpdateUpcomingDueSuccess extends billFlowState {
@@ -174,4 +183,21 @@ class ValidateBillFailed extends billFlowState {
 class ValidateBillError extends billFlowState {
   final String? message;
   ValidateBillError({@required this.message});
+}
+
+class AllAutopayLoading extends billFlowState {}
+
+class AllAutopaySuccess extends billFlowState {
+  AutoSchedulePayModel? autoSchedulePayData;
+  AllAutopaySuccess({@required this.autoSchedulePayData});
+}
+
+class AllAutopayFailed extends billFlowState {
+  final String? message;
+  AllAutopayFailed({@required this.message});
+}
+
+class AllAutopayError extends billFlowState {
+  final String? message;
+  AllAutopayError({@required this.message});
 }

@@ -1,10 +1,10 @@
-import 'dart:convert';
-import 'dart:developer';
-
+import 'package:dotted_line/dotted_line.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
+
 import '../../model/history_model.dart';
 import '../../utils/commen.dart';
 import '../../utils/const.dart';
@@ -37,13 +37,44 @@ class _TransactionItemState extends State<TransactionItem> {
           ListTile(
             dense: true,
             visualDensity: VisualDensity.adaptivePlatformDensity,
-            leading: Image.asset(
-              bNeumonic,
-              // height: height(context) * 0.07,
+            leading: Container(
+              width: width(context) * 0.13,
+              height: height(context) * 0.06,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  gradient: LinearGradient(
+                      begin: Alignment.bottomRight,
+                      stops: [
+                        0.1,
+                        0.9
+                      ],
+                      colors: [
+                        Colors.deepPurple.withOpacity(.16),
+                        Colors.grey.withOpacity(.08)
+                      ])),
+              child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SvgPicture.asset(BillerLogo(
+                      widget.historyData![widget.index].bILLERNAME.toString(),
+                      widget.historyData![widget.index].cATEGORYNAME
+                          .toString()))),
             ),
             title: appText(
-                data: widget.historyData![widget.index].bILLNUMBER.toString() ??
-                    '',
+                data: widget.historyData![widget.index].cATEGORYNAME
+                        .toString()
+                        .toLowerCase()
+                        .contains("mobile prepaid")
+                    ? widget.historyData![widget.index].pARAMETERS!
+                            .firstWhere((params) => params.pARAMETERNAME == null
+                                ? params.pARAMETERNAME == null
+                                : params.pARAMETERNAME
+                                        .toString()
+                                        .toLowerCase() ==
+                                    "mobile number")
+                            .pARAMETERVALUE ??
+                        widget.historyData![widget.index].bILLNUMBER.toString()
+                    : widget.historyData![widget.index].bILLNUMBER.toString() ??
+                        '',
                 size: width(context) * 0.04,
                 color: txtSecondaryColor,
                 weight: FontWeight.w400),
@@ -56,27 +87,17 @@ class _TransactionItemState extends State<TransactionItem> {
                   maxline: 1,
                   weight: FontWeight.w600),
             ),
-            // trailing: widget.historyData![widget.index].aUTOPAYID == null
-            //     ? null
-            //     : Container(
-            //         alignment: Alignment.center,
-            //         width: width(context) * 0.35,
-            //         height: width(context) * 0.06,
-            //         decoration: BoxDecoration(
-            //             borderRadius: BorderRadius.circular(6),
-            //             color: alertSuccessColor.withOpacity(0.1)),
-            //         child: appText(
-            //             data: "AutoPay Enabled",
-            //             size: width(context) * 0.03,
-            //             color: alertSuccessColor,
-            //             weight: FontWeight.w600),
-            //       ),
           ),
-          Divider(
-            thickness: 1,
-            endIndent: 16.0,
-            indent: 16.0,
-            color: divideColor,
+          Padding(
+            padding: EdgeInsets.only(
+              right: width(context) * 0.040,
+              left: width(context) * 0.040,
+              top: width(context) * 0.020,
+              bottom: width(context) * 0.020,
+            ),
+            child: DottedLine(
+              dashColor: dashColor,
+            ),
           ),
           Padding(
             padding: EdgeInsets.symmetric(
@@ -96,11 +117,16 @@ class _TransactionItemState extends State<TransactionItem> {
               ],
             ),
           ),
-          Divider(
-            thickness: 1,
-            color: divideColor,
-            indent: 16.0,
-            endIndent: 16.0,
+          Padding(
+            padding: EdgeInsets.only(
+              right: width(context) * 0.040,
+              left: width(context) * 0.040,
+              top: width(context) * 0.020,
+              bottom: width(context) * 0.020,
+            ),
+            child: DottedLine(
+              dashColor: dashColor,
+            ),
           ),
           Padding(
             padding: EdgeInsets.symmetric(
@@ -132,105 +158,21 @@ class _TransactionItemState extends State<TransactionItem> {
                             'success'
                         ? const Icon(Icons.check_circle_outline,
                             color: Color(0xff2ECC71))
-                        : const Icon(
-                            Icons.cancel_outlined,
-                            color: Color(0xffD63031),
-                          ),
+                        : widget.historyData![widget.index].tRANSACTIONSTATUS ==
+                                'bbps-timeout'
+                            ? Icon(
+                                Icons.hourglass_bottom_rounded,
+                                color: alertPendingColor,
+                              )
+                            : const Icon(
+                                Icons.cancel_outlined,
+                                color: Color(0xffD63031),
+                              ),
                   ],
                 ))
               ],
             ),
           ),
-          if (widget.historyData![widget.index].aUTOPAYID != null)
-            Column(
-              children: [
-                Divider(
-                  thickness: 1,
-                  color: divideColor,
-                  indent: 16.0,
-                  endIndent: 16.0,
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: width(context) * 0.032,
-                      vertical: width(context) * 0.010),
-                  child: Container(
-                    // margin: EdgeInsets.symmetric(
-                    //     horizontal: width(context) * 0.14),
-                    height: height(context) * 0.038,
-                    width: width(context),
-                    decoration: BoxDecoration(
-                      color: const Color(0x172ECC70),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text("Autopay Enabled",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          height: height(context) * 0.002,
-                          color: alertSuccessColor,
-                          fontSize: width(context) * 0.04,
-                          fontFamily: appFont,
-                          fontWeight: FontWeight.normal,
-                        )),
-                  ),
-                ),
-              ],
-            ),
-          if (widget.historyData![widget.index].aUTOPAYID == null &&
-              widget.historyData![widget.index].cUSTOMERBILLID != null &&
-              widget.historyData![widget.index].tRANSACTIONSTATUS ==
-                  "success" &&
-              widget.historyData![widget.index].bILLERACCEPTSADHOC == "N")
-            Column(
-              children: [
-                Divider(
-                  thickness: 1,
-                  color: divideColor,
-                  indent: 16.0,
-                  endIndent: 16.0,
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: width(context) * 0.032,
-                      vertical: width(context) * 0.010),
-                  child: Container(
-                      // margin: EdgeInsets.symmetric(
-                      //     horizontal: width(context) * 0.14),
-                      height: height(context) * 0.038,
-                      width: width(context),
-                      decoration: BoxDecoration(
-                        color: txtPrimaryColor,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: TextButton(
-                        onPressed: () => goToData(context, setupAutoPayRoute, {
-                          "customerBillID": widget
-                              .historyData![widget.index].cUSTOMERBILLID
-                              .toString(),
-                          "paidAmount": widget
-                              .historyData![widget.index].bILLAMOUNT
-                              .toString(),
-                          "inputSignatures":
-                              widget.historyData![widget.index].pARAMETERS,
-                          "billname":
-                              widget.historyData![widget.index].bILLNAME,
-                          "billername":
-                              widget.historyData![widget.index].bILLERNAME,
-                          "limit": "0"
-                        }),
-                        child: Text("Eligible for Autopay",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              height: height(context) * 0.001,
-                              color: Colors.white,
-                              fontSize: width(context) * 0.04,
-                              fontFamily: appFont,
-                              fontWeight: FontWeight.normal,
-                            )),
-                      )),
-                ),
-              ],
-            ),
           verticalSpacer(8.0),
         ],
       ),

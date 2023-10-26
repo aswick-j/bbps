@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:bbps/widgets/shimmerCell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,12 +12,10 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../bloc/home/home_cubit.dart';
 import '../../model/biller_model.dart';
-import '../../model/paymentInformationModel.dart';
 import '../../model/saved_billers_model.dart';
 import '../../utils/commen.dart';
 import '../../utils/const.dart';
 import '../../utils/utils.dart';
-import '../../widgets/shimmerCell.dart';
 
 final searchTxtController = TextEditingController();
 
@@ -36,6 +35,9 @@ class BillFlow extends StatefulWidget {
 class _BillFlowState extends State<BillFlow> {
   List<SavedBillersData>? SavedBiller = [];
   List<SavedBillersData>? SavedBillerOrg = [];
+
+  List<SavedBillersData>? SavedBillerFilterTemp1 = [];
+  List<SavedBillersData>? SavedBillerFilterTemp2 = [];
 
   List<BillersData>? Allbiller = [];
   List<BillersData>? AllbillerSearch = [];
@@ -152,35 +154,19 @@ class _BillFlowState extends State<BillFlow> {
                 autofocus: true,
                 controller: searchTxtController,
                 onChanged: (searchTxt) {
-                  // searchTxtController.text = searchTxt;
-                  // searchTxtController.selection = TextSelection.fromPosition(
-                  //     TextPosition(offset: searchTxt.length));
                   if (searchTxt.isEmpty) {
                     Loader.hide();
                   }
                   if (lastSearchValue != searchTxt) {
                     searchData(searchTxt);
                   }
-
-                  // List<HistoryData>? searchData = [];
-
-                  // searchData = cloneData!
-                  //     .where((i) => i.bILLERNAME!
-                  //         .toLowerCase()
-                  //         .contains(searchTxt.toLowerCase()))
-                  //     .toList();
-                  // print(searchTxt);
-                  // print(searchData);
-                  // setState(() {
-                  //   historyData = searchData;
-                  // });
                 },
                 onFieldSubmitted: (_) {},
                 keyboardType: TextInputType.text,
                 autocorrect: false,
                 enableSuggestions: false,
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^[a-z0-9A-Z ]*'))
+                  FilteringTextInputFormatter.allow(RegExp(r'^[a-z0-9A-Z. ]*'))
                 ],
                 decoration: InputDecoration(
                   suffixIcon: GestureDetector(
@@ -240,12 +226,14 @@ class _BillFlowState extends State<BillFlow> {
                   isSavedBillersLoading = true;
                 } else if (state is SavedBillersSuccess) {
                   isSavedBillersLoading = false;
-                  SavedBiller = state.savedBillersData
+
+                  SavedBillerFilterTemp1 = state.savedBillersData
                       ?.where((item) => item.cATEGORYNAME == widget.name)
                       .toList();
-                  SavedBillerOrg = state.savedBillersData
-                      ?.where((item) => item.cATEGORYNAME == widget.name)
-                      .toList();
+
+                  SavedBiller = SavedBillerFilterTemp1;
+                  SavedBillerOrg = SavedBiller?.where(
+                      (item) => item.cATEGORYNAME == widget.name).toList();
                   Future.delayed(
                     const Duration(milliseconds: 1),
                     () => {
@@ -267,8 +255,9 @@ class _BillFlowState extends State<BillFlow> {
                 return Column(children: [
                   if (isSavedBillersLoading || SavedBiller!.isNotEmpty)
                     Container(
-                      margin:
-                          EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
+                      margin: EdgeInsets.symmetric(
+                          vertical: width(context) * 0.024,
+                          horizontal: width(context) * 0.044),
                       alignment: Alignment.centerLeft,
                       child: appText(
                         data: "Saved Billers",
@@ -330,12 +319,10 @@ class _BillFlowState extends State<BillFlow> {
                               ))
                           : Container(
                               constraints: BoxConstraints(
-                                minHeight: height(context) / 10,
+                                minHeight: height(context) / 8.2,
                                 maxHeight: height(context) / 3.2,
                               ),
-                              padding: EdgeInsets.only(
-                                top: width(context) * 0.008,
-                              ),
+
                               // height: height(context) / 3.2,
                               decoration: BoxDecoration(
                                 color: primaryBodyColor,
@@ -351,9 +338,10 @@ class _BillFlowState extends State<BillFlow> {
                                       borderRadius: BorderRadius.circular(4),
                                       color: txtColor),
                                   margin: EdgeInsets.only(
-                                      right: width(context) * 0.008,
-                                      left: width(context) * 0.008,
-                                      bottom: width(context) * 0.008),
+                                    top: width(context) * 0.02,
+                                    right: width(context) * 0.02,
+                                    left: width(context) * 0.02,
+                                  ),
                                   child: Column(
                                     children: [
                                       ListTile(
@@ -365,37 +353,20 @@ class _BillFlowState extends State<BillFlow> {
                                               .contains("mobile prepaid")) {
                                             isSavedBillFrom = true;
                                             isMobilePrepaidFrom = true;
-                                            if (baseUrl
-                                                .toString()
-                                                .toLowerCase()
-                                                .contains("digiservicesuat")) {
-                                              goToData(context,
-                                                  prepaidAddBillerRoute, {
-                                                "id": widget.id,
-                                                "name": SavedBiller![index]
-                                                    .cATEGORYNAME
-                                                    .toString(),
-                                                "savedBillersData":
-                                                    SavedBiller![index],
-                                                "isSavedBill": true
-                                              });
-                                            } else {
-                                              customDialog(
-                                                  context: context,
-                                                  message:
-                                                      "This is an upcoming feature.",
-                                                  message2: "",
-                                                  message3: "",
-                                                  title: "Alert!",
-                                                  buttonName: "Okay",
-                                                  dialogHeight:
-                                                      height(context) / 2.5,
-                                                  buttonAction: () {
-                                                    Navigator.pop(
-                                                        context, true);
-                                                  },
-                                                  iconSvg: alertSvg);
-                                            }
+                                            // if (baseUrl
+                                            //     .toString()
+                                            //     .toLowerCase()
+                                            //     .contains("digiservicesuat")) {
+                                            goToData(context,
+                                                prepaidAddBillerRoute, {
+                                              "id": widget.id,
+                                              "name": SavedBiller![index]
+                                                  .cATEGORYNAME
+                                                  .toString(),
+                                              "savedBillersData":
+                                                  SavedBiller![index],
+                                              "isSavedBill": true
+                                            });
                                           } else {
                                             isSavedBillFrom = true;
                                             isMobilePrepaidFrom = false;
@@ -416,16 +387,44 @@ class _BillFlowState extends State<BillFlow> {
                                           }
                                         },
                                         contentPadding: EdgeInsets.symmetric(
-                                          horizontal: width(context) * 0.016,
-                                          vertical: width(context) * 0.001,
+                                          horizontal: width(context) * 0.036,
+                                          vertical: width(context) * 0.02,
                                         ),
                                         // leading: SvgPicture.asset(
                                         //   airtelLogo,
                                         // ),
-                                        leading: Image.asset(
-                                          bNeumonic,
-                                          height: height(context) * 0.07,
+                                        leading: Container(
+                                          width: width(context) * 0.13,
+                                          height: height(context) * 0.06,
+                                          decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              gradient: LinearGradient(
+                                                  begin: Alignment.bottomRight,
+                                                  stops: [
+                                                    0.1,
+                                                    0.9
+                                                  ],
+                                                  colors: [
+                                                    Colors.deepPurple
+                                                        .withOpacity(.16),
+                                                    Colors.grey.withOpacity(.08)
+                                                  ])),
+                                          child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: SvgPicture.asset(
+                                                BillerLogo(
+                                                    SavedBiller![index]
+                                                        .bILLERNAME
+                                                        .toString(),
+                                                    SavedBiller![index]
+                                                        .cATEGORYNAME
+                                                        .toString()),
+                                                // height: height(context) * 0.07,
+                                              )),
                                         ),
+
                                         title: Padding(
                                           padding: EdgeInsets.only(
                                               bottom: width(context) * 0.008),
@@ -500,7 +499,7 @@ class _BillFlowState extends State<BillFlow> {
                                               value: 0,
                                               onTap: () => {},
                                               height: height(context) * 0.045,
-                                              child: const Text('View'),
+                                              child: const Text('Edit'),
                                             ),
                                             PopupMenuItem(
                                               value: 1,
@@ -511,6 +510,196 @@ class _BillFlowState extends State<BillFlow> {
                                           ],
                                         ),
                                       ),
+                                      // trailing: IconButton(
+                                      //     icon: const Icon(
+                                      //       Icons.more_vert,
+                                      //     ),
+                                      //     // the method which is called
+                                      //     // when button is pressed
+                                      //     onPressed: () {
+                                      //       showModalBottomSheet(
+                                      //         context: context,
+                                      //         shape:
+                                      //             const RoundedRectangleBorder(
+                                      //           borderRadius:
+                                      //               BorderRadius.vertical(
+                                      //             top:
+                                      //                 Radius.circular(20.0),
+                                      //           ),
+                                      //         ),
+                                      //         backgroundColor:
+                                      //             primaryBodyColor,
+                                      //         builder:
+                                      //             (BuildContext context) {
+                                      //           return SizedBox(
+                                      //             child: Wrap(
+                                      //               children: [
+                                      //                 Container(
+                                      //                     margin: EdgeInsets.only(
+                                      //                         top: width(
+                                      //                                 context) *
+                                      //                             0.024,
+                                      //                         left: width(
+                                      //                                 context) *
+                                      //                             0.044,
+                                      //                         right: width(
+                                      //                                 context) *
+                                      //                             0.044),
+                                      //                     child: Padding(
+                                      //                       padding: EdgeInsets.symmetric(
+                                      //                           horizontal:
+                                      //                               width(context) *
+                                      //                                   0.044),
+                                      //                       child: Row(
+                                      //                         mainAxisAlignment:
+                                      //                             MainAxisAlignment
+                                      //                                 .spaceBetween,
+                                      //                         children: [
+                                      //                           appText(
+                                      //                             data:
+                                      //                                 "Select Option",
+                                      //                             size: width(
+                                      //                                     context) *
+                                      //                                 0.04,
+                                      //                             color:
+                                      //                                 primaryColor,
+                                      //                             weight: FontWeight
+                                      //                                 .bold,
+                                      //                           ),
+                                      //                           IconButton(
+                                      //                             icon: Icon(
+                                      //                                 Icons
+                                      //                                     .close,
+                                      //                                 color:
+                                      //                                     primaryColor),
+                                      //                             onPressed:
+                                      //                                 () {
+                                      //                               Navigator.pop(
+                                      //                                   context);
+                                      //                             },
+                                      //                           )
+                                      //                         ],
+                                      //                       ),
+                                      //                     )),
+                                      //                 Divider(
+                                      //                   thickness: 1,
+                                      //                   endIndent: 16.0,
+                                      //                   indent: 16.0,
+                                      //                   color: divideColor,
+                                      //                 ),
+                                      //                 Padding(
+                                      //                   padding: EdgeInsets
+                                      //                       .symmetric(
+                                      //                           horizontal:
+                                      //                               width(context) *
+                                      //                                   0.044),
+                                      //                   child: ListTile(
+                                      //                     leading: Icon(
+                                      //                         Icons.edit,
+                                      //                         color: Colors
+                                      //                             .green),
+                                      //                     title: appText(
+                                      //                       data: "Edit",
+                                      //                       size: width(
+                                      //                               context) *
+                                      //                           0.04,
+                                      //                       color:
+                                      //                           primaryColor,
+                                      //                       weight:
+                                      //                           FontWeight
+                                      //                               .bold,
+                                      //                     ),
+                                      //                     onTap: () {
+                                      //                       Navigator.pop(
+                                      //                           context);
+                                      //                       goToData(
+                                      //                           context,
+                                      //                           editBill,
+                                      //                           {
+                                      //                             "data": SavedBiller![
+                                      //                                 index],
+                                      //                           });
+                                      //                     },
+                                      //                   ),
+                                      //                 ),
+                                      //                 Padding(
+                                      //                   padding: EdgeInsets
+                                      //                       .symmetric(
+                                      //                           horizontal:
+                                      //                               width(context) *
+                                      //                                   0.044),
+                                      //                   child: ListTile(
+                                      //                     leading: Icon(
+                                      //                         Icons.delete,
+                                      //                         color:
+                                      //                             txtRejectColor),
+                                      //                     title: appText(
+                                      //                       data: "Delete",
+                                      //                       size: width(
+                                      //                               context) *
+                                      //                           0.04,
+                                      //                       color:
+                                      //                           primaryColor,
+                                      //                       weight:
+                                      //                           FontWeight
+                                      //                               .bold,
+                                      //                     ),
+                                      //                     onTap: () {
+                                      //                       Navigator.pop(
+                                      //                           context);
+                                      //                       customDialogConsole(
+                                      //                         context:
+                                      //                             context,
+                                      //                         message: SavedBiller![index]
+                                      //                                     .cATEGORYNAME ==
+                                      //                                 "Mobile Prepaid"
+                                      //                             ? "You will no longer receive any notifications about the biller in future"
+                                      //                             : "You will no longer receive any notifications about the biller in future and all auto pay setups would be disabled effectively from the next cycle",
+                                      //                         message2: "",
+                                      //                         message3: "",
+                                      //                         title:
+                                      //                             "Alert!",
+                                      //                         buttonName:
+                                      //                             "Delete",
+                                      //                         isMultiBTN:
+                                      //                             true,
+                                      //                         dialogHeight:
+                                      //                             height(context) /
+                                      //                                 2.5,
+                                      //                         buttonAction:
+                                      //                             () {
+                                      //                           // Navigator.pop(
+                                      //                           //     context,
+                                      //                           //     true);
+                                      //                           goToData(
+                                      //                               context,
+                                      //                               otpRoute,
+                                      //                               {
+                                      //                                 "from":
+                                      //                                     myBillRoute,
+                                      //                                 "templateName":
+                                      //                                     "delete-biller-otp",
+                                      //                                 "data":
+                                      //                                     {
+                                      //                                   "bILLERNAME":
+                                      //                                       SavedBiller![index].bILLERNAME,
+                                      //                                   "cbid":
+                                      //                                       SavedBiller![index].cUSTOMERBILLID.toString()
+                                      //                                 }
+                                      //                               });
+                                      //                         },
+                                      //                         iconSvg:
+                                      //                             alertSvg,
+                                      //                       );
+                                      //                     },
+                                      //                   ),
+                                      //                 ),
+                                      //               ],
+                                      //             ),
+                                      //           );
+                                      //         },
+                                      //       );
+                                      //     })),
                                     ],
                                   ),
                                 ),
@@ -521,7 +710,7 @@ class _BillFlowState extends State<BillFlow> {
               })),
             Container(
               margin: EdgeInsets.symmetric(
-                  vertical: width(context) * 0.004,
+                  vertical: width(context) * 0.024,
                   horizontal: width(context) * 0.044),
               child: appText(
                 data: "All Billers",
@@ -633,71 +822,69 @@ class _BillFlowState extends State<BillFlow> {
                                                             4),
                                                     color: txtColor),
                                                 margin: EdgeInsets.only(
-                                                  top: width(context) * 0.008,
-                                                  right: width(context) * 0.008,
-                                                  left: width(context) * 0.008,
+                                                  top: width(context) * 0.02,
+                                                  right: width(context) * 0.02,
+                                                  left: width(context) * 0.02,
                                                 ),
                                                 child: Column(
                                                   children: [
                                                     ListTile(
                                                       onTap: () {
-                                                        log(
+                                                        logConsole(
                                                             jsonEncode(
                                                                     Allbiller![
                                                                         index])
                                                                 .toString(),
-                                                            name:
-                                                                "Allbiller![index]");
+                                                            "Allbiller![index]");
                                                         if (Allbiller![index]
                                                             .cATEGORYNAME
                                                             .toString()
                                                             .toLowerCase()
                                                             .contains(
                                                                 "mobile prepaid")) {
-                                                          if (baseUrl
-                                                              .toString()
-                                                              .toLowerCase()
-                                                              .contains(
-                                                                  "digiservicesuat")) {
-                                                            goToData(
-                                                                context,
-                                                                prepaidAddBillerRoute,
-                                                                {
-                                                                  "id":
-                                                                      widget.id,
-                                                                  "name": Allbiller![
-                                                                          index]
-                                                                      .cATEGORYNAME
-                                                                      .toString(),
-                                                                  "billerData":
-                                                                      Allbiller![
-                                                                          index],
-                                                                  "isSavedBill":
-                                                                      false
-                                                                });
-                                                          } else {
-                                                            customDialog(
-                                                                context:
-                                                                    context,
-                                                                message:
-                                                                    "This is an upcoming feature.",
-                                                                message2: "",
-                                                                message3: "",
-                                                                title: "Alert!",
-                                                                buttonName:
-                                                                    "Okay",
-                                                                dialogHeight:
-                                                                    height(context) /
-                                                                        2.5,
-                                                                buttonAction:
-                                                                    () {
-                                                                  Navigator.pop(
-                                                                      context,
-                                                                      true);
-                                                                },
-                                                                iconSvg:
-                                                                    alertSvg);
-                                                          }
+                                                          // if (baseUrl
+                                                          //     .toString()
+                                                          //     .toLowerCase()
+                                                          //     .contains(
+                                                          //         "digiservicesuat")) {
+                                                          goToData(
+                                                              context,
+                                                              prepaidAddBillerRoute,
+                                                              {
+                                                                "id": widget.id,
+                                                                "name": Allbiller![
+                                                                        index]
+                                                                    .cATEGORYNAME
+                                                                    .toString(),
+                                                                "billerData":
+                                                                    Allbiller![
+                                                                        index],
+                                                                "isSavedBill":
+                                                                    false
+                                                              });
+                                                          // } else {
+                                                          //   customDialogConsole(
+                                                          //       context:
+                                                          //           context,
+                                                          //       message:
+                                                          //           "This is an upcoming feature.",
+                                                          //       message2: "",
+                                                          //       message3: "",
+                                                          //       title: "Alert!",
+                                                          //       buttonName:
+                                                          //           "Okay",
+                                                          //       dialogHeight:
+                                                          //           height(context) /
+                                                          //               2.5,
+                                                          //       buttonAction:
+                                                          //           () {
+                                                          //         Navigator.pop(
+                                                          //             context,
+                                                          //             true);
+                                                          //       },
+                                                          //       iconSvg:
+                                                          //           alertSvg);
+                                                          // }
                                                         } else {
                                                           goToData(context,
                                                               addNewBill, {
@@ -711,19 +898,61 @@ class _BillFlowState extends State<BillFlow> {
                                                           EdgeInsets.symmetric(
                                                         horizontal:
                                                             width(context) *
-                                                                0.016,
+                                                                0.036,
                                                         vertical:
                                                             width(context) *
-                                                                0.001,
+                                                                0.02,
                                                       ),
                                                       // leading: SvgPicture.asset(rupeeSvg,),
 
-                                                      leading: Image.asset(
-                                                        bNeumonic,
+                                                      leading: Container(
+                                                        width: width(context) *
+                                                            0.13,
                                                         height:
                                                             height(context) *
-                                                                0.07,
+                                                                0.06,
+                                                        decoration: BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        8),
+                                                            gradient: LinearGradient(
+                                                                begin: Alignment
+                                                                    .bottomRight,
+                                                                stops: [
+                                                                  0.1,
+                                                                  0.9
+                                                                ],
+                                                                colors: [
+                                                                  Colors
+                                                                      .deepPurple
+                                                                      .withOpacity(
+                                                                          .16),
+                                                                  Colors.grey
+                                                                      .withOpacity(
+                                                                          .08)
+                                                                ])),
+                                                        child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(8.0),
+                                                            child: SvgPicture
+                                                                .asset(
+                                                              BillerLogo(
+                                                                  Allbiller![
+                                                                          index]
+                                                                      .bILLERNAME
+                                                                      .toString(),
+                                                                  Allbiller![
+                                                                          index]
+                                                                      .cATEGORYNAME
+                                                                      .toString()),
+                                                              height: height(
+                                                                      context) *
+                                                                  0.07,
+                                                            )),
                                                       ),
+
                                                       title: Padding(
                                                         padding: EdgeInsets.only(
                                                             bottom:
@@ -1001,53 +1230,51 @@ class _BillFlowState extends State<BillFlow> {
                                           children: [
                                             ListTile(
                                               onTap: () {
-                                                log(
+                                                logConsole(
                                                     jsonEncode(AllbillerSearch![
                                                             index])
                                                         .toString(),
-                                                    name:
-                                                        "AllbillerSearch![index]");
+                                                    "AllbillerSearch![index]");
                                                 if (AllbillerSearch![index]
                                                     .cATEGORYNAME
                                                     .toString()
                                                     .toLowerCase()
                                                     .contains(
                                                         "mobile prepaid")) {
-                                                  if (baseUrl
-                                                      .toString()
-                                                      .toLowerCase()
-                                                      .contains(
-                                                          "digiservicesuat")) {
-                                                    goToData(context,
-                                                        prepaidAddBillerRoute, {
-                                                      "id": widget.id,
-                                                      "name": AllbillerSearch![
-                                                              index]
-                                                          .cATEGORYNAME
-                                                          .toString(),
-                                                      "billerData":
-                                                          AllbillerSearch![
-                                                              index],
-                                                      "isSavedBill": false
-                                                    });
-                                                  } else {
-                                                    customDialog(
-                                                        context: context,
-                                                        message:
-                                                            "This is an upcoming feature.",
-                                                        message2: "",
-                                                        message3: "",
-                                                        title: "Alert!",
-                                                        buttonName: "Okay",
-                                                        dialogHeight:
-                                                            height(context) /
-                                                                2.5,
-                                                        buttonAction: () {
-                                                          Navigator.pop(
-                                                              context, true);
-                                                        },
-                                                        iconSvg: alertSvg);
-                                                  }
+                                                  // if (baseUrl
+                                                  //     .toString()
+                                                  //     .toLowerCase()
+                                                  //     .contains(
+                                                  //         "digiservicesuat")) {
+                                                  goToData(context,
+                                                      prepaidAddBillerRoute, {
+                                                    "id": widget.id,
+                                                    "name":
+                                                        AllbillerSearch![index]
+                                                            .cATEGORYNAME
+                                                            .toString(),
+                                                    "billerData":
+                                                        AllbillerSearch![index],
+                                                    "isSavedBill": false
+                                                  });
+                                                  // } else {
+                                                  //   customDialogConsole(
+                                                  //       context: context,
+                                                  //       message:
+                                                  //           "This is an upcoming feature.",
+                                                  //       message2: "",
+                                                  //       message3: "",
+                                                  //       title: "Alert!",
+                                                  //       buttonName: "Okay",
+                                                  //       dialogHeight:
+                                                  //           height(context) /
+                                                  //               2.5,
+                                                  //       buttonAction: () {
+                                                  //         Navigator.pop(
+                                                  //             context, true);
+                                                  //       },
+                                                  //       iconSvg: alertSvg);
+                                                  // }
                                                 } else {
                                                   goToData(
                                                       context, addNewBill, {
@@ -1065,10 +1292,44 @@ class _BillFlowState extends State<BillFlow> {
                                               ),
                                               // leading: SvgPicture.asset(rupeeSvg,),
 
-                                              leading: Image.asset(
-                                                bNeumonic,
-                                                height: height(context) * 0.07,
+                                              leading: Container(
+                                                width: width(context) * 0.13,
+                                                height: height(context) * 0.06,
+                                                decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                    gradient: LinearGradient(
+                                                        begin: Alignment
+                                                            .bottomRight,
+                                                        stops: [
+                                                          0.1,
+                                                          0.9
+                                                        ],
+                                                        colors: [
+                                                          Colors.deepPurple
+                                                              .withOpacity(.16),
+                                                          Colors.grey
+                                                              .withOpacity(.08)
+                                                        ])),
+                                                child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: SvgPicture.asset(
+                                                      BillerLogo(
+                                                          AllbillerSearch![
+                                                                  index]
+                                                              .bILLERNAME
+                                                              .toString(),
+                                                          AllbillerSearch![
+                                                                  index]
+                                                              .cATEGORYNAME
+                                                              .toString()),
+                                                      // height: height(context) * 0.07,
+                                                    )),
                                               ),
+
                                               title: Padding(
                                                 padding: EdgeInsets.only(
                                                     bottom:

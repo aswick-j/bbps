@@ -1,6 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:bbps/model/account_info_model.dart';
+import 'package:bbps/model/add_update_upcoming_due_model.dart';
+import 'package:bbps/model/amount_by_date_model.dart';
+import 'package:bbps/model/fetch_bill_model.dart';
+import 'package:bbps/model/saved_bill_details_model.dart';
+import 'package:bbps/model/validate_bill_model.dart';
+import 'package:bbps/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -8,12 +15,8 @@ import '../../../api/api_repository.dart';
 import '../../../model/bbps_settings_model.dart';
 import '../../../model/confirm_fetch_bill_model.dart';
 import '../../../model/paymentInformationModel.dart';
-import '../../model/account_info_model.dart';
-import '../../model/add_update_upcoming_due_model.dart';
-import '../../model/amount_by_date_model.dart';
-import '../../model/fetch_bill_model.dart';
-import '../../model/saved_bill_details_model.dart';
-import '../../model/validate_bill_model.dart';
+import '../../model/auto_schedule_pay_model.dart';
+import '../../utils/const.dart';
 import 'billflow_state.dart';
 
 class billFlowCubit extends Cubit<billFlowState> {
@@ -52,7 +55,7 @@ class billFlowCubit extends Cubit<billFlowState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getAmountByDate:::");
+      logConsole(e.toString(), "CUBIT::getAmountByDate:::");
     }
   }
 
@@ -89,7 +92,7 @@ class billFlowCubit extends Cubit<billFlowState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getSavedDetails:::");
+      logConsole(e.toString(), "CUBIT::getSavedDetails:::");
     }
   }
 
@@ -99,7 +102,8 @@ class billFlowCubit extends Cubit<billFlowState> {
       String? quickPayAmount,
       String? adHocBillValidationRefKey,
       bool? validateBill,
-      Map<String, dynamic>? billerParams}) {
+      Map<String, dynamic>? billerParams,
+      String? billName}) {
     //static data working perfectly
 
     // String billerParams =
@@ -169,7 +173,7 @@ class billFlowCubit extends Cubit<billFlowState> {
     try {
       repository!
           .fetchBill(validateBill, billerID, billerParams, quickPay,
-              quickPayAmount, adHocBillValidationRefKey)
+              quickPayAmount, adHocBillValidationRefKey, billName)
           .then((value) {
         // value = mockResponse;
         if (value != null) {
@@ -197,19 +201,19 @@ class billFlowCubit extends Cubit<billFlowState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::fetchBill:::");
+      logConsole(e.toString(), "CUBIT::fetchBill:::");
     }
   }
 
   void prepaidValidateBill(dynamic payload) async {
-    print("prepaidValidateBill payload ===>");
+    debugPrint("prepaidValidateBill payload ===>");
     inspect(payload);
     if (!isClosed) {
       emit(ValidateBillLoading());
     }
     try {
-      await repository!.validateBill(payload).then((value) {
-        log(value.toString());
+      await repository!.PrepaidFetchvalidateBill(payload).then((value) {
+        logInfo(value.toString());
         if (value != null) {
           if (!value.toString().contains("Invalid token")) {
             if (value['status'] == 200) {
@@ -237,19 +241,19 @@ class billFlowCubit extends Cubit<billFlowState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::prepaidValidateBill:::");
+      logConsole(e.toString(), "CUBIT::prepaidValidateBill:::");
     }
   }
 
   void fetchValidateBill(dynamic payload) async {
-    print("validateBill payload ===>");
+    debugPrint("validateBill payload ===>");
     inspect(payload);
     if (!isClosed) {
       emit(ValidateBillLoading());
     }
     try {
       await repository!.validateBill(payload).then((value) {
-        log(value.toString());
+        logInfo(value.toString());
         if (value != null) {
           if (!value.toString().contains("Invalid token")) {
             if (value['status'] == 200) {
@@ -257,9 +261,9 @@ class billFlowCubit extends Cubit<billFlowState> {
                   ValidateBillModel.fromJson(value);
               if (!isClosed) {
                 emit(ValidateBillSuccess(
-                    validateBillResponseData: validateBillModel.data,
-                    bbpsTranlogId:
-                        validateBillModel.data!.data!.bbpsTranlogId));
+                  validateBillResponseData: validateBillModel.data,
+                  bbpsTranlogId: validateBillModel.data!.data!.bbpsTranlogId,
+                ));
               }
             } else {
               if (!isClosed) {
@@ -278,7 +282,7 @@ class billFlowCubit extends Cubit<billFlowState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::fetchValidateBill:::");
+      logConsole(e.toString(), "CUBIT::fetchValidateBill:::");
     }
   }
 
@@ -289,6 +293,7 @@ class billFlowCubit extends Cubit<billFlowState> {
       String? adHocBillValidationRefKey,
       bool? validateBill,
       Map<String, dynamic>? billerParams,
+      String? billName,
 
       //prepaid
       dynamic? forChannel,
@@ -304,7 +309,7 @@ class billFlowCubit extends Cubit<billFlowState> {
     try {
       repository!
           .fetchBill(validateBill, billerID, billerParams, quickPay,
-              quickPayAmount, adHocBillValidationRefKey)
+              quickPayAmount, adHocBillValidationRefKey, billName)
           .then((value) {
         if (value != null) {
           if (!value.toString().contains("Invalid token")) {
@@ -333,7 +338,7 @@ class billFlowCubit extends Cubit<billFlowState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::confirmFetchBill:::");
+      logConsole(e.toString(), "CUBIT::confirmFetchBill:::");
     }
   }
 
@@ -370,12 +375,16 @@ class billFlowCubit extends Cubit<billFlowState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getAccountInfo:::");
+      logConsole(e.toString(), "CUBIT::getAccountInfo:::");
     }
   }
 
   void getAddUpdateUpcomingDue(
-      {int? customerBillID, String? dueAmount, String? dueDate}) {
+      {int? customerBillID,
+      String? dueAmount,
+      String? dueDate,
+      String? billDate,
+      String? billPeriod}) {
     // int customerBillID = 1621;
     // String dueAmount = "1000.00";
     // String dueDate = "2015-06-20";
@@ -384,7 +393,8 @@ class billFlowCubit extends Cubit<billFlowState> {
     }
     try {
       repository!
-          .getAddUpdateUpcomingDue(customerBillID, dueAmount, dueDate)
+          .getAddUpdateUpcomingDue(
+              customerBillID, dueAmount, dueDate, billDate, billPeriod)
           .then((value) {
         if (value != null) {
           if (!value.toString().contains("Invalid token")) {
@@ -412,7 +422,44 @@ class billFlowCubit extends Cubit<billFlowState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getAddUpdateUpcomingDue:::");
+      logConsole(e.toString(), "CUBIT::getAddUpdateUpcomingDue:::");
+    }
+  }
+
+  void getAutopay() async {
+    try {
+      if (!isClosed) {
+        emit(AllAutopayLoading());
+      }
+      repository!.getAllScheduledAutoPay().then((value) {
+        if (value != null) {
+          if (!value.toString().contains("Invalid token")) {
+            if (value['status'] == 200) {
+              AutoSchedulePayModel? autoSchedulePayModel =
+                  AutoSchedulePayModel.fromJson(value);
+              logConsole(jsonEncode(autoSchedulePayModel), "getAutopay() :::");
+              if (!isClosed) {
+                emit(AllAutopaySuccess(
+                    autoSchedulePayData: autoSchedulePayModel));
+              }
+            } else {
+              if (!isClosed) {
+                emit(AllAutopayFailed(message: value['message']));
+              }
+            }
+          } else {
+            if (!isClosed) {
+              emit(AllAutopayError(message: value['message']));
+            }
+          }
+        } else {
+          if (!isClosed) {
+            emit(AllAutopayFailed(message: value['message']));
+          }
+        }
+      });
+    } catch (e) {
+      logConsole(e.toString(), "CUBIT::getAutopay:::");
     }
   }
 
@@ -447,7 +494,7 @@ class billFlowCubit extends Cubit<billFlowState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getPaymentInformation:::");
+      logConsole(e.toString(), "CUBIT::getPaymentInformation:::");
     }
   }
 
@@ -483,7 +530,7 @@ class billFlowCubit extends Cubit<billFlowState> {
         }
       });
     } catch (e) {
-      log(e.toString(), name: "CUBIT::getBbpsSettings:::");
+      logConsole(e.toString(), "CUBIT::getBbpsSettings:::");
     }
   }
 }

@@ -166,6 +166,23 @@ class EditBillError extends HomeState {
   EditBillError({@required this.message});
 }
 
+class AddUpdateUpcomingDueLoading extends HomeState {}
+
+class AddUpdateUpcomingDueSuccess extends HomeState {
+  final AddUpdateUpcomingData? addUpdateUpcomingDueData;
+  AddUpdateUpcomingDueSuccess({@required this.addUpdateUpcomingDueData});
+}
+
+class AddUpdateUpcomingDueFailed extends HomeState {
+  final String? message;
+  AddUpdateUpcomingDueFailed({@required this.message});
+}
+
+class AddUpdateUpcomingDueError extends HomeState {
+  final String? message;
+  AddUpdateUpcomingDueError({@required this.message});
+}
+
 class UpdateBillLoading extends HomeState {}
 
 class UpdateBillSuccess extends HomeState {

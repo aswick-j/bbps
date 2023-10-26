@@ -1,23 +1,20 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:bbps/model/add_bill_payload_model.dart';
+import 'package:bbps/model/saved_billers_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../bloc/home/home_cubit.dart';
-import '../../model/add_bill_payload_model.dart';
 import '../../model/bbps_settings_model.dart';
 import '../../model/biller_model.dart';
-import '../../model/chart_model.dart';
-import '../../model/edit_bill_modal.dart';
 import '../../model/input_signatures_model.dart';
 import '../../utils/commen.dart';
 import '../../utils/const.dart';
 import '../../utils/utils.dart';
-import '../../widgets/shimmerCell.dart';
 
 class AddNewBill extends StatefulWidget {
   BillersData? billerData;
@@ -33,7 +30,7 @@ class AddNewBill extends StatefulWidget {
 class _AddNewBillState extends State<AddNewBill> {
   bool isButtonActive = false;
   bool isValidBillName = false;
-  bool isAddtoMybill = true;
+  bool isAddtoMybill = false;
   bool isEdit = false;
   List<InputSignaturesData>? inputSignatureItems = [];
   // List<InputSignaturess>? editInputItems = [];
@@ -92,10 +89,11 @@ class _AddNewBillState extends State<AddNewBill> {
   }
 
   addMobilePrepaid() {
-    Map<String, dynamic> tempMap = new Map();
+    List<AddbillerpayloadModel> inputPayloadDataPrepaid = [];
+    // Map<String, dynamic> inputPayload = {};
+    Map<String, dynamic> tempMapPrepaid = new Map();
 
     List<InputSignaturesData>? tempInputSignatures = inputSignatureItems;
-
     tempInputSignatures!.forEach((element) {
       if (element.pARAMETERNAME.toString().toLowerCase() == "id") {
         element.pARAMETER_VALUE = billNameController.text;
@@ -107,15 +105,40 @@ class _AddNewBillState extends State<AddNewBill> {
         element.pARAMETER_VALUE = circleValue;
       }
     });
-    log(jsonEncode(tempInputSignatures).toString(),
-        name: "tempInputSignatures ::::");
+
     var addbillerPayload = {
       "billerId": widget.billerData!.bILLERID,
-      "inputSignatures": tempInputSignatures,
+      "inputSignatures": inputPayloadDataPrepaid,
       "billName": billNameController.text,
-      // "confirmPaymentRouteData": {}
-      "confirmPaymentRouteData": tempMap
+      "confirmPaymentRouteData": tempMapPrepaid
     };
+    for (var k = 0; k < tempInputSignatures!.length; k++) {
+      AddbillerpayloadModel makeInputPrepaid;
+      makeInputPrepaid = AddbillerpayloadModel(
+          bILLERID: tempInputSignatures![k].bILLERID,
+          pARAMETERID: tempInputSignatures![k].pARAMETERID,
+          pARAMETERNAME: tempInputSignatures![k].pARAMETERNAME,
+          pARAMETERTYPE: tempInputSignatures![k].pARAMETERTYPE,
+          mINLENGTH: tempInputSignatures![k].mINLENGTH,
+          mAXLENGTH: tempInputSignatures![k].mAXLENGTH,
+          // rEGEX: inputSignatureItems![k].rEGEX,
+          rEGEX: null,
+          oPTIONAL: tempInputSignatures![k].oPTIONAL,
+          eRROR: '',
+          pARAMETERVALUE: tempInputSignatures![k].pARAMETER_VALUE);
+
+      inputPayloadDataPrepaid.add(makeInputPrepaid);
+    }
+
+    logConsole(
+        jsonEncode(tempInputSignatures).toString(), "tempInputSignatures ::::");
+    // var addbillerPayload = {
+    //   "billerId": widget.billerData!.bILLERID,
+    //   "inputSignatures": "",
+    //   "billName": billNameController.text,
+    //   // "confirmPaymentRouteData": {}
+    //   "confirmPaymentRouteData": tempMap
+    // };
     goToData(context, otpRoute, {
       "from": fromAddnewBillOtp,
       "templateName": "add-biller-otp",
@@ -134,7 +157,7 @@ class _AddNewBillState extends State<AddNewBill> {
       "billName": billNameController.text,
       "confirmPaymentRouteData": tempMap
     };
-    log(inputPayloadData.toString(), name: "BEFORE inputPayloadData");
+    logConsole(inputPayloadData.toString(), "BEFORE inputPayloadData");
     for (var k = 0; k < inputSignatureItems!.length; k++) {
       AddbillerpayloadModel makeInput;
       makeInput = AddbillerpayloadModel(
@@ -152,9 +175,9 @@ class _AddNewBillState extends State<AddNewBill> {
 
       inputPayloadData.add(makeInput);
     }
-    log(jsonEncode(inputPayloadData).toString(),
-        name: "AFTER inputPayloadData");
-    log(validateBill.toString(), name: "validateBill:::");
+    logConsole(
+        jsonEncode(inputPayloadData).toString(), "AFTER inputPayloadData");
+    logConsole(validateBill.toString(), "validateBill:::");
     if (validateBill!['fetchBill']) {
       addbillerPayload = {
         ...addbillerPayload,
@@ -170,23 +193,23 @@ class _AddNewBillState extends State<AddNewBill> {
     }
     inspect(addbillerPayload);
 
-    if (isAddtoMybill) {
-      goToData(context, otpRoute, {
-        "from": fromAddnewBillOtp,
-        "templateName": "add-biller-otp",
-        "data": addbillerPayload,
-      });
-    } else {
-      isSavedBillFrom = false;
-      isMobilePrepaidFrom = false;
-      goToData(context, confirmPaymentRoute, {
-        "name": widget.billerData!.bILLERNAME,
-        "billName": billNameController.text,
-        "billerData": widget.billerData,
-        "inputParameters": inputPayloadData,
-        "isSavedBill": false
-      });
-    }
+    // if (isAddtoMybill) {
+    //   goToData(context, otpRoute, {
+    //     "from": fromAddnewBillOtp,
+    //     "templateName": "add-biller-otp",
+    //     "data": addbillerPayload,
+    //   });
+    // } else {
+    isSavedBillFrom = false;
+    isMobilePrepaidFrom = false;
+    goToData(context, confirmPaymentRoute, {
+      "name": widget.billerData!.bILLERNAME,
+      "billName": billNameController.text,
+      "billerData": widget.billerData,
+      "inputParameters": inputPayloadData,
+      "isSavedBill": false
+    });
+    // }
   }
 
   FormValidation(int index, bool _static) {
@@ -195,7 +218,7 @@ class _AddNewBillState extends State<AddNewBill> {
           _fieldKey.every((element) => element.currentState!.isValid);
     });
 
-    print(isButtonActive.toString());
+    debugPrint(isButtonActive.toString());
     if (!_static) {
       _fieldKey[index].currentState!.validate();
     } else {
@@ -268,7 +291,7 @@ class _AddNewBillState extends State<AddNewBill> {
                 message3: "",
                 dialogHeight: height(context) / 3,
                 iconHeight: height(context) * 0.1,
-                title: "Update Biller",
+                title: "Biller Updated",
                 buttonName: "Okay",
                 buttonAction: () {
                   goToUntil(context, homeRoute);
@@ -590,7 +613,7 @@ class _AddNewBillState extends State<AddNewBill> {
                                               final fieldRegExp = RegExp(
                                                   "${inputSignatureItems![q].rEGEX}");
 
-                                              print(fieldRegExp
+                                              debugPrint(fieldRegExp
                                                   .hasMatch(inputValue!)
                                                   .toString());
                                               if (inputValue.length <
@@ -624,9 +647,9 @@ class _AddNewBillState extends State<AddNewBill> {
                                                   inputSignatureItems![q]
                                                           .rEGEX !=
                                                       null) {
-                                                print(
+                                                debugPrint(
                                                     "fieldRegExp====> $_regex");
-                                                print(
+                                                debugPrint(
                                                     "RegExp validate====> ${fieldRegExp.hasMatch(inputValue)}");
 
                                                 return "${inputSignatureItems![q].pARAMETERNAME} Must be Valid";
@@ -870,26 +893,26 @@ class _AddNewBillState extends State<AddNewBill> {
                                       ),
                                     ),
                                   ),
-                                  if (widget.billerData?.cATEGORYNAME
-                                          .toString()
-                                          .toLowerCase() !=
-                                      "mobile prepaid")
-                                    Row(children: [
-                                      Checkbox(
-                                        value: isAddtoMybill,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            this.isAddtoMybill = !isAddtoMybill;
-                                          });
-                                        },
-                                      ),
-                                      horizondalSpacer(width(context) * 0.01),
-                                      appText(
-                                        data: "Add Operator to my Billing list",
-                                        size: width(context) * 0.04,
-                                        color: txtPrimaryColor,
-                                      ),
-                                    ]), //Checkbox],),
+                                  // if (widget.billerData?.cATEGORYNAME
+                                  //         .toString()
+                                  //         .toLowerCase() !=
+                                  //     "mobile prepaid")
+                                  //   Row(children: [
+                                  //     Checkbox(
+                                  //       value: isAddtoMybill,
+                                  //       onChanged: (value) {
+                                  //         setState(() {
+                                  //           this.isAddtoMybill = !isAddtoMybill;
+                                  //         });
+                                  //       },
+                                  //     ),
+                                  //     horizondalSpacer(width(context) * 0.01),
+                                  //     appText(
+                                  //       data: "Add Operator to my Billing list",
+                                  //       size: width(context) * 0.04,
+                                  //       color: txtPrimaryColor,
+                                  //     ),
+                                  //   ]), //Checkbox],),
                                 ],
                               ),
                             )
@@ -898,7 +921,7 @@ class _AddNewBillState extends State<AddNewBill> {
                               width: width(context),
                               child: Center(
                                 child: Image.asset(
-                                  "assets/images/loader.gif",
+                                  LoaderGif,
                                   height: height(context) * 0.07,
                                   width: height(context) * 0.07,
                                 ),

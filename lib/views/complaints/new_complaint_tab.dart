@@ -1,16 +1,17 @@
+import 'package:bbps/views/complaints/complaint_last_three_months_txns.dart';
+import 'package:bbps/views/complaints/complaint_last_month_txns.dart';
+import 'package:bbps/views/complaints/complaint_last_week_txns.dart';
+import 'package:bbps/views/complaints/complaint_this_month_txns.dart';
+import 'package:bbps/views/complaints/complaint_this_week_txns.dart';
+import 'package:bbps/views/complaints/complaint_today_txns.dart';
+import 'package:bbps/views/complaints/complaint_yesterday_txns.dart';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../../utils/commen.dart';
 import '../../utils/const.dart';
 import '../../utils/utils.dart';
-import 'complaint_last_month_txns.dart';
-import 'complaint_last_three_months_txns.dart';
-import 'complaint_last_week_txns.dart';
-import 'complaint_this_month_txns.dart';
-import 'complaint_this_week_txns.dart';
-import 'complaint_today_txns.dart';
-import 'complaint_yesterday_txns.dart';
 
 class NewComplaintTabViewScreen extends StatefulWidget {
   const NewComplaintTabViewScreen({Key? key}) : super(key: key);

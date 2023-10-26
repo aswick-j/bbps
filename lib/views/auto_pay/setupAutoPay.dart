@@ -1,5 +1,7 @@
 import 'dart:developer';
 
+import 'package:bbps/utils/const.dart';
+import 'package:bbps/views/complaints/new_complaint.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,9 +11,7 @@ import 'package:intl/intl.dart';
 import '../../bloc/autopay/autopay_cubit.dart';
 import '../../model/saved_bill_model.dart';
 import '../../utils/commen.dart';
-import '../../utils/const.dart';
 import '../../utils/utils.dart';
-import '../../widgets/editAutopay_shimmer.dart';
 
 class SetupAutoPay extends StatefulWidget {
   String? billID;
@@ -20,6 +20,7 @@ class SetupAutoPay extends StatefulWidget {
   String? billName;
   List<dynamic> inputSignatures;
   String? paidAmount;
+  String? dueAmount;
 
   SetupAutoPay(
       {Key? key,
@@ -28,7 +29,8 @@ class SetupAutoPay extends StatefulWidget {
       this.billerName,
       this.billName,
       required this.inputSignatures,
-      this.paidAmount})
+      this.paidAmount,
+      this.dueAmount})
       : super(key: key);
 
   @override
@@ -77,7 +79,9 @@ class _SetupAutoPayState extends State<SetupAutoPay> {
 
   String activatesFrom = "Immediately";
   int? isBimonthly = 0;
-  int? isActive = 0;
+  int? isActive = 1;
+  int? amountLimit = 1;
+
   int accountNumber = 0;
   bool disableSubmitButton = true;
   String? maxAllowedAmount = "0";
@@ -93,11 +97,11 @@ class _SetupAutoPayState extends State<SetupAutoPay> {
   @override
   void initState() {
     var test1 = getMonthName2(99);
-    log(test1.toString(), name: "TEST1 ::");
+    logConsole(test1.toString(), "TEST1 ::");
     var test2 = getMonthName2(0)[0];
-    log(test2.toString(), name: "TEST2 ::");
+    logConsole(test2.toString(), "TEST2 ::");
     var test3 = getMonthName2(0)[1];
-    log(test3.toString(), name: "TEST2 ::");
+    logConsole(test3.toString(), "TEST2 ::");
     super.initState();
     inspect(widget.inputSignatures);
 
@@ -105,18 +109,26 @@ class _SetupAutoPayState extends State<SetupAutoPay> {
 
     txtDateofPaymentController.text = "1";
     setState(() {
-      maxAllowedAmount = widget.maxAllowedAmount;
+      maxAllowedAmount = "50000";
     });
     if (widget.maxAllowedAmount == "0") {
       BlocProvider.of<AutopayCubit>(context).fetchAutoPayMaxAmount();
     }
     // log(maxAllowedAmount.toString(), name: "SETSTATE maxAllowedAmount:::");
     setState(() {
-      // txtMaxAmountController.text = double.parse(widget.paidAmount!) != 0
-      //     ? double.parse(widget.paidAmount!).toString()
-      //     : "1000";
-      txtMaxAmountController.text = "0";
-      isTxtAmountValid = false;
+      txtMaxAmountController.text = maxAllowedAmount!.isNotEmpty
+          ? maxAllowedAmount!
+          : "40000"; // txtMaxAmountController.text = "0";
+      // txtMaxAmountController.text = widget.paidAmount!.isEmpty
+      //     ? "40000"
+      //     : (widget.paidAmount.toString() != "null"
+      //             ? (double.parse(widget.paidAmount.toString()) * 0.3) +
+      //                 (double.parse(widget.paidAmount.toString()))
+      //             : (double.parse(widget.dueAmount.toString()) * 0.3) +
+      //                 (double.parse(widget.dueAmount.toString())))
+      //         .toStringAsFixed(2);
+      // maxAllowedAmount!.isNotEmpty ? maxAllowedAmount! : "40000";
+      isTxtAmountValid = true;
       // isTxtAmountValid = (txtMaxAmountController.text.isNotEmpty &&
       //         double.parse(maxAllowedAmount.toString()) >=
       //             double.parse(txtMaxAmountController.text))
@@ -135,7 +147,7 @@ class _SetupAutoPayState extends State<SetupAutoPay> {
       decodedTokenAccounts = decodedToken['accounts'];
     });
 
-    log(decodedTokenAccounts.toString(), name: "HERERE *******");
+    logConsole(decodedTokenAccounts.toString(), "HERERE *******");
   }
 
   disableButton() {
@@ -164,7 +176,7 @@ class _SetupAutoPayState extends State<SetupAutoPay> {
             //     (element) => element.accountID == accNum.toString());
             accountIndex = data['id'];
           });
-          log('${data['id']}', name: "array value");
+          logConsole('${data['id']}', "array value");
         }
       }
 
@@ -172,7 +184,7 @@ class _SetupAutoPayState extends State<SetupAutoPay> {
       // // });
       // log('$accountIndex', name: "Account Index assignDecodedToken fn");
     } catch (e) {
-      log(e.toString(), name: 'Error at assignDecodedToken fn');
+      logConsole(e.toString(), 'Error at assignDecodedToken fn');
     }
   }
 
@@ -189,7 +201,25 @@ class _SetupAutoPayState extends State<SetupAutoPay> {
               width: width(context),
               color: primaryBodyColor,
             ),
-          )),
+          ),
+          actions: [
+            Tooltip(
+              textStyle: TextStyle(fontFamily: appFont, color: Colors.white),
+              decoration: BoxDecoration(color: primaryColorDark),
+              triggerMode: TooltipTriggerMode.tap,
+              padding: EdgeInsets.all(width(context) * 0.02),
+              margin: EdgeInsets.symmetric(horizontal: width(context) * 0.06),
+              message:
+                  "Autopay will be enabled from the 1st of the month you selected while setting up the autopay and payments will be made from the date selected for autopay execution. Until the autopay is enabled, you cannot edit it. To edit the auto pay that is not enabled yet, please wait till the autopay is enabled in the month selected during creation or delete the autopay and create a new one.",
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(
+                  Icons.info_outline,
+                  color: iconColor,
+                ),
+              ),
+            ),
+          ]),
       body: BlocConsumer<AutopayCubit, AutopayState>(
         listener: (context, state) {
           if (state is AutopayEditLoading) {
@@ -222,7 +252,7 @@ class _SetupAutoPayState extends State<SetupAutoPay> {
               //     double.parse(
               //             state.fetchAutoPayMaxAmountModel!.data.toString()) >=
               //         double.parse(txtMaxAmountController.text));
-              isTxtAmountValid = false;
+              isTxtAmountValid = true;
             });
             Loader.hide();
           } else if (state is FetchAutoPayMaxAmountFailed) {
@@ -320,6 +350,51 @@ class _SetupAutoPayState extends State<SetupAutoPay> {
                 ),
                 child: Column(children: [
                   // max amount
+                  RadioListTile(
+                    value: 1,
+                    activeColor: txtCheckBalanceColor,
+                    groupValue: amountLimit,
+                    onChanged: (ind) {
+                      setState(() {
+                        amountLimit = 1;
+                        // txtMaxAmountController.text =
+                        //     widget.paidAmount.toString();
+                        txtMaxAmountController.text =
+                            maxAllowedAmount!.isNotEmpty
+                                ? maxAllowedAmount!
+                                : "40000";
+                      });
+                    },
+                    title: appText(
+                        data: "Default Bill Amount",
+                        size: width(context) * 0.04,
+                        color: txtPrimaryColor),
+                  ),
+                  RadioListTile(
+                    value: 0,
+                    activeColor: txtCheckBalanceColor,
+                    groupValue: amountLimit,
+                    onChanged: (ind) {
+                      setState(() {
+                        amountLimit = 0;
+                        final dataAmount = (double.parse(
+                                    widget.paidAmount.toString() != "null"
+                                        ? widget.paidAmount.toString()
+                                        : widget.dueAmount.toString()) +
+                                (double.parse(
+                                        widget.paidAmount.toString() != "null"
+                                            ? widget.paidAmount.toString()
+                                            : widget.dueAmount.toString()) *
+                                    0.3))
+                            .toStringAsFixed(2);
+                        txtMaxAmountController.text = dataAmount;
+                      });
+                    },
+                    title: appText(
+                        data: "Set Bill Limit",
+                        size: width(context) * 0.04,
+                        color: txtPrimaryColor),
+                  ),
                   verticalSpacer(16.0),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -342,7 +417,7 @@ class _SetupAutoPayState extends State<SetupAutoPay> {
 
                     autocorrect: false,
                     enableSuggestions: false,
-
+                    enabled: amountLimit == 0 ? true : false,
                     keyboardType:
                         TextInputType.numberWithOptions(decimal: true),
                     inputFormatters: [
@@ -357,7 +432,10 @@ class _SetupAutoPayState extends State<SetupAutoPay> {
                           (double.parse(maxAllowedAmount.toString()) >=
                               double.parse(txtMaxAmountController.text)) &&
                           (double.parse(txtMaxAmountController.text) >=
-                              double.parse(widget.paidAmount!))) {
+                              (widget.paidAmount.toString() != "null"
+                                  ? double.parse(widget.paidAmount!)
+                                  : double.parse(
+                                      widget.dueAmount.toString())))) {
                         setState(() {
                           isTxtAmountValid = true;
                         });
@@ -370,7 +448,10 @@ class _SetupAutoPayState extends State<SetupAutoPay> {
                     },
                     // keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      fillColor: primaryBodyColor,
+                      filled: true,
+                      fillColor: amountLimit == 0
+                          ? Colors.white
+                          : Colors.grey.shade300,
                       border: OutlineInputBorder(
                         borderSide:
                             BorderSide(color: primaryBodyColor, width: 2.0),
@@ -400,7 +481,7 @@ class _SetupAutoPayState extends State<SetupAutoPay> {
                     alignment: Alignment.centerLeft,
                     child: appText(
                         data:
-                            "Amount should be between ₹${double.parse(widget.paidAmount!)} to ₹${double.parse(maxAllowedAmount!)}",
+                            "Amount should be between ₹${widget.paidAmount.toString() != "null" ? double.parse(widget.paidAmount.toString()) : double.parse(widget.dueAmount.toString())} to ₹${double.parse(maxAllowedAmount!)}",
                         size: width(context) * 0.03,
                         color: isTxtAmountValid
                             ? txtPrimaryColor
@@ -562,8 +643,7 @@ class _SetupAutoPayState extends State<SetupAutoPay> {
                                   color: primaryColor),
                               horizondalSpacer(width(context) * 0.016),
                               ImageIcon(
-                                const AssetImage(
-                                    "assets/images/iconCalender.png"),
+                                const AssetImage(iconCalender),
                                 color: txtCheckBalanceColor,
                               ),
                             ])),
@@ -606,6 +686,7 @@ class _SetupAutoPayState extends State<SetupAutoPay> {
                       }).toList(),
                       isExpanded: true,
                       onChanged: (String? value) {
+                        debugPrint(value);
                         setState(() {
                           activatesFrom = value!;
                         });
@@ -760,33 +841,35 @@ class _SetupAutoPayState extends State<SetupAutoPay> {
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        onPressed:
-                            isTxtAmountValid == false || accountNumber == 0
-                                ? null
-                                : () async {
-                                    await assignDecodedToken(accountNumber);
-                                    // ignore: use_build_context_synchronously
-                                    goToData(context, otpRoute, {
-                                      "from": fromAutoPayCreate,
-                                      "templateName": "create-auto-pay",
-                                      "id": widget.billerName,
-                                      "data": {
-                                        "accountNumber": accountIndex,
-                                        "maximumAmount":
-                                            txtMaxAmountController.text,
-                                        "paymentDate":
-                                            txtDateofPaymentController.text,
-                                        "isBimonthly": isBimonthly,
-                                        "activatesFrom":
-                                            activatesFrom == "Immediately"
-                                                ? null
-                                                : activatesFrom.toLowerCase(),
-                                        "isActive": isActive,
-                                        "billID": widget.billID,
-                                        "billerName": widget.billerName
-                                      }
-                                    });
-                                  },
+                        onPressed: isTxtAmountValid == false ||
+                                accountNumber == 0
+                            ? null
+                            : () async {
+                                await assignDecodedToken(accountNumber);
+                                // ignore: use_build_context_synchronously
+                                goToData(context, otpRoute, {
+                                  "from": fromAutoPayCreate,
+                                  "templateName": "create-auto-pay",
+                                  "id": widget.billerName,
+                                  "data": {
+                                    "accountNumber": accountIndex,
+                                    "maximumAmount":
+                                        txtMaxAmountController.text,
+                                    "paymentDate":
+                                        txtDateofPaymentController.text,
+                                    "isBimonthly": isBimonthly,
+                                    "activatesFrom":
+                                        activatesFrom == "Immediately"
+                                            ? null
+                                            : activatesFrom.toLowerCase(),
+                                    "isActive":
+                                        activatesFrom == "Immediately" ? 1 : 0,
+                                    "billID": widget.billID,
+                                    "billerName": widget.billerName,
+                                    "amountLimit": amountLimit
+                                  }
+                                });
+                              },
                         child: appText(
                             data: "Create Autopay",
                             size: width(context) * 0.04,

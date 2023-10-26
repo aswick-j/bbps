@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:bbps/model/login_model.dart';
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 
 import '../../api/api_repository.dart';
-import '../../model/login_model.dart';
 import '../../model/redirect_model.dart';
 import '../../utils/const.dart';
 import '../../utils/utils.dart';
@@ -44,14 +44,11 @@ class SplashCubit extends Cubit<SplashState> {
   }
 
   void checkRedirection(redirectData, checkSum) {
-    print("ParentRedirect() : :::" + redirectData.toString());
     RedirectModel? redirectModel;
     if (!isClosed) {
       emit(SplashLoading());
     }
     repository!.parentRedirect(redirectData, checkSum).then((value) {
-      print("parentRedirect() splash_cubit ::: ");
-      print(jsonEncode(value));
       if (value != null) {
         if (!value.toString().contains("Invalid token")) {
           if (value['status'] == 200) {
@@ -90,7 +87,7 @@ class SplashCubit extends Cubit<SplashState> {
 
               var isValid = validateJWT();
               if (isValid.toString() == 'restart') {
-                log("restart need", name: "TOKEN EXPAIR RESTART NEED");
+                logConsole("restart need", "TOKEN EXPAIR RESTART NEED");
                 redirect('two');
               } else {
                 if (!isClosed) {

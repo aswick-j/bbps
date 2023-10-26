@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 
 import '../../bloc/home/home_cubit.dart';
 import '../../model/bbps_settings_model.dart';
 import '../../model/edit_bill_modal.dart';
 import '../../model/input_signatures_model.dart';
-
 import '../../model/saved_billers_model.dart';
 import '../../utils/commen.dart';
 import '../../utils/const.dart';
@@ -53,7 +51,7 @@ class _EditBillState extends State<EditBill> {
         appBar: myAppBar(
           context: context,
           backgroundColor: primaryColor,
-          title: "View Biller",
+          title: "Edit Biller",
           bottom: PreferredSize(
             preferredSize: Size(width(context), 8.0),
             child: Container(
@@ -110,7 +108,7 @@ class _EditBillState extends State<EditBill> {
                   message3: "",
                   dialogHeight: height(context) / 3,
                   iconHeight: height(context) * 0.1,
-                  title: "Update Biller",
+                  title: "Biller Updated",
                   buttonName: "Okay",
                   buttonAction: () {
                     goToUntil(context, homeRoute);
@@ -409,7 +407,7 @@ class _EditBillState extends State<EditBill> {
                                       ),
                                       child: TextFormField(
                                         //EDIT BILLER CHANGED TO VIEW BILLER AS PER TL SAYING
-                                        enabled: false,
+                                        enabled: true,
                                         controller: billNameController,
                                         key: _billnameKey,
                                         autocorrect: false,
@@ -437,7 +435,7 @@ class _EditBillState extends State<EditBill> {
                                         },
                                         decoration: InputDecoration(
                                           filled: true,
-                                          fillColor: disableColor,
+                                          fillColor: Colors.white,
                                           border: OutlineInputBorder(
                                             borderSide: BorderSide(
                                                 color: primaryBodyColor,
@@ -569,25 +567,25 @@ class _EditBillState extends State<EditBill> {
                                 width: width(context),
                                 child: Center(
                                   child: Image.asset(
-                                    "assets/images/loader.gif",
+                                    LoaderGif,
                                     height: height(context) * 0.07,
                                     width: height(context) * 0.07,
                                   ),
                                 ))),
                   ),
-                  // myAppButton(
-                  //   context: context,
-                  //   buttonName: "Edit Biller",
-                  //   onpress: isButtonActive
-                  //       ? () {
-                  //           submitForm();
-                  //         }
-                  //       : null,
-                  //   margin: EdgeInsets.symmetric(
-                  //     horizontal: width(context) * 0.04,
-                  //     vertical: width(context) * 0.042,
-                  //   ),
-                  // ),
+                  myAppButton(
+                    context: context,
+                    buttonName: "Update Biller",
+                    onpress: isButtonActive
+                        ? () {
+                            submitForm();
+                          }
+                        : null,
+                    margin: EdgeInsets.symmetric(
+                      horizontal: width(context) * 0.04,
+                      vertical: width(context) * 0.042,
+                    ),
+                  ),
                 ],
               )
             ]);
