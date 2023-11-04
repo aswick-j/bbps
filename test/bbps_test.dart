@@ -4,10 +4,7 @@ import 'package:bbps/bbps_platform_interface.dart';
 import 'package:bbps/bbps_method_channel.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-class MockBbpsPlatform
-    with MockPlatformInterfaceMixin
-    implements BbpsPlatform {
-
+class MockBbpsPlatform with MockPlatformInterfaceMixin implements BbpsPlatform {
   @override
   Future<String?> getPlatformVersion() => Future.value('42');
 }
@@ -17,13 +14,5 @@ void main() {
 
   test('$MethodChannelBbps is the default instance', () {
     expect(initialPlatform, isInstanceOf<MethodChannelBbps>());
-  });
-
-  test('getPlatformVersion', () async {
-    Bbps bbpsPlugin = Bbps();
-    MockBbpsPlatform fakePlatform = MockBbpsPlatform();
-    BbpsPlatform.instance = fakePlatform;
-
-    expect(await bbpsPlugin.getPlatformVersion(), '42');
   });
 }

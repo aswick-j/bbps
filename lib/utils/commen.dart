@@ -123,6 +123,8 @@ myAppBar({
         );
 }
 
+final GlobalKey _dialogKey = GlobalKey();
+
 customDialog(
     {context,
     message,
@@ -141,120 +143,114 @@ customDialog(
     barrierDismissible: false,
     context: context,
     builder: (context) {
-      return WillPopScope(
-        onWillPop: () {
-          return Future.value(false);
-        },
-        child: Dialog(
-          shape: RoundedRectangleBorder(
+      return Dialog(
+        key: _dialogKey,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        elevation: 16,
+        child: Container(
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
           ),
-          elevation: 16,
+          height: dialogHeight ?? height(context) / 2,
           child: Container(
             alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            height: dialogHeight ?? height(context) / 2,
-            child: Container(
-              alignment: Alignment.center,
-              margin: EdgeInsets.symmetric(
-                  horizontal: width(context) * 0.04,
-                  vertical: width(context) * 0.04),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 16,
-                    ),
-                    child: SvgPicture.asset(
-                        [
-                          "you have no pending bill",
-                          "no bill data available at the moment"
-                        ].any(message.toString().toLowerCase().contains)
-                            ? iconSuccessSvg
-                            : iconSvg,
-                        height: iconHeight ?? null),
+            margin: EdgeInsets.symmetric(
+                horizontal: width(context) * 0.04,
+                vertical: width(context) * 0.04),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 16,
                   ),
-                  if (!fcp)
-                    appText(
-                      data: title,
-                      size: width(context) * 0.04,
+                  child: SvgPicture.asset(
+                      [
+                        "you have no pending bill",
+                        "no bill data available at the moment"
+                      ].any(message.toString().toLowerCase().contains)
+                          ? iconSuccessSvg
+                          : iconSvg,
+                      height: iconHeight ?? null),
+                ),
+                if (!fcp)
+                  appText(
+                    data: title,
+                    size: width(context) * 0.04,
+                    color: txtPrimaryColor,
+                    weight: FontWeight.w600,
+                  ),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: width(context) * 0.03,
+                      vertical:
+                          fcp ? width(context) * 0.001 : width(context) * 0.03),
+                  child: appText(
+                      data: message,
+                      maxline: 6,
+                      align: TextAlign.center,
+                      size:
+                          fcp ? width(context) * 0.04 : width(context) * 0.032,
                       color: txtPrimaryColor,
-                      weight: FontWeight.w600,
-                    ),
+                      weight: fcp ? FontWeight.bold : FontWeight.w500),
+                ),
+                if (message2 != "")
+                  appText(
+                      data: message2,
+                      align: TextAlign.center,
+                      size: width(context) * 0.03,
+                      color: txtSecondaryDarkColor,
+                      weight: FontWeight.w500),
+                if (message3 != "")
                   Padding(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: width(context) * 0.03,
-                        vertical: fcp
-                            ? width(context) * 0.001
-                            : width(context) * 0.03),
+                    padding: const EdgeInsets.only(top: 8),
                     child: appText(
-                        data: message,
-                        maxline: 6,
-                        align: TextAlign.center,
-                        size: fcp
-                            ? width(context) * 0.04
-                            : width(context) * 0.032,
-                        color: txtPrimaryColor,
-                        weight: fcp ? FontWeight.bold : FontWeight.w500),
+                        data: message3,
+                        size: width(context) * 0.04,
+                        color: txtAmountColor),
                   ),
-                  if (message2 != "")
-                    appText(
-                        data: message2,
-                        align: TextAlign.center,
-                        size: width(context) * 0.03,
-                        color: txtSecondaryDarkColor,
-                        weight: FontWeight.w500),
-                  if (message3 != "")
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: appText(
-                          data: message3,
-                          size: width(context) * 0.04,
-                          color: txtAmountColor),
-                    ),
-                  isMultiBTN ?? false
-                      ? Padding(
-                          padding: const EdgeInsets.only(top: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    minimumSize:
-                                        Size(width(context) * 0.30, 40.0),
-                                    backgroundColor: primaryColor),
-                                child: const Text("Cancel"),
-                                onPressed: () => Navigator.pop(context),
-                              ),
-                              horizondalSpacer(28.0),
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    minimumSize:
-                                        Size(width(context) * 0.30, 40.0),
-                                    backgroundColor: alertFailedColor),
-                                child: Text(buttonName),
-                                onPressed: buttonAction,
-                              )
-                            ],
-                          ),
-                        )
-                      : myAppButton(
-                          context: context,
-                          buttonName: buttonName,
-                          margin: const EdgeInsets.only(
-                            right: 40,
-                            left: 40,
-                            top: 0,
-                          ),
-                          onpress: buttonAction,
+                isMultiBTN ?? false
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  minimumSize:
+                                      Size(width(context) * 0.30, 40.0),
+                                  backgroundColor: primaryColor),
+                              child: const Text("Cancel"),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                            horizondalSpacer(28.0),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  minimumSize:
+                                      Size(width(context) * 0.30, 40.0),
+                                  backgroundColor: alertFailedColor),
+                              child: Text(buttonName),
+                              onPressed: buttonAction,
+                            )
+                          ],
                         ),
-                ],
-              ),
+                      )
+                    : myAppButton(
+                        context: context,
+                        buttonName: buttonName,
+                        margin: const EdgeInsets.only(
+                          right: 40,
+                          left: 40,
+                          top: 0,
+                        ),
+                        onpress: buttonAction,
+                      ),
+              ],
             ),
           ),
         ),
@@ -298,7 +294,7 @@ prepaidCustomDialogMultiText(
       var eachItem;
       return WillPopScope(
         onWillPop: () {
-          return Future.value(false);
+          return Future.value(true);
         },
         child: Dialog(
           shape: RoundedRectangleBorder(

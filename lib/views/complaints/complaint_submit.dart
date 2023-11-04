@@ -30,6 +30,12 @@ class _ComplaintSubmitState extends State<ComplaintSubmit> {
 
   @override
   Widget build(BuildContext context) {
+    void hideDialog() {
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+    }
+
     return Scaffold(
       body: BlocConsumer<ComplaintCubit, ComplaintState>(
         listener: (context, state) {
@@ -59,6 +65,7 @@ class _ComplaintSubmitState extends State<ComplaintSubmit> {
                 title: "Success!",
                 buttonName: "Okay",
                 buttonAction: () {
+                  hideDialog();
                   goToUntil(context, homeRoute);
                 },
                 iconSvg: iconSuccessSvg);
@@ -89,6 +96,7 @@ class _ComplaintSubmitState extends State<ComplaintSubmit> {
                 title: "Oops!",
                 buttonName: "Okay",
                 buttonAction: () {
+                  hideDialog();
                   goToUntil(context, homeRoute);
                 },
                 iconSvg: alertSvg);

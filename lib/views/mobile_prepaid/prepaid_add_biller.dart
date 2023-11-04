@@ -277,6 +277,12 @@ class _PrepaidAddBillerState extends State<PrepaidAddBiller>
     return filterPlans;
   }
 
+  void hideDialog() {
+    if (mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -364,6 +370,7 @@ class _PrepaidAddBillerState extends State<PrepaidAddBiller>
               buttonName: "Okay",
               dialogHeight: height(context) / 3,
               buttonAction: () {
+                hideDialog();
                 goBack(context);
                 goBack(context);
               },

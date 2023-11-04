@@ -316,6 +316,12 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
 
   @override
   Widget build(BuildContext context) {
+    void hideDialog() {
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+    }
+
     return Scaffold(
       backgroundColor: primaryBodyColor,
       appBar: AppBar(
@@ -421,6 +427,8 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
                 buttonName: "Okay",
                 dialogHeight: height(context) / 3,
                 buttonAction: () {
+                  hideDialog();
+
                   goBack(context);
                   goBack(context);
                 },
@@ -455,6 +463,8 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
                 buttonName: "Okay",
                 dialogHeight: height(context) / 3,
                 buttonAction: () {
+                  hideDialog();
+
                   goBack(context);
                   goBack(context);
                 },
@@ -493,6 +503,8 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
                 buttonName: "Okay",
                 dialogHeight: height(context) / 3,
                 buttonAction: () {
+                  hideDialog();
+
                   goBack(context);
                   goBack(context);
                 },
@@ -535,6 +547,8 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
                 buttonName: "Okay",
                 dialogHeight: height(context) / 3,
                 buttonAction: () {
+                  hideDialog();
+
                   goBack(context);
                   goBack(context);
                 },
@@ -591,6 +605,8 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
                 buttonName: "Okay",
                 dialogHeight: height(context) / 2.6,
                 buttonAction: () {
+                  hideDialog();
+
                   goBack(context);
                   goBack(context);
                   // goToUntil(context, homeRoute);
@@ -634,6 +650,8 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
                 buttonName: "Okay",
                 dialogHeight: height(context) / 3,
                 buttonAction: () {
+                  hideDialog();
+
                   goBack(context);
                   goBack(context);
                 },
@@ -1025,6 +1043,12 @@ class _ConformPaymentUIState extends State<ConformPaymentUI> {
 
   @override
   Widget build(BuildContext context) {
+    void hideDialog() {
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+    }
+
     return BlocConsumer<billFlowCubit, billFlowState>(
         listener: (context, state) {
       if (state is ConfirmFetchBillLoading) {
@@ -1198,6 +1222,8 @@ class _ConformPaymentUIState extends State<ConformPaymentUI> {
             buttonName: "Okay",
             dialogHeight: height(context) / 2.6,
             buttonAction: () {
+              hideDialog();
+
               goBack(context);
               goBack(context);
             },

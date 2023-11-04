@@ -472,8 +472,9 @@ class _BillFlowState extends State<BillFlow> {
                                                   dialogHeight:
                                                       height(context) / 2.5,
                                                   buttonAction: () {
-                                                    Navigator.pop(
-                                                        context, true);
+                                                    Navigator.of(context,
+                                                            rootNavigator: true)
+                                                        .pop();
 
                                                     goToData(
                                                         context, otpRoute, {

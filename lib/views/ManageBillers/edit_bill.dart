@@ -1,3 +1,4 @@
+import 'package:bbps/bbps.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -43,6 +44,12 @@ class _EditBillState extends State<EditBill> {
     };
 
     BlocProvider.of<HomeCubit>(context).updateBill(inputParameters);
+  }
+
+  void hideDialog() {
+    if (mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
   }
 
   @override
@@ -111,6 +118,7 @@ class _EditBillState extends State<EditBill> {
                   title: "Biller Updated",
                   buttonName: "Okay",
                   buttonAction: () {
+                    hideDialog();
                     goToUntil(context, homeRoute);
                   },
                   iconSvg: iconSuccessSvg);

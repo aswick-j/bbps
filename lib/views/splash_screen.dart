@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:bbps/bbps.dart';
 import 'package:bbps/bloc/splash/splash_cubit.dart';
 import 'package:bbps/utils/commen.dart';
 import 'package:bbps/utils/const.dart';
@@ -31,6 +32,31 @@ class _SplashScreenState extends State<SplashScreen> {
   AssetImage? myAssetImage;
   Timer? timer;
 
+  static const newspl = MethodChannel('equitas.flutter.fas/backButton');
+
+  bool isTriggerDisabled = false;
+  Timer? delayedTimer = null;
+
+  Future<void> triggerBackButton() async {
+    if (!isTriggerDisabled) {
+      try {
+        setState(() {
+          isTriggerDisabled = true;
+        });
+
+        await newspl.invokeMethod("triggerBackButton");
+      } catch (e) {
+        print("Error: $e");
+      } finally {
+        delayedTimer = Timer(Duration(seconds: 4), () {
+          setState(() {
+            isTriggerDisabled = false;
+          });
+        });
+      }
+    }
+  }
+
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   checkRedirect() async {
     if (await isConnected()) {
@@ -59,7 +85,8 @@ class _SplashScreenState extends State<SplashScreen> {
         dialogHeight: height(context) / 2.5,
         buttonAction: () {
           if (Platform.isAndroid) {
-            SystemNavigator.pop(animated: true);
+            AppTrigger.instance.mainAppTrigger!.call();
+            triggerBackButton();
           } else {
             platform_channel.invokeMethod("exitBbpsModule", "");
           }
@@ -128,6 +155,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void dispose() {
     Loader.hide();
     myAssetImage?.evict();
+    delayedTimer?.cancel();
     super.dispose();
   }
 

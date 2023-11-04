@@ -257,6 +257,12 @@ class _OtpVerificationState extends State<OtpVerification> {
 
   @override
   Widget build(BuildContext context) {
+    void hideDialog() {
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+    }
+
     return WillPopScope(
       onWillPop: () async {
         return false;
@@ -436,6 +442,7 @@ class _OtpVerificationState extends State<OtpVerification> {
                     title: "Success!",
                     buttonName: "Okay",
                     buttonAction: () {
+                      hideDialog();
                       goToUntil(context, homeRoute);
                     },
                     iconSvg: iconSuccessSvg);
@@ -456,6 +463,8 @@ class _OtpVerificationState extends State<OtpVerification> {
                     title: "Success!",
                     buttonName: "Okay",
                     buttonAction: () {
+                      hideDialog();
+
                       goToUntil(context, homeRoute);
                     },
                     iconSvg: iconSuccessSvg);
@@ -491,6 +500,8 @@ class _OtpVerificationState extends State<OtpVerification> {
                     title: "Success!",
                     buttonName: "Okay",
                     buttonAction: () {
+                      hideDialog();
+
                       goToUntil(context, homeRoute);
                     },
                     iconSvg: iconSuccessSvg);
@@ -516,6 +527,8 @@ class _OtpVerificationState extends State<OtpVerification> {
                     title: "Success!",
                     buttonName: "Okay",
                     buttonAction: () {
+                      hideDialog();
+
                       goToUntil(context, homeRoute);
                     },
                     iconSvg: iconSuccessSvg);
@@ -534,6 +547,8 @@ class _OtpVerificationState extends State<OtpVerification> {
                       title: "Success!",
                       buttonName: "Okay",
                       buttonAction: () {
+                        hideDialog();
+
                         goToUntil(context, homeRoute);
                       },
                       iconSvg: iconSuccessSvg);
@@ -668,6 +683,8 @@ pARAMETERS;
                                         "isSavedBill": true
                                       }),
                          */
+                        hideDialog();
+
                         txtOtpController.clear();
                         //logConsole(state.data!['inputParameters'],
                         //     name: "near gotoData");
@@ -693,6 +710,8 @@ pARAMETERS;
                     title: "Success!",
                     buttonName: "Okay",
                     buttonAction: () {
+                      hideDialog();
+
                       goToUntil(context, homeRoute);
                     },
                     iconSvg: iconSuccessSvg);
@@ -747,6 +766,8 @@ pARAMETERS;
                       buttonName: "View Details",
                       isMultiBTN: true,
                       buttonAction: () {
+                        hideDialog();
+
                         txtOtpController.clear();
 
                         if (!isSavedBillFrom) {
@@ -801,6 +822,8 @@ pARAMETERS;
                       title: "Alert!",
                       buttonName: "Okay",
                       buttonAction: () {
+                        hideDialog();
+
                         goToUntil(context, homeRoute);
                       },
                       iconSvg: alertSvg);
@@ -821,6 +844,8 @@ pARAMETERS;
                       title: "Alert!",
                       buttonName: "Okay",
                       buttonAction: () {
+                        hideDialog();
+
                         goToUntil(context, homeRoute);
                       },
                       iconSvg: alertSvg);
@@ -864,6 +889,8 @@ pARAMETERS;
                     title: "Alert!",
                     buttonName: "Okay",
                     buttonAction: () {
+                      hideDialog();
+
                       goToUntil(context, homeRoute);
                     },
                     iconSvg: alertSvg);

@@ -228,6 +228,12 @@ class _AddNewBillState extends State<AddNewBill> {
     }
   }
 
+  void hideDialog() {
+    if (mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -294,6 +300,7 @@ class _AddNewBillState extends State<AddNewBill> {
                 title: "Biller Updated",
                 buttonName: "Okay",
                 buttonAction: () {
+                  hideDialog();
                   goToUntil(context, homeRoute);
                 },
                 iconSvg: iconSuccessSvg);

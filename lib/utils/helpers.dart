@@ -28,7 +28,8 @@ void onSelected(BuildContext context, dynamic? BillerData,
           isMultiBTN: true,
           dialogHeight: height(context) / 2.5,
           buttonAction: () {
-            Navigator.pop(context, true);
+            Navigator.of(context, rootNavigator: true).pop();
+
             goToData(context, otpRoute, {
               "from": myBillRoute,
               "templateName": "delete-biller-otp",
@@ -57,7 +58,7 @@ void onSelected(BuildContext context, dynamic? BillerData,
               ? height(context) / 2.3
               : height(context) / 2.6,
           buttonAction: () {
-            Navigator.pop(context);
+            Navigator.of(context, rootNavigator: true).pop();
             goToData(context, otpRoute, {
               "from": fromUpcomingDisable,
               "templateName": allAutopayData.iSACTIVE == 1
@@ -95,6 +96,8 @@ void onSelected(BuildContext context, dynamic? BillerData,
               isMultiBTN: false,
               dialogHeight: height(context) / 2.6,
               buttonAction: () {
+                Navigator.of(context, rootNavigator: true).pop();
+
                 goBack(context);
               },
               iconSvg: alertSvg)
@@ -109,7 +112,7 @@ void onSelected(BuildContext context, dynamic? BillerData,
               isMultiBTN: true,
               dialogHeight: height(context) / 2.5,
               buttonAction: () {
-                Navigator.pop(context, true);
+                Navigator.of(context, rootNavigator: true).pop();
                 goToData(context, otpRoute, {
                   "from": fromAutoPayDelete,
                   "templateName": "delete-auto-pay",

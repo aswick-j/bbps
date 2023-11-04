@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:bbps/bbps.dart';
 import 'package:bbps/bloc/mybill/mybill_cubit.dart';
 import 'package:bbps/utils/const.dart';
 import 'package:bbps/views/home/home.dart';
@@ -10,7 +12,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../api/api_repository.dart';
 import '../../bloc/history/history_cubit.dart';
-import '../../utils/commen.dart';
 import '../../utils/utils.dart';
 import '../history/history_tab_module.dart';
 import '../mybills/my_bill.dart';
@@ -23,6 +24,37 @@ class HomeTabScreen extends StatefulWidget {
 }
 
 class _HomeTabScreenState extends State<HomeTabScreen> {
+  static const newspl = MethodChannel('equitas.flutter.fas/backButton');
+
+  bool isTriggerDisabled = false;
+  Timer? delayedTimer = null;
+
+  Future<void> triggerBackButton() async {
+    if (!isTriggerDisabled) {
+      try {
+        setState(() {
+          isTriggerDisabled = true;
+        });
+
+        await newspl.invokeMethod("triggerBackButton");
+      } catch (e) {
+        print("Error: $e");
+      } finally {
+        delayedTimer = Timer(Duration(seconds: 4), () {
+          setState(() {
+            isTriggerDisabled = false;
+          });
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    delayedTimer?.cancel();
+    super.dispose();
+  }
+
   int selectedIndex = 1;
   @override
   void initState() {
@@ -36,67 +68,6 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
     setState(() {});
   }
 
-  showAlert() {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
-      content: SizedBox(
-        height: height(context) / 2.7,
-        width: width(context) / 1.5,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            // SvgPicture.asset(iconAlertDialog),
-            SvgPicture.asset(alertSvg, height: height(context) * 0.09),
-            appText(
-              data: "Alert!",
-              size: width(context) * 0.04,
-              color: txtPrimaryColor,
-              weight: FontWeight.w600,
-            ),
-            appText(
-                data: "It will redirect to mobile banking home page",
-                size: width(context) * 0.034,
-                align: TextAlign.center,
-                color: txtSecondaryDarkColor),
-            appText(
-                data: "Are you sure want to redirect",
-                size: width(context) * 0.034,
-                color: txtSecondaryDarkColor),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xff2ECC71)),
-                  child: const Text("Yes"),
-                  onPressed: () {
-                    // SystemNavigator.pop(animated: true);
-                    if (Platform.isAndroid) {
-                      SystemNavigator.pop(animated: true);
-                    } else {
-                      platform_channel.invokeMethod("exitBbpsModule", "");
-                    }
-                  },
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xffD63031)),
-                  child: const Text("No"),
-                  onPressed: () {
-                    setState(() {
-                      selectedIndex = 1;
-                    });
-                  },
-                )
-              ],
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
   _onItemTapped(int index) {
     setState(() {
       selectedIndex = index;
@@ -104,7 +75,8 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
     switch (index) {
       case 0:
         if (Platform.isAndroid) {
-          SystemNavigator.pop(animated: true);
+          AppTrigger.instance.mainAppTrigger!.call();
+          triggerBackButton();
         } else {
           platform_channel.invokeMethod("exitBbpsModule", "");
         }
@@ -143,19 +115,7 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () {
-        if (selectedIndex != 0) {
-          _onItemTapped(0);
-        } else {
-          // SystemNavigator.pop(animated: true);
-          if (Platform.isAndroid) {
-            SystemNavigator.pop(animated: true);
-          } else {
-            platform_channel.invokeMethod("exitBbpsModule", "");
-          }
-        }
-        return Future.value(false);
-      },
+      onWillPop: () async => false,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: _onItemTapped(selectedIndex),

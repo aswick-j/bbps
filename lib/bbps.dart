@@ -1,30 +1,34 @@
-// You have generated a new plugin project without specifying the `--platforms`
-// flag. A plugin project with no platform support was generated. To add a
-// platform, run `flutter create -t plugin --platforms <platforms> .` under the
-// same directory. You can also find a detailed instruction on how to add
-// platforms in the `pubspec.yaml` at
-// https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
-
+// bbps.dart (Plugin)
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'bbps_platform_interface.dart';
 import 'utils/const.dart';
 import 'utils/utils.dart';
 
-class Bbps {
-  Future<String?> getPlatformVersion() {
-    return BbpsPlatform.instance.getPlatformVersion();
+class AppTrigger {
+  AppTrigger._privateConstructor();
+
+  static final AppTrigger instance = AppTrigger._privateConstructor();
+
+  Function? mainAppTrigger;
+
+  void setMainAppTrigger(final Function? Trigger) {
+    mainAppTrigger = Trigger;
   }
 }
 
 class BbpsScreen extends StatelessWidget {
   Map<String, dynamic>? data;
+  final VoidCallback triggerBackButton;
 
-  bool isSuccess = false;
-  final MyRouter? router;
-
-  BbpsScreen({Key? key, required this.data, this.router}) : super(key: key);
+  final MyRouter? router = MyRouter();
+  BbpsScreen({
+    Key? key,
+    required this.data,
+    required this.triggerBackButton,
+  }) : super(key: key) {
+    AppTrigger.instance.setMainAppTrigger(triggerBackButton);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +37,7 @@ class BbpsScreen extends StatelessWidget {
       title: appName,
       theme: ThemeData(
         primarySwatch: MaterialColor(
-          0xff21084A, // 0% comes in here, this will be color picked if no shade is selected when defining a Color property which doesn’t require a swatch.
+          0xff21084A,
           <int, Color>{
             50: Color.fromRGBO(33, 8, 74, .1),
             100: Color.fromRGBO(33, 8, 74, .2),
@@ -51,10 +55,7 @@ class BbpsScreen extends StatelessWidget {
       initialRoute: splashRoute,
       onGenerateInitialRoutes: (initialRoute) => [
         router!.generateRoute(
-          RouteSettings(
-            name: splashRoute,
-            arguments: data,
-          ),
+          RouteSettings(name: splashRoute, arguments: data),
         )!
       ],
       debugShowCheckedModeBanner: false,

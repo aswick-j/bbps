@@ -67,12 +67,12 @@ dependencies:
   #     url: https://glpat-eyLEGzzq95yFxZkjSPh7@git.equitasbank.com/diginet/ebpsmobileclient.git
   #     ref: plugin-uat
 
-  # bbps:
-  #   path: ../
   bbps:
-    git:
-      url: https://github.com/aswick-j/bbps.git
-      ref: master
+    path: ../
+  # bbps:
+  #   git:
+  #     url: https://github.com/aswick-j/bbps.git
+  #     ref: master
 
 dev_dependencies:
   flutter_test:
