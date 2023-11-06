@@ -74,12 +74,10 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
     });
     switch (index) {
       case 0:
-        if (Platform.isAndroid) {
+      
           AppTrigger.instance.mainAppTrigger!.call();
           triggerBackButton();
-        } else {
-          platform_channel.invokeMethod("exitBbpsModule", "");
-        }
+       
 
         break;
       //Redirect to Parent app removal

@@ -51,9 +51,6 @@ class _MainAppScreenState extends State<MainAppScreen> {
 
   Future<void> triggerBackButton() async {
     try {
-      print("=====================TRIGERED====");
-
-      print("+++++NNN+++");
       trigger = true;
     } catch (e) {
       print("Error: $e");
@@ -65,19 +62,6 @@ class _MainAppScreenState extends State<MainAppScreen> {
     return WillPopScope(
       onWillPop: () async => trigger,
       child: Scaffold(
-        // appBar: AppBar(
-        //   backgroundColor: primaryColor,
-        //   leading: IconButton(
-        //     splashRadius: 25,
-        //     onPressed: () => goBack(context),
-        //     icon: Icon(
-        //       Icons.arrow_back_ios,
-        //       color: Colors.white,
-        //     ),
-        //   ),
-        //   title: Text('Plugin Screen'),
-        //   automaticallyImplyLeading: false,
-        // ),
         body: Center(
             child: BbpsScreen(data: params, triggerBackButton: triggerBackButton
                 // router: MyRouter(),

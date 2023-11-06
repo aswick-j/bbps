@@ -57,19 +57,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  static const newspl = MethodChannel('equitas.flutter.fas/backButton');
-
-  Future<void> triggerBackButton() async {
-    try {
-      print("=====================TRIGERED====");
-
-      print("+++++NNN+++");
-      await newspl.invokeMethod("triggerBackButton");
-    } catch (e) {
-      print("Error: $e");
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

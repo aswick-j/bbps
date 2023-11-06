@@ -84,12 +84,8 @@ class _SplashScreenState extends State<SplashScreen> {
         isMultiBTN: false,
         dialogHeight: height(context) / 2.5,
         buttonAction: () {
-          if (Platform.isAndroid) {
-            AppTrigger.instance.mainAppTrigger!.call();
-            triggerBackButton();
-          } else {
-            platform_channel.invokeMethod("exitBbpsModule", "");
-          }
+          AppTrigger.instance.mainAppTrigger!.call();
+          triggerBackButton();
         },
         iconSvg: alertSvg);
   }
