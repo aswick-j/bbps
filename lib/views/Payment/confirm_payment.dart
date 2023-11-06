@@ -428,8 +428,6 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
                 dialogHeight: height(context) / 3,
                 buttonAction: () {
                   hideDialog();
-
-                  goBack(context);
                   goBack(context);
                 },
                 context: context,
@@ -464,8 +462,6 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
                 dialogHeight: height(context) / 3,
                 buttonAction: () {
                   hideDialog();
-
-                  goBack(context);
                   goBack(context);
                 },
                 context: context,
@@ -504,8 +500,6 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
                 dialogHeight: height(context) / 3,
                 buttonAction: () {
                   hideDialog();
-
-                  goBack(context);
                   goBack(context);
                 },
                 context: context,
@@ -548,8 +542,6 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
                 dialogHeight: height(context) / 3,
                 buttonAction: () {
                   hideDialog();
-
-                  goBack(context);
                   goBack(context);
                 },
                 context: context,
@@ -606,8 +598,6 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
                 dialogHeight: height(context) / 2.6,
                 buttonAction: () {
                   hideDialog();
-
-                  goBack(context);
                   goBack(context);
                   // goToUntil(context, homeRoute);
                 },
@@ -651,8 +641,6 @@ class _ConfirmPaymentState extends State<ConfirmPayment> {
                 dialogHeight: height(context) / 3,
                 buttonAction: () {
                   hideDialog();
-
-                  goBack(context);
                   goBack(context);
                 },
                 context: context,
@@ -1223,8 +1211,6 @@ class _ConformPaymentUIState extends State<ConformPaymentUI> {
             dialogHeight: height(context) / 2.6,
             buttonAction: () {
               hideDialog();
-
-              goBack(context);
               goBack(context);
             },
             context: context,
